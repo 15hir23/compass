@@ -175,8 +175,8 @@ export default function CompassView({
 
   // Filters for smooth readings - optimized for maximum stability (like professional compasses)
   const deviceInfo = useRef(getDeviceInfo());
-  // Initialize filter with Pixel-specific settings if needed
-  const initialAlpha = deviceInfo.current.isPixel ? 0.08 : 0.12;
+  // Initialize filter with very low alpha for maximum smoothness and stability
+  const initialAlpha = deviceInfo.current.isPixel ? 0.05 : 0.08;
   const headingFilter = useRef(new LowPassFilter(initialAlpha)); // Lower alpha = more smoothing = more stability
   
   // Stability tracking
@@ -191,13 +191,14 @@ export default function CompassView({
   const [isCompassStable, setIsCompassStable] = useState(false); // UI state for stability indicator
   
   // Configuration - optimized for maximum stability (professional compass behavior)
-  const DEAD_ZONE_THRESHOLD = 2.0; // Degrees - increased significantly to ignore tiny movements
-  const STABILITY_TIME = 2500; // ms - longer time before considering stable
+  const DEAD_ZONE_THRESHOLD = 2.5; // Degrees - increased to ignore tiny movements
+  const STABILITY_TIME = 2000; // ms - time before considering stable
   const MOVEMENT_THRESHOLD = 0.4; // m/s² - higher threshold to ignore slight movements
   const HIGH_CONFIDENCE_THRESHOLD = 0.8; // Confidence level considered "high"
-  const MIN_UPDATE_INTERVAL = 80; // ms - slightly slower updates for stability
+  const MIN_UPDATE_INTERVAL = 100; // ms - slower updates for stability
   const STATIONARY_ACCEL_THRESHOLD = 0.5; // m/s² - higher threshold for stationary detection
   const MIN_MOVEMENT_ANGLE = 3.0; // Degrees - minimum angle change to consider as movement
+  const MIN_ROTATION_CHANGE = 1.5; // Degrees - minimum change before updating rotation animation
   
   const MIN_SIZE = COMPASS_SIZE * 1.0;
   const MAX_SIZE = COMPASS_SIZE * 1.3;
@@ -724,20 +725,9 @@ export default function CompassView({
             // Extra smoothing for Pixel to prevent jitter (maximum stability)
             // Use a dedicated Pixel filter with very low alpha for maximum stability
             if (!headingFilter.current.pixelFilter) {
-              headingFilter.current.pixelFilter = new LowPassFilter(0.08); // Very smooth for Pixel
+              headingFilter.current.pixelFilter = new LowPassFilter(0.05); // Very smooth for Pixel
             }
             smoothed = headingFilter.current.pixelFilter.filter(angle);
-            
-            // Additional stability check for Pixel - only update if change is significant
-            const lastPixelHeading = headingFilter.current.pixelFilter.value;
-            if (lastPixelHeading !== null) {
-              const diff = Math.abs(smoothed - lastPixelHeading);
-              const wrappedDiff = Math.min(diff, 360 - diff);
-              // Only update if change is more than 1 degree (reduces jitter)
-              if (wrappedDiff < 1 && wrappedDiff > 0.1) {
-                smoothed = lastPixelHeading; // Keep previous value for stability
-              }
-            }
           } else {
             smoothed = headingFilter.current.filter(angle);
           }
@@ -746,19 +736,27 @@ export default function CompassView({
           const shouldUpdate = shouldUpdateHeading(smoothed, confidence, now);
           
           if (shouldUpdate) {
-            setHeading(smoothed);
-            rotation.value = withSpring(-smoothed, { 
-              damping: device.isPixel ? 45 : 40,  // Higher damping for stability
-              stiffness: device.isPixel ? 80 : 90, // Lower stiffness for smoother, more stable motion
-              mass: 1.0  // Higher mass for more inertia, less jitter
-            });
+            // Only update rotation if change is significant enough to avoid flickering
+            const currentRotation = rotation.value ? -rotation.value : 0;
+            let rotationDiff = Math.abs(smoothed - currentRotation);
+            if (rotationDiff > 180) rotationDiff = 360 - rotationDiff;
             
-            if (onHeadingChange) {
-              onHeadingChange(smoothed);
+            // Only animate if change is significant or it's the first update
+            if (rotationDiff >= MIN_ROTATION_CHANGE || lastStableHeading.current === null) {
+              setHeading(smoothed);
+              // Use withTiming for smoother, more controlled movement instead of withSpring
+              rotation.value = withTiming(-smoothed, {
+                duration: 500, // Smooth, controlled animation duration (slightly longer for smoother feel)
+                easing: Easing.out(Easing.cubic), // Smooth easing
+              });
+              
+              if (onHeadingChange) {
+                onHeadingChange(smoothed);
+              }
+              
+              lastHeadingUpdate.current = now;
+              lastStableHeading.current = smoothed;
             }
-            
-            lastHeadingUpdate.current = now;
-            lastStableHeading.current = smoothed;
           }
         }
       };
@@ -881,19 +879,27 @@ export default function CompassView({
           const shouldUpdate = shouldUpdateHeading(angle, confidence, now);
           
           if (shouldUpdate) {
-            setHeading(angle);
-            rotation.value = withSpring(-angle, { 
-              damping: 40,  // Higher damping for stability
-              stiffness: 90, // Lower stiffness for smoother, more stable motion
-              mass: 1.0  // Higher mass for more inertia, less jitter
-            });
+            // Only update rotation if change is significant enough to avoid flickering
+            const currentRotation = rotation.value ? -rotation.value : 0;
+            let rotationDiff = Math.abs(angle - currentRotation);
+            if (rotationDiff > 180) rotationDiff = 360 - rotationDiff;
             
-            if (onHeadingChange) {
-              onHeadingChange(angle);
+            // Only animate if change is significant or it's the first update
+            if (rotationDiff >= MIN_ROTATION_CHANGE || lastStableHeading.current === null) {
+              setHeading(angle);
+              // Use withTiming for smoother, more controlled movement instead of withSpring
+              rotation.value = withTiming(-angle, {
+                duration: 500, // Smooth, controlled animation duration (slightly longer for smoother feel)
+                easing: Easing.out(Easing.cubic), // Smooth easing
+              });
+              
+              if (onHeadingChange) {
+                onHeadingChange(angle);
+              }
+              
+              lastHeadingUpdate.current = now;
+              lastStableHeading.current = angle;
             }
-            
-            lastHeadingUpdate.current = now;
-            lastStableHeading.current = angle;
           }
         });
       } catch (error) {

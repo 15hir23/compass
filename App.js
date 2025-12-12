@@ -39,6 +39,7 @@ import CompassInfoBar from './components/CompassInfoBar';
 import CompassBottomNav from './components/CompassBottomNav';
 import Sidebar from './components/Sidebar';
 import MapViewModal from './components/MapViewModal';
+import SplashScreen from './components/SplashScreen';
 import { useI18n } from './utils/i18n';
 
 // Get dimensions safely
@@ -132,6 +133,7 @@ const COMPASS_TYPES = {
 export default function App() {
   const { t } = useI18n();
   const [calibrationModalOpen, setCalibrationModalOpen] = useState(false);
+  const [showSplash, setShowSplash] = useState(true);
   const [showHomeScreen, setShowHomeScreen] = useState(true);
   const [compassType, setCompassType] = useState(COMPASS_TYPES.VASTU); // Default to Vastu
   const [currentMode, setCurrentMode] = useState(COMPASS_MODES.NORMAL);
@@ -323,7 +325,14 @@ export default function App() {
     }
   };
 
-  // Show HomeScreen first
+  // Show Splash Screen first
+  if (showSplash) {
+    return (
+      <SplashScreen onComplete={() => setShowSplash(false)} />
+    );
+  }
+
+  // Show HomeScreen
   if (showHomeScreen) {
     return (
       <>

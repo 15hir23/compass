@@ -6,6 +6,7 @@ const translations = {
   en: {
     // Header
     'app.title': 'Compass - Vastu',
+    'app.subtitle': 'Vastu Compass',
     'header.search': 'Search Location',
     'header.selectCompass': 'Select Compasses Type',
     
@@ -86,6 +87,7 @@ const translations = {
   hi: {
     // Header
     'app.title': 'कम्पास - वास्तु',
+    'app.subtitle': 'वास्तु कम्पास',
     'header.search': 'स्थान खोजें',
     'header.selectCompass': 'कम्पास प्रकार चुनें',
     
