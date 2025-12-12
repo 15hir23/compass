@@ -1,0 +1,91 @@
+{
+  "expo": {
+    "name": "Vastu Compass",
+    "slug": "vastu-compass",
+    "owner": "hir25",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/vastu.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#FFF8E1"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "splash": {
+        "image": "./assets/vastu.png",
+        "resizeMode": "contain",
+        "backgroundColor": "#FFF8E1"
+      },
+      "infoPlist": {
+        "NSCameraUsageDescription": "This app needs access to camera to capture floor plans.",
+        "NSLocationWhenInUseUsageDescription": "This app needs location access for accurate compass readings."
+      }
+    },
+    "android": {
+      "splash": {
+        "image": "./assets/vastu.png",
+        "resizeMode": "contain",
+        "backgroundColor": "#FFF8E1"
+      },
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#F4C430"
+      },
+      "permissions": [
+        "CAMERA",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.READ_MEDIA_VISUAL_USER_SELECTED",
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.READ_MEDIA_VIDEO",
+        "android.permission.READ_MEDIA_AUDIO",
+        "CAMERA",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.READ_MEDIA_VISUAL_USER_SELECTED",
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.READ_MEDIA_VIDEO",
+        "android.permission.READ_MEDIA_AUDIO"
+      ],
+      "package": "com.appliedvastu.compass"
+    },
+    "plugins": [
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Allow $(PRODUCT_NAME) to access your photos to save images.",
+          "savePhotosPermission": "Allow $(PRODUCT_NAME) to save photos.",
+          "isAccessMediaLocationEnabled": false
+        }
+      ]
+    ],
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "4488f2c4-cc90-49c5-95cb-d209e22df1d4"
+      }
+    },
+    "updates": {
+      "url": "https://u.expo.dev/4488f2c4-cc90-49c5-95cb-d209e22df1d4"
+    }
+  }
+}

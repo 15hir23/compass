@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vastu Purusha Mandala Chart</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f4;
+            font-family: 'Georgia', serif;
+        }
+
+        .chart-container {
+            position: relative;
+            width: 600px;
+            height: 600px;
+            background: white;
+            border-radius: 50%;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        svg {
+            width: 100%;
+            height: 100%;
+            transform-origin: center;
+        }
+
+        /* Text Styling */
+        text {
+            fill: #c0392b; /* Burnt Orange/Red color */
+            font-weight: bold;
+            font-size: 10px;
+            text-anchor: middle;
+            dominant-baseline: middle;
+        }
+
+        .outer-text { font-size: 11px; }
+        
+        /* Inner text: Larger, Bolder, and now Horizontal */
+        .inner-text { 
+            font-size: 12px; 
+            font-weight: 800; 
+            fill: #a93226;
+        } 
+        
+        .cardinal-text { font-size: 18px; fill: #c0392b; font-weight: bold; }
+
+        /* Lines */
+        path, line, circle {
+            stroke: #333;
+            stroke-width: 1.5;
+            fill: none;
+        }
+
+        .center-dot {
+            fill: #333;
+        }
+
+        .highlight-line {
+            stroke: #d35400;
+            stroke-width: 2.5;
+        }
+    </style>
+</head>
+<body>
+
+<div class="chart-container">
+    <svg viewBox="0 0 500 500" id="vastuSvg">
+        </svg>
+</div>
+
+<script>
+    const svg = document.getElementById('vastuSvg');
+    const cx = 250;
+    const cy = 250;
+    
+    // Radii configuration
+    const rOuter = 240;
+    const rMid = 160;
+    const rInner = 100;
+
+    // --- Data: Outer Ring (32 Deities) ---
+    // Listed clockwise starting from immediately Right of North
+    const outerDeities = [
+        "Indra", "Surya", "Satya", "Bhasha", "Akash", "Atul", "Pusha", "Vitatha", 
+        "Grihrakshit", "Yama", "Gandharv", "Bhringraj", "Mrita", "Pitr", "Dauvrik", "Sugriva",
+        "Varun", "Asur", "Shosha", "Papyakshma", "Roga", "Naga", "Mukhya", "Bhallat",
+        "Soma", "Bhujaga", "Aditi", "Diti", "Shikhi", "Parjanya", "Jayant", "Indra"
+    ];
+
+    // Helper to convert polar to cartesian
+    function polarToCartesian(centerX, centerY, radius, angleInDegrees) {
+        var angleInRadians = (angleInDegrees - 90) * Math.PI / 180.0;
+        return {
+            x: centerX + (radius * Math.cos(angleInRadians)),
+            y: centerY + (radius * Math.sin(angleInRadians))
+        };
+    }
+
+    // --- 1. Draw Outer Ring (Radial Layout) ---
+    const sectorAngle = 360 / 32;
+    
+    outerDeities.forEach((name, i) => {
+        const startA = i * sectorAngle; 
+        const midA = startA + (sectorAngle / 2);
+
+        // Draw Line between Outer and Mid
+        const p1 = polarToCartesian(cx, cy, rMid, startA);
+        const p2 = polarToCartesian(cx, cy, rOuter, startA);
+        
+        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        line.setAttribute("x1", p1.x);
+        line.setAttribute("y1", p1.y);
+        line.setAttribute("x2", p2.x);
+        line.setAttribute("y2", p2.y);
+        svg.appendChild(line);
+
+        // Draw Text (These stay rotated to follow the circle boundary)
+        const textPos = polarToCartesian(cx, cy, rOuter - 25, midA);
+        const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        text.setAttribute("x", textPos.x);
+        text.setAttribute("y", textPos.y);
+        text.setAttribute("class", "outer-text");
+        
+        let rotateAngle = midA;
+        if (midA > 90 && midA < 270) {
+            rotateAngle += 180;
+        }
+        
+        text.setAttribute("transform", `rotate(${rotateAngle - 90}, ${textPos.x}, ${textPos.y})`);
+        text.textContent = name;
+        svg.appendChild(text);
+    });
+
+    // --- 2. Draw Inner Ring Lines ---
+    // Lines at N, NE, E, SE, S, SW, W, NW
+    const innerLineAngles = [0, 45, 90, 135, 180, 225, 270, 315];
+    
+    innerLineAngles.forEach(angle => {
+        const p1 = polarToCartesian(cx, cy, rInner, angle);
+        const p2 = polarToCartesian(cx, cy, rMid, angle);
+        
+        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        line.setAttribute("x1", p1.x);
+        line.setAttribute("y1", p1.y);
+        line.setAttribute("x2", p2.x);
+        line.setAttribute("y2", p2.y);
+        svg.appendChild(line);
+    });
+
+    // --- 3. Draw Inner Text Labels (HORIZONTAL) ---
+    const innerLabels = [
+        { text: "Aapha Vasta", angle: 22.5 },   // NE Sector (Right of North)
+        { text: "Airyama", angle: 70 },         // East
+        { text: "Savitra", angle: 115 },        // SE
+        { text: "Bram", angle: 157.5 },         // South (Left part of sector)
+        { text: "Vivasvam", angle: 202.5 },     // South (Right part of sector)
+        { text: "Indra", angle: 245 },          // SW Diagonal
+        { text: "Jaya", angle: 290 },           // West
+        { text: "Rudra Jaya", angle: 337.5 }    // NW Sector (Left of North)
+    ];
+
+    innerLabels.forEach(item => {
+        // Calculate position slightly closer to mid circle for better spacing
+        const textPos = polarToCartesian(cx, cy, rMid - 30, item.angle);
+        
+        const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        text.setAttribute("x", textPos.x);
+        text.setAttribute("y", textPos.y);
+        text.setAttribute("class", "inner-text");
+
+        // NO ROTATION applied here, making them strictly horizontal
+        text.textContent = item.text;
+        
+        // Add a white stroke (outline) to the text so it's readable if it crosses a line
+        text.setAttribute("stroke", "white");
+        text.setAttribute("stroke-width", "3");
+        text.setAttribute("paint-order", "stroke");
+        
+        svg.appendChild(text);
+    });
+
+    // --- 4. Circles ---
+    // Outer
+    const c1 = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    c1.setAttribute("cx", cx); c1.setAttribute("cy", cy); c1.setAttribute("r", rOuter);
+    svg.appendChild(c1);
+    
+    // Mid
+    const c2 = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    c2.setAttribute("cx", cx); c2.setAttribute("cy", cy); c2.setAttribute("r", rMid);
+    svg.appendChild(c2);
+
+    // Inner
+    const c3 = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    c3.setAttribute("cx", cx); c3.setAttribute("cy", cy); c3.setAttribute("r", rInner);
+    svg.appendChild(c3);
+
+    // --- 5. Compass Lines & Center ---
+    // North-South (Red)
+    const arrowLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    arrowLine.setAttribute("x1", cx);
+    arrowLine.setAttribute("y1", cy - rOuter);
+    arrowLine.setAttribute("x2", cx);
+    arrowLine.setAttribute("y2", cy + rOuter);
+    arrowLine.setAttribute("class", "highlight-line");
+    svg.appendChild(arrowLine);
+
+    // East-West
+    const ewLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    ewLine.setAttribute("x1", cx - rOuter);
+    ewLine.setAttribute("y1", cy);
+    ewLine.setAttribute("x2", cx + rOuter);
+    ewLine.setAttribute("y2", cy);
+    svg.appendChild(ewLine);
+
+    // Center Dot
+    const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    dot.setAttribute("cx", cx); dot.setAttribute("cy", cy); dot.setAttribute("r", 5);
+    dot.setAttribute("class", "center-dot");
+    svg.appendChild(dot);
+
+    // N and S labels
+    const nText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    nText.setAttribute("x", cx);
+    nText.setAttribute("y", cy - rInner + 20); 
+    nText.setAttribute("class", "cardinal-text");
+    nText.setAttribute("stroke", "white");
+    nText.setAttribute("stroke-width", "3");
+    nText.setAttribute("paint-order", "stroke");
+    nText.textContent = "N";
+    svg.appendChild(nText);
+
+    const sText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    sText.setAttribute("x", cx);
+    sText.setAttribute("y", cy + rInner - 20);
+    sText.setAttribute("class", "cardinal-text");
+    sText.setAttribute("stroke", "white");
+    sText.setAttribute("stroke-width", "3");
+    sText.setAttribute("paint-order", "stroke");
+    sText.textContent = "S";
+    svg.appendChild(sText);
+
+</script>
+</body>
+</html>
