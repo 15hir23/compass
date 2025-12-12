@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Platform } from '
 import LocationIcon from './icons/LocationIcon';
 import CameraIcon from './icons/CameraIcon';
 import { useI18n } from '../utils/i18n';
+import { colors, typography, elevation } from '../utils/theme';
 
 // Get dimensions safely
 const getDimensions = () => {
@@ -109,54 +110,46 @@ const styles = StyleSheet.create({
     gap: getResponsiveSize(4),
   },
   buttonCircle: {
-    width: getResponsiveSize(50), // Increased from 46 to 50
-    height: getResponsiveSize(50), // Increased from 46 to 50
-    borderRadius: getResponsiveSize(25), // Increased from 23 to 25
-    backgroundColor: '#F4C430',
+    width: getResponsiveSize(50),
+    height: getResponsiveSize(50),
+    borderRadius: getResponsiveSize(25),
+    backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
-    elevation: 4,
-    shadowColor: '#F4C430',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
+    ...elevation.level2,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
+    borderColor: colors.primaryLight,
   },
   buttonLabel: {
-    fontSize: getResponsiveFont(12), // Increased from 11 to 12
-    color: '#8B7355',
-    fontWeight: '700',
-    marginTop: getResponsiveSize(4), // Increased from 3 to 4
-    fontFamily: Platform.OS === 'web' ? "'DM Sans', sans-serif" : 'System',
+    fontSize: getResponsiveFont(12),
+    color: colors.onSurfaceVariant,
+    fontWeight: '500',
+    marginTop: getResponsiveSize(4),
+    ...typography.labelMedium,
     letterSpacing: 0.3,
   },
   degreeContainer: {
     alignItems: 'center',
   },
   degreeBox: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     borderRadius: getResponsiveSize(8),
     borderWidth: 1.5,
-    borderColor: '#F4C430',
-    paddingVertical: getResponsiveSize(6), // Increased from 5 to 6
-    paddingHorizontal: getResponsiveSize(16), // Increased from 14 to 16
-    minWidth: getResponsiveSize(150), // Increased from 140 to 150
+    borderColor: colors.primary,
+    paddingVertical: getResponsiveSize(6),
+    paddingHorizontal: getResponsiveSize(16),
+    minWidth: getResponsiveSize(150),
     alignItems: 'center',
-    elevation: 4,
-    shadowColor: '#F4C430',
-    shadowOffset: { width: 2, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
+    ...elevation.level2,
   },
   degreeTitle: {
-    fontSize: getResponsiveFont(10), // Increased from 9 to 10
-    color: '#666666',
-    fontWeight: '900',
-    letterSpacing: 1.2, // Increased from 1.1 to 1.2
+    fontSize: getResponsiveFont(10),
+    color: colors.onSurfaceVariant,
+    fontWeight: '500',
+    letterSpacing: 1.2,
     textTransform: 'uppercase',
-    marginBottom: getResponsiveSize(5), // Increased from 4 to 5
-    fontFamily: Platform.OS === 'web' ? "'DM Sans', sans-serif" : 'System',
+    marginBottom: getResponsiveSize(5),
+    ...typography.labelSmall,
   },
   degreeMainInfo: {
     flexDirection: 'row',
@@ -165,30 +158,33 @@ const styles = StyleSheet.create({
     marginBottom: getResponsiveSize(2), // Increased from 1.5 to 2
   },
   degreeDirection: {
-    fontSize: getResponsiveFont(20), // Increased from 19 to 20
-    fontWeight: '700',
-    color: '#F4C430',
+    fontSize: getResponsiveFont(20),
+    fontWeight: '500',
+    color: colors.primary,
     letterSpacing: 0.7,
+    ...typography.headlineSmall,
   },
   degreeDivider: {
     width: 1.5,
-    height: getResponsiveSize(22), // Increased from 20 to 22
-    backgroundColor: '#F4C430',
-    marginHorizontal: getResponsiveSize(10), // Increased from 9 to 10
+    height: getResponsiveSize(22),
+    backgroundColor: colors.primary,
+    marginHorizontal: getResponsiveSize(10),
     borderRadius: 1,
   },
   degreeValue: {
-    fontSize: getResponsiveFont(20), // Increased from 19 to 20
-    fontWeight: '700',
-    color: '#F4C430',
-    fontFamily: 'monospace',
+    fontSize: getResponsiveFont(20),
+    fontWeight: '500',
+    color: colors.primary,
+    fontFamily: Platform.OS === 'web' ? "'DM Sans', sans-serif" : 'System',
     letterSpacing: 0.5,
+    ...typography.headlineSmall,
   },
   degreeSecondary: {
-    fontSize: getResponsiveFont(10), // Increased from 9 to 10
-    color: '#666666',
-    fontWeight: '600',
+    fontSize: getResponsiveFont(10),
+    color: colors.onSurfaceVariant,
+    fontWeight: '400',
     letterSpacing: 0.5,
+    ...typography.labelSmall,
   },
 });
 

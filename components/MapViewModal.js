@@ -283,15 +283,16 @@ export default function MapViewModal({ visible, onClose, mode, compassType, sele
         ];
         verticalLines.push(vLine);
         
-        // Horizontal line
+        // Horizontal line - flipped: row 0 (North) goes to top, row 8 (South) goes to bottom
+        const flippedT = 1 - t; // Invert: t=0 -> 1.0 (top), t=1 -> 0.0 (bottom)
         const hLine = [
           {
-            x: plotCorners[0].latitude + (plotCorners[3].latitude - plotCorners[0].latitude) * t,
-            y: plotCorners[0].longitude + (plotCorners[3].longitude - plotCorners[0].longitude) * t,
+            x: plotCorners[0].latitude + (plotCorners[3].latitude - plotCorners[0].latitude) * flippedT,
+            y: plotCorners[0].longitude + (plotCorners[3].longitude - plotCorners[0].longitude) * flippedT,
           },
           {
-            x: plotCorners[1].latitude + (plotCorners[2].latitude - plotCorners[1].latitude) * t,
-            y: plotCorners[1].longitude + (plotCorners[2].longitude - plotCorners[1].longitude) * t,
+            x: plotCorners[1].latitude + (plotCorners[2].latitude - plotCorners[1].latitude) * flippedT,
+            y: plotCorners[1].longitude + (plotCorners[2].longitude - plotCorners[1].longitude) * flippedT,
           },
         ];
         horizontalLines.push(hLine);
@@ -333,9 +334,9 @@ export default function MapViewModal({ visible, onClose, mode, compassType, sele
       if (highlightBrahmasthan) {
         const brahmasthanCells = getBrahmasthanCells();
         brahmasthanCells.forEach(({ row, col }) => {
-          // Calculate cell corners using simple interpolation
-          const rowStart = row / 9;
-          const rowEnd = (row + 1) / 9;
+          // Calculate cell corners using simple interpolation - flipped rows
+          const rowStart = 1 - ((row + 1) / 9); // Inverted: row 0 -> top, row 8 -> bottom
+          const rowEnd = 1 - (row / 9);
           const colStart = col / 9;
           const colEnd = (col + 1) / 9;
           
@@ -375,8 +376,8 @@ export default function MapViewModal({ visible, onClose, mode, compassType, sele
             const devtaInfo = VASTU_GRID_9X9[row][col];
             const translatedDevtaName = translateDevtaName(devtaInfo.devta, currentLang);
             
-            // Calculate cell center using simple interpolation
-            const rowCenter = (row + 0.5) / 9;
+            // Calculate cell center using simple interpolation - flipped rows
+            const rowCenter = 1 - ((row + 0.5) / 9); // Inverted: row 0 -> top, row 8 -> bottom
             const colCenter = (col + 0.5) / 9;
             
             const cellLat = plotCorners[0].latitude + 
@@ -916,7 +917,7 @@ export default function MapViewModal({ visible, onClose, mode, compassType, sele
                   color: '#FF0000', 
                   fontSize: '11px', 
                   margin: 0,
-                  fontFamily: 'monospace'
+                  fontFamily: Platform.OS === 'web' ? "'DM Sans', sans-serif" : 'System'
                 }}></p>
                 <p style={{ 
                   color: '#8B7355', 
@@ -1104,6 +1105,7 @@ export default function MapViewModal({ visible, onClose, mode, compassType, sele
               capturedImage={null}
               onClearImage={() => {}}
               onHeadingChange={setHeading}
+              hideCalibration={true}
             />
           </View>
         )}
@@ -1121,143 +1123,172 @@ export default function MapViewModal({ visible, onClose, mode, compassType, sele
           {/* Map Controls */}
           <View style={[styles.mapControls, { pointerEvents: 'box-none' }]}>
              {/* Compass Toggle Button */}
-             <TouchableOpacity
-               style={[styles.mapControlButton, showCompass && styles.mapControlButtonActive, { pointerEvents: 'auto' }]}
-               onPress={() => setShowCompass(!showCompass)}
-               onPressIn={() => setPressedButton('compass')}
-               onPressOut={() => setPressedButton(null)}
-               activeOpacity={0.6}
-             >
-               <CompassToggleIcon 
-                 size={getResponsiveSize(24)} 
-                 color={pressedButton === 'compass' ? "#5D4037" : "#F4C430"} 
-               />
-             </TouchableOpacity>
-
-             {/* Map Type Toggle */}
-             <TouchableOpacity
-               style={styles.mapControlButton}
-               onPress={changeMapType}
-               onPressIn={() => setPressedButton('maptype')}
-               onPressOut={() => setPressedButton(null)}
-               activeOpacity={0.6}
-             >
-               <Text style={[styles.mapControlButtonText, pressedButton === 'maptype' && { opacity: 0.7 }]}>
-                 {mapType === 'satellite' ? '🗺️' : '🛰️'}
-               </Text>
-             </TouchableOpacity>
-             
-             {/* Vastu Grid Toggle - Corner Selection */}
-             {!showVastuGrid && (
+             <View style={styles.buttonWithLabel}>
                <TouchableOpacity
-                 style={[styles.mapControlButton, cornerSelectionMode && styles.mapControlButtonActive]}
-                 onPress={() => {
-                   const newMode = !cornerSelectionMode;
-                   console.log('🔄 Toggling corner selection mode:', newMode);
-                   setCornerSelectionMode(newMode);
-                   
-                   if (isMapLocked && newMode) {
-                     // Auto-unlock map when starting selection
-                     setIsMapLocked(false);
-                     if (googleMapRef.current && window.L) {
-                       googleMapRef.current.dragging.enable();
-                       googleMapRef.current.touchZoom.enable();
-                       googleMapRef.current.doubleClickZoom.enable();
-                       googleMapRef.current.scrollWheelZoom.enable();
-                       console.log('🔓 Map unlocked for corner selection');
-                     }
-                   }
-                 }}
-                 onPressIn={() => setPressedButton('vastu')}
+                 style={[styles.mapControlButton, showCompass && styles.mapControlButtonActive, { pointerEvents: 'auto' }]}
+                 onPress={() => setShowCompass(!showCompass)}
+                 onPressIn={() => setPressedButton('compass')}
                  onPressOut={() => setPressedButton(null)}
                  activeOpacity={0.6}
                >
-                 <Text style={[styles.mapControlButtonText, pressedButton === 'vastu' && { opacity: 0.7 }]}>
-                   {cornerSelectionMode ? '📍' : '⬜'}
+                 <CompassToggleIcon 
+                   size={getResponsiveSize(24)} 
+                   color={pressedButton === 'compass' ? "#5D4037" : "#F4C430"} 
+                 />
+               </TouchableOpacity>
+               <Text style={styles.buttonLabel}>{t('map.compassToggle') || 'Compass'}</Text>
+             </View>
+
+             {/* Map Type Toggle */}
+             <View style={styles.buttonWithLabel}>
+               <TouchableOpacity
+                 style={styles.mapControlButton}
+                 onPress={changeMapType}
+                 onPressIn={() => setPressedButton('maptype')}
+                 onPressOut={() => setPressedButton(null)}
+                 activeOpacity={0.6}
+               >
+                 <Text style={[styles.mapControlButtonText, pressedButton === 'maptype' && { opacity: 0.7 }]}>
+                   {mapType === 'satellite' ? '🗺️' : '🛰️'}
                  </Text>
                </TouchableOpacity>
+               <Text style={styles.buttonLabel}>
+                 {mapType === 'satellite' ? (t('map.mapView') || 'Map') : (t('map.satelliteView') || 'Satellite')}
+               </Text>
+             </View>
+             
+             {/* Vastu Grid Toggle - Corner Selection */}
+             {!showVastuGrid && (
+               <View style={styles.buttonWithLabel}>
+                 <TouchableOpacity
+                   style={[styles.mapControlButton, cornerSelectionMode && styles.mapControlButtonActive]}
+                   onPress={() => {
+                     const newMode = !cornerSelectionMode;
+                     console.log('🔄 Toggling corner selection mode:', newMode);
+                     setCornerSelectionMode(newMode);
+                     
+                     if (isMapLocked && newMode) {
+                       // Auto-unlock map when starting selection
+                       setIsMapLocked(false);
+                       if (googleMapRef.current && window.L) {
+                         googleMapRef.current.dragging.enable();
+                         googleMapRef.current.touchZoom.enable();
+                         googleMapRef.current.doubleClickZoom.enable();
+                         googleMapRef.current.scrollWheelZoom.enable();
+                         console.log('🔓 Map unlocked for corner selection');
+                       }
+                     }
+                   }}
+                   onPressIn={() => setPressedButton('vastu')}
+                   onPressOut={() => setPressedButton(null)}
+                   activeOpacity={0.6}
+                 >
+                   <Text style={[styles.mapControlButtonText, pressedButton === 'vastu' && { opacity: 0.7 }]}>
+                     {cornerSelectionMode ? '📍' : '⬜'}
+                   </Text>
+                 </TouchableOpacity>
+                 <Text style={styles.buttonLabel}>
+                   {cornerSelectionMode ? (t('map.selectCorners') || 'Select Corners') : (t('map.vastuGrid') || 'Vastu Grid')}
+                 </Text>
+               </View>
              )}
              
              {/* Apply Grid Button - Show when corners are being adjusted */}
              {cornerSelectionMode && plotCorners.length === 4 && (
-               <TouchableOpacity
-                 style={[styles.mapControlButton, styles.applyButton]}
-                 onPress={() => {
-                   console.log('✅ Applying Vastu grid with final corners:', plotCorners);
-                   // Remove corner tooltips (make them non-permanent)
-                   cornerMarkersRef.current.forEach(marker => {
-                     if (marker && marker.unbindTooltip) {
-                       marker.unbindTooltip();
-                     }
-                   });
-                   setCornerSelectionMode(false);
-                   // Grid will be drawn by the existing useEffect
-                 }}
-                 onPressIn={() => setPressedButton('apply')}
-                 onPressOut={() => setPressedButton(null)}
-                 activeOpacity={0.6}
-               >
-                 <Text style={[styles.applyButtonText, pressedButton === 'apply' && { opacity: 0.7 }]}>
-                   ✓
-                 </Text>
-               </TouchableOpacity>
+               <View style={styles.buttonWithLabel}>
+                 <TouchableOpacity
+                   style={[styles.mapControlButton, styles.applyButton]}
+                   onPress={() => {
+                     console.log('✅ Applying Vastu grid with final corners:', plotCorners);
+                     // Remove corner tooltips (make them non-permanent)
+                     cornerMarkersRef.current.forEach(marker => {
+                       if (marker && marker.unbindTooltip) {
+                         marker.unbindTooltip();
+                       }
+                     });
+                     setCornerSelectionMode(false);
+                     // Grid will be drawn by the existing useEffect
+                   }}
+                   onPressIn={() => setPressedButton('apply')}
+                   onPressOut={() => setPressedButton(null)}
+                   activeOpacity={0.6}
+                 >
+                   <Text style={[styles.applyButtonText, pressedButton === 'apply' && { opacity: 0.7 }]}>
+                     ✓
+                   </Text>
+                 </TouchableOpacity>
+                 <Text style={styles.buttonLabel}>{t('map.applyGrid') || 'Apply Grid'}</Text>
+               </View>
              )}
              
              {/* Clear Grid Button - Show when grid exists */}
              {showVastuGrid && (
-               <TouchableOpacity
-                 style={styles.mapControlButton}
-                 onPress={() => {
-                   console.log('🗑️ Clearing grid and corners');
-                   // Clear all grid layers
-                   gridLayersRef.current.forEach(layer => {
-                     if (googleMapRef.current) {
-                       googleMapRef.current.removeLayer(layer);
-                     }
-                   });
-                   gridLayersRef.current = [];
-                   setPlotCorners([]);
-                   setShowVastuGrid(false);
-                   setCornerSelectionMode(false);
-                 }}
-                 onPressIn={() => setPressedButton('clear')}
-                 onPressOut={() => setPressedButton(null)}
-                 activeOpacity={0.6}
-               >
-                 <Text style={[styles.mapControlButtonText, pressedButton === 'clear' && { opacity: 0.7 }]}>
-                   🗑️
-                 </Text>
-               </TouchableOpacity>
+               <View style={styles.buttonWithLabel}>
+                 <TouchableOpacity
+                   style={styles.mapControlButton}
+                   onPress={() => {
+                     console.log('🗑️ Clearing grid and corners');
+                     // Clear all grid layers
+                     gridLayersRef.current.forEach(layer => {
+                       if (googleMapRef.current) {
+                         googleMapRef.current.removeLayer(layer);
+                       }
+                     });
+                     gridLayersRef.current = [];
+                     setPlotCorners([]);
+                     setShowVastuGrid(false);
+                     setCornerSelectionMode(false);
+                   }}
+                   onPressIn={() => setPressedButton('clear')}
+                   onPressOut={() => setPressedButton(null)}
+                   activeOpacity={0.6}
+                 >
+                   <Text style={[styles.mapControlButtonText, pressedButton === 'clear' && { opacity: 0.7 }]}>
+                     🗑️
+                   </Text>
+                 </TouchableOpacity>
+                 <Text style={styles.buttonLabel}>{t('map.clearGrid') || 'Clear Grid'}</Text>
+               </View>
              )}
              
              {/* Toggle Devta Labels - Show when grid exists */}
              {showVastuGrid && (
-               <TouchableOpacity
-                 style={[styles.mapControlButton, showDevtaLabels && styles.mapControlButtonActive]}
-                 onPress={() => setShowDevtaLabels(!showDevtaLabels)}
-                 onPressIn={() => setPressedButton('labels')}
-                 onPressOut={() => setPressedButton(null)}
-                 activeOpacity={0.6}
-               >
-                 <Text style={[styles.mapControlButtonText, pressedButton === 'labels' && { opacity: 0.7 }]}>
-                   🏷️
+               <View style={styles.buttonWithLabel}>
+                 <TouchableOpacity
+                   style={[styles.mapControlButton, showDevtaLabels && styles.mapControlButtonActive]}
+                   onPress={() => setShowDevtaLabels(!showDevtaLabels)}
+                   onPressIn={() => setPressedButton('labels')}
+                   onPressOut={() => setPressedButton(null)}
+                   activeOpacity={0.6}
+                 >
+                   <Text style={[styles.mapControlButtonText, pressedButton === 'labels' && { opacity: 0.7 }]}>
+                     🏷️
+                   </Text>
+                 </TouchableOpacity>
+                 <Text style={styles.buttonLabel}>
+                   {showDevtaLabels ? (t('map.hideLabels') || 'Hide Labels') : (t('map.showLabels') || 'Show Labels')}
                  </Text>
-               </TouchableOpacity>
+               </View>
              )}
              
              {/* Toggle Brahmasthan - Show when grid exists */}
              {showVastuGrid && (
-               <TouchableOpacity
-                 style={[styles.mapControlButton, highlightBrahmasthan && styles.mapControlButtonActive]}
-                 onPress={() => setHighlightBrahmasthan(!highlightBrahmasthan)}
-                 onPressIn={() => setPressedButton('brahma')}
-                 onPressOut={() => setPressedButton(null)}
-                 activeOpacity={0.6}
-               >
-                 <Text style={[styles.mapControlButtonText, pressedButton === 'brahma' && { opacity: 0.7 }]}>
-                   🕉️
+               <View style={styles.buttonWithLabel}>
+                 <TouchableOpacity
+                   style={[styles.mapControlButton, highlightBrahmasthan && styles.mapControlButtonActive]}
+                   onPress={() => setHighlightBrahmasthan(!highlightBrahmasthan)}
+                   onPressIn={() => setPressedButton('brahma')}
+                   onPressOut={() => setPressedButton(null)}
+                   activeOpacity={0.6}
+                 >
+                   <Text style={[styles.mapControlButtonText, pressedButton === 'brahma' && { opacity: 0.7 }]}>
+                     🕉️
+                   </Text>
+                 </TouchableOpacity>
+                 <Text style={styles.buttonLabel}>
+                   {highlightBrahmasthan ? (t('map.hideBrahma') || 'Hide Brahma') : (t('map.showBrahma') || 'Show Brahma')}
                  </Text>
-               </TouchableOpacity>
+               </View>
              )}
           </View>
         </View>
@@ -1343,9 +1374,10 @@ export default function MapViewModal({ visible, onClose, mode, compassType, sele
         {/* Bottom Control Buttons */}
         <View style={styles.bottomControls}>
            {/* Download/Screenshot Button */}
-           <TouchableOpacity
-             style={styles.bottomButton}
-             onPress={async () => {
+           <View style={styles.bottomButtonWithLabel}>
+             <TouchableOpacity
+               style={styles.bottomButton}
+               onPress={async () => {
                if (Platform.OS === 'web') {
                  try {
                    const html2canvas = (await import('html2canvas')).default;
@@ -1381,39 +1413,45 @@ export default function MapViewModal({ visible, onClose, mode, compassType, sele
                  }
                }
              }}
-             onPressIn={() => setPressedButton('download')}
-             onPressOut={() => setPressedButton(null)}
-             activeOpacity={0.6}
-           >
-             <DownloadIcon 
-               size={getResponsiveSize(24)} 
-               color={pressedButton === 'download' ? "#5D4037" : "#F4C430"} 
-             />
-           </TouchableOpacity>
+               onPressIn={() => setPressedButton('download')}
+               onPressOut={() => setPressedButton(null)}
+               activeOpacity={0.6}
+             >
+               <DownloadIcon 
+                 size={getResponsiveSize(24)} 
+                 color={pressedButton === 'download' ? "#5D4037" : "#F4C430"} 
+               />
+             </TouchableOpacity>
+             <Text style={styles.bottomButtonLabel}>{t('map.download') || 'Download'}</Text>
+           </View>
 
            {/* Recenter to Current Location Button */}
-           <TouchableOpacity
-             style={styles.bottomButton}
-             onPress={() => {
+           <View style={styles.bottomButtonWithLabel}>
+             <TouchableOpacity
+               style={styles.bottomButton}
+               onPress={() => {
                if (googleMapRef.current && currentLocation) {
                  googleMapRef.current.setView([currentLocation.latitude, currentLocation.longitude], 18);
                  setMapLocation(null); // Reset to current location
                }
              }}
-             onPressIn={() => setPressedButton('recenter')}
-             onPressOut={() => setPressedButton(null)}
-             activeOpacity={0.6}
-           >
-             <RecenterIcon 
-               size={getResponsiveSize(24)} 
-               color={pressedButton === 'recenter' ? "#5D4037" : "#F4C430"} 
-             />
-           </TouchableOpacity>
+               onPressIn={() => setPressedButton('recenter')}
+               onPressOut={() => setPressedButton(null)}
+               activeOpacity={0.6}
+             >
+               <RecenterIcon 
+                 size={getResponsiveSize(24)} 
+                 color={pressedButton === 'recenter' ? "#5D4037" : "#F4C430"} 
+               />
+             </TouchableOpacity>
+             <Text style={styles.bottomButtonLabel}>{t('map.recenter') || 'Recenter'}</Text>
+           </View>
 
            {/* Lock/Unlock Map Button */}
-           <TouchableOpacity
-             style={[styles.bottomButton, isMapLocked && styles.bottomButtonActive]}
-             onPress={() => {
+           <View style={styles.bottomButtonWithLabel}>
+             <TouchableOpacity
+               style={[styles.bottomButton, isMapLocked && styles.bottomButtonActive]}
+               onPress={() => {
                setIsMapLocked(!isMapLocked);
                if (googleMapRef.current && window.L) {
                  if (!isMapLocked) {
@@ -1431,35 +1469,44 @@ export default function MapViewModal({ visible, onClose, mode, compassType, sele
                  }
                }
              }}
-             onPressIn={() => setPressedButton('lock')}
-             onPressOut={() => setPressedButton(null)}
-             activeOpacity={0.6}
-           >
-             <LockIcon 
-               size={getResponsiveSize(24)} 
-               color={pressedButton === 'lock' ? "#5D4037" : "#F4C430"} 
-               locked={isMapLocked} 
-             />
-           </TouchableOpacity>
+               onPressIn={() => setPressedButton('lock')}
+               onPressOut={() => setPressedButton(null)}
+               activeOpacity={0.6}
+             >
+               <LockIcon 
+                 size={getResponsiveSize(24)} 
+                 color={pressedButton === 'lock' ? "#5D4037" : "#F4C430"} 
+                 locked={isMapLocked} 
+               />
+             </TouchableOpacity>
+             <Text style={styles.bottomButtonLabel}>
+               {isMapLocked ? (t('map.unlock') || 'Unlock') : (t('map.lock') || 'Lock')}
+             </Text>
+           </View>
 
            {/* Go to Selected Location Button */}
-           <TouchableOpacity
-             style={styles.bottomButton}
-             onPress={() => {
+           <View style={styles.bottomButtonWithLabel}>
+             <TouchableOpacity
+               style={styles.bottomButton}
+               onPress={() => {
                if (googleMapRef.current && mapLocation) {
                  googleMapRef.current.setView([mapLocation.latitude, mapLocation.longitude], 18);
                }
              }}
-             onPressIn={() => setPressedButton('pin')}
-             onPressOut={() => setPressedButton(null)}
-             activeOpacity={0.6}
-             disabled={!mapLocation}
-           >
-             <PinIcon 
-               size={getResponsiveSize(24)} 
-               color={pressedButton === 'pin' && mapLocation ? "#5D4037" : (mapLocation ? "#F4C430" : "#CCCCCC")} 
-             />
-           </TouchableOpacity>
+               onPressIn={() => setPressedButton('pin')}
+               onPressOut={() => setPressedButton(null)}
+               activeOpacity={0.6}
+               disabled={!mapLocation}
+             >
+               <PinIcon 
+                 size={getResponsiveSize(24)} 
+                 color={pressedButton === 'pin' && mapLocation ? "#5D4037" : (mapLocation ? "#F4C430" : "#CCCCCC")} 
+               />
+             </TouchableOpacity>
+             <Text style={[styles.bottomButtonLabel, !mapLocation && styles.bottomButtonLabelDisabled]}>
+               {t('map.goToLocation') || 'Go to Location'}
+             </Text>
+           </View>
         </View>
       </View>
       </SafeAreaView>
@@ -1597,6 +1644,40 @@ const styles = StyleSheet.create({
   },
   mapControlButtonText: {
     fontSize: getResponsiveFont(22),
+  },
+  buttonWithLabel: {
+    alignItems: 'center',
+    gap: getResponsiveSize(4),
+  },
+  buttonLabel: {
+    fontSize: getResponsiveFont(9),
+    color: '#FFFFFF',
+    fontWeight: '500',
+    textAlign: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    paddingHorizontal: getResponsiveSize(6),
+    paddingVertical: getResponsiveSize(2),
+    borderRadius: getResponsiveSize(4),
+    maxWidth: getResponsiveSize(60),
+  },
+  bottomButtonWithLabel: {
+    alignItems: 'center',
+    gap: getResponsiveSize(4),
+  },
+  bottomButtonLabel: {
+    fontSize: getResponsiveFont(9),
+    color: '#FFFFFF',
+    fontWeight: '500',
+    textAlign: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    paddingHorizontal: getResponsiveSize(6),
+    paddingVertical: getResponsiveSize(2),
+    borderRadius: getResponsiveSize(4),
+    maxWidth: getResponsiveSize(70),
+  },
+  bottomButtonLabelDisabled: {
+    color: '#CCCCCC',
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
   },
   locationSearchOverlay: {
     position: 'absolute',

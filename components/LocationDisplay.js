@@ -199,7 +199,7 @@ const styles = StyleSheet.create({
     fontSize: getResponsiveFont(13),
     color: '#B8860B',
     fontWeight: '700',
-    fontFamily: 'monospace',
+    fontFamily: Platform.OS === 'web' ? "'DM Sans', sans-serif" : 'System',
     letterSpacing: 0.5,
   },
   divider: {

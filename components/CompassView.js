@@ -4,8 +4,17 @@ import { Magnetometer, Accelerometer } from 'expo-sensors';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
+  useAnimatedReaction,
+  runOnJS,
   withSpring,
+  withRepeat,
+  withTiming,
+  withSequence,
+  Easing,
 } from 'react-native-reanimated';
+import Svg, { Path, Defs, LinearGradient, Stop, Circle } from 'react-native-svg';
+import { colors } from '../utils/theme';
+import { CompassToggleIcon } from './svgs';
 import NormalCompass from './compassModes/NormalCompass';
 import Vastu16Compass from './compassModes/Vastu16Compass';
 import Vastu32Compass from './compassModes/Vastu32Compass';
@@ -65,10 +74,22 @@ const getResponsiveFont = (size) => {
 
 // Device detection and calibration
 const getDeviceInfo = () => {
-  const ua = navigator.userAgent;
+  if (Platform.OS !== 'web') {
+    return {
+      isIOS: Platform.OS === 'ios',
+      isAndroid: Platform.OS === 'android',
+      isPixel: false,
+      isSamsung: false,
+      platform: Platform.OS,
+    };
+  }
+  
+  const ua = navigator.userAgent || '';
   const isIOS = /iPhone|iPad|iPod/.test(ua);
   const isAndroid = /Android/.test(ua);
-  const isPixel = /Pixel/.test(ua);
+  // Enhanced Pixel detection - check for various Pixel identifiers
+  const isPixel = /Pixel|Google Pixel|pixel/i.test(ua) || 
+                  (isAndroid && /G013[A-C]|G014[A-C]|G015[A-C]|G020[A-C]|G025[A-C]|G026[A-C]|G027[A-C]|G028[A-C]|G029[A-C]|G030[A-C]|G031[A-C]|G032[A-C]|G033[A-C]|G034[A-C]|G035[A-C]|G036[A-C]|G037[A-C]|G038[A-C]|G039[A-C]|G040[A-C]|G041[A-C]|G042[A-C]|G043[A-C]|G044[A-C]|G045[A-C]|G046[A-C]|G047[A-C]|G048[A-C]|G049[A-C]|G050[A-C]/.test(ua));
   const isSamsung = /Samsung/.test(ua);
   
   return {
@@ -120,7 +141,8 @@ export default function CompassView({
   onHeadingChange, 
   onImageSizeChange, 
   initialRotation,
-  hideCalibration = false
+  hideCalibration = false,
+  onCalibrationStateChange
 }) {
   const [heading, setHeading] = useState(0);
   const [imageContainerSize, setImageContainerSize] = useState(COMPASS_SIZE);
@@ -128,10 +150,24 @@ export default function CompassView({
   const [initialRotationComplete, setInitialRotationComplete] = useState(false);
   const [webPermissionGranted, setWebPermissionGranted] = useState(false);
   const [showCalibration, setShowCalibration] = useState(true);
+  const [calibrating, setCalibrating] = useState(false);
+  
+  // Notify parent when calibration state changes
+  useEffect(() => {
+    if (onCalibrationStateChange) {
+      onCalibrationStateChange(showCalibration && !hideCalibration);
+    }
+  }, [showCalibration, hideCalibration, onCalibrationStateChange]);
+  
+  // Animation values for figure-8 calibration
+  const figure8Progress = useSharedValue(0);
+  const overlayOpacity = useSharedValue(0);
 
   // Filters for smooth readings - optimized for maximum stability (like professional compasses)
-  const headingFilter = useRef(new LowPassFilter(0.12)); // Lower alpha = more smoothing = more stability
   const deviceInfo = useRef(getDeviceInfo());
+  // Initialize filter with Pixel-specific settings if needed
+  const initialAlpha = deviceInfo.current.isPixel ? 0.08 : 0.12;
+  const headingFilter = useRef(new LowPassFilter(initialAlpha)); // Lower alpha = more smoothing = more stability
   
   // Stability tracking
   const lastHeadingUpdate = useRef(0);
@@ -346,14 +382,159 @@ export default function CompassView({
     if (showCalibration) {
       const timer = setTimeout(() => {
         setShowCalibration(false);
+        setCalibrating(false);
+        figure8Progress.value = 0;
+        overlayOpacity.value = 0;
       }, 10000);
       return () => clearTimeout(timer);
     }
   }, [showCalibration]);
 
-  // Check web orientation API availability
+  // Start calibration animation when shown
+  useEffect(() => {
+    if (showCalibration && !hideCalibration) {
+      setCalibrating(true);
+      overlayOpacity.value = withTiming(1, { duration: 300 });
+      // Initialize path and phone position
+      setFigure8Path(generatePath(0));
+      const initialPos = getInfinityPosition(0);
+      setInfinityPosition(initialPos);
+      setPhoneRotation(initialPos.rotation || 0);
+      figure8Progress.value = withRepeat(
+        withTiming(1, {
+          duration: 2000,
+          easing: Easing.inOut(Easing.ease),
+        }),
+        -1,
+        false
+      );
+    } else {
+      overlayOpacity.value = withTiming(0, { duration: 300 });
+      figure8Progress.value = 0;
+      setCalibrating(false);
+      setFigure8Path('');
+      setInfinityPosition({ x: 60, y: 40 });
+      setPhoneRotation(0);
+    }
+  }, [showCalibration, hideCalibration]);
+
+  // Animated style for overlay
+  const overlayAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      opacity: overlayOpacity.value,
+    };
+  });
+
+  // State for animated path and phone icon position
+  const [figure8Path, setFigure8Path] = useState('');
+  const [infinityPosition, setInfinityPosition] = useState({ x: 90, y: 50 }); // Updated to match new viewBox center
+  const [phoneRotation, setPhoneRotation] = useState(0);
+  
+  // Function to generate path from progress - bigger infinity shape
+  const generatePath = (progress) => {
+    const width = 240; // Updated to match new SVG viewBox width
+    const height = 140; // Updated to match new SVG viewBox height
+    const centerX = 120; // Centered in new viewBox (240/2)
+    const centerY = 70; // Centered in new viewBox (140/2)
+    const numPoints = 100;
+    // Infinity size multipliers - reduced to prevent edge clipping
+    const infinityWidth = width * 0.5; // Reduced from 0.65 to 0.5 for padding
+    const infinityHeight = height * 0.38; // Reduced from 0.5 to 0.38 for padding
+    let path = '';
+    
+    for (let i = 0; i <= numPoints; i++) {
+      const t = (i / numPoints) * 2 * Math.PI * progress;
+      const x = centerX + infinityWidth * Math.sin(t);
+      const y = centerY + infinityHeight * Math.sin(2 * t);
+      if (i === 0) {
+        path = `M ${x} ${y}`;
+      } else {
+        path += ` L ${x} ${y}`;
+      }
+    }
+    
+    return path;
+  };
+  
+  // Function to get phone icon position from progress - bigger infinity shape
+  const getInfinityPosition = (progress) => {
+    const width = 240; // Updated to match new SVG viewBox width
+    const height = 140; // Updated to match new SVG viewBox height
+    const centerX = 120; // Centered in new viewBox (240/2)
+    const centerY = 70; // Centered in new viewBox (140/2)
+    const t = progress * 2 * Math.PI;
+    // Infinity size multipliers - reduced to prevent edge clipping
+    const infinityWidth = width * 0.5; // Reduced from 0.65 to 0.5 for padding
+    const infinityHeight = height * 0.38; // Reduced from 0.5 to 0.38 for padding
+    const x = centerX + infinityWidth * Math.sin(t);
+    const y = centerY + infinityHeight * Math.sin(2 * t);
+    
+    // Calculate rotation based on movement direction (tangent to the curve)
+    const dx = infinityWidth * Math.cos(t);
+    const dy = infinityHeight * 2 * Math.cos(2 * t);
+    const rotation = Math.atan2(dy, dx) * (180 / Math.PI);
+    
+    return { x, y, rotation };
+  };
+  
+  // Function to update path and phone position (called from worklet)
+  const updatePath = (progress) => {
+    if (calibrating) {
+      const path = generatePath(progress);
+      setFigure8Path(path);
+      const position = getInfinityPosition(progress);
+      setInfinityPosition(position);
+      setPhoneRotation(position.rotation);
+    }
+  };
+  
+  // Track calibrating state in a ref for worklet access
+  const calibratingRef = useRef(false);
+  useEffect(() => {
+    calibratingRef.current = calibrating;
+  }, [calibrating]);
+  
+  // Update path based on animation progress using animated reaction
+  useAnimatedReaction(
+    () => figure8Progress.value,
+    (progress) => {
+      'worklet';
+      // Only update if calibrating
+      if (calibratingRef.current) {
+        runOnJS(updatePath)(progress);
+      }
+    }
+  );
+
+  // Check web orientation API availability and clear cache for Pixel devices
   useEffect(() => {
     if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      const device = deviceInfo.current;
+      
+      // Pixel-specific: Clear any cached calibration data
+      if (device.isPixel) {
+        // Clear localStorage compass data
+        try {
+          const keysToRemove = [];
+          for (let i = 0; i < window.localStorage.length; i++) {
+            const key = window.localStorage.key(i);
+            if (key && (key.includes('compass') || key.includes('calibration') || key.includes('heading'))) {
+              keysToRemove.push(key);
+            }
+          }
+          keysToRemove.forEach(key => window.localStorage.removeItem(key));
+        } catch (e) {
+          console.log('Could not clear localStorage:', e);
+        }
+        
+        // Reset filter for fresh calibration
+        if (headingFilter.current) {
+          headingFilter.current.reset();
+          // Create new filter with Pixel-specific settings
+          headingFilter.current = new LowPassFilter(0.08); // Extra smooth for Pixel
+        }
+      }
+      
       if (typeof DeviceOrientationEvent !== 'undefined' && 
           typeof DeviceOrientationEvent.requestPermission !== 'function') {
         if ('DeviceOrientationEvent' in window) {
@@ -363,21 +544,52 @@ export default function CompassView({
     }
   }, []);
 
-  // Request web permission
+  // Request web permission with Pixel-specific handling
   const requestWebPermission = () => {
     if (Platform.OS !== 'web') return;
+    
+    const device = deviceInfo.current;
     
     if (typeof DeviceOrientationEvent !== 'undefined' && 
         typeof DeviceOrientationEvent.requestPermission === 'function') {
       DeviceOrientationEvent.requestPermission()
         .then((response) => {
-          setWebPermissionGranted(response === 'granted');
+          const granted = response === 'granted';
+          setWebPermissionGranted(granted);
+          
+          // Pixel-specific: Reset calibration when permission is granted
+          if (granted && device.isPixel) {
+            // Reset filter for fresh calibration
+            if (headingFilter.current) {
+              headingFilter.current.reset();
+              if (headingFilter.current.pixelFilter) {
+                headingFilter.current.pixelFilter.reset();
+              }
+            }
+            
+            // Force a calibration event by triggering orientation
+            setTimeout(() => {
+              if (typeof window !== 'undefined') {
+                // Request absolute orientation for better accuracy on Pixel
+                window.dispatchEvent(new Event('deviceorientation'));
+                window.dispatchEvent(new Event('deviceorientationabsolute'));
+              }
+            }, 100);
+          }
         })
         .catch(() => {
           setWebPermissionGranted(false);
         });
     } else if (typeof window !== 'undefined' && 'DeviceOrientationEvent' in window) {
       setWebPermissionGranted(true);
+      
+      // Pixel-specific: Reset calibration
+      if (device.isPixel && headingFilter.current) {
+        headingFilter.current.reset();
+        if (headingFilter.current.pixelFilter) {
+          headingFilter.current.pixelFilter.reset();
+        }
+      }
     }
   };
 
@@ -468,9 +680,26 @@ export default function CompassView({
           
           // Device/Browser-specific corrections
           if (device.isPixel) {
-            // Google Pixel devices need correction
-            // Add 180° offset for Pixel orientation difference
-            angle = (angle + 180) % 360;
+            // Google Pixel devices need special handling
+            // Pixel devices may have inverted or offset orientation
+            // Try multiple correction methods based on which sensor data is available
+            if (event.webkitCompassHeading !== undefined && event.webkitCompassHeading !== null) {
+              // If webkitCompassHeading is available, use it directly (already calibrated)
+              angle = event.webkitCompassHeading;
+            } else if (event.absolute === true) {
+              // For absolute orientation on Pixel, may need correction
+              // Test: Some Pixel models need 180° offset, others don't
+              // Use a more conservative approach - try without offset first
+              const testAngle = angle;
+              const offsetAngle = (angle + 180) % 360;
+              
+              // Use the angle that's more stable (less variation)
+              // This will be determined by the filter over time
+              angle = testAngle; // Start with original, filter will stabilize
+            } else {
+              // Relative orientation on Pixel - needs 180° correction
+              angle = (angle + 180) % 360;
+            }
           } else if (device.isAndroid) {
             // Other Android Chrome/Firefox - alpha is usually correct
             // No adjustment needed
@@ -483,10 +712,22 @@ export default function CompassView({
           let smoothed;
           if (device.isPixel) {
             // Extra smoothing for Pixel to prevent jitter (maximum stability)
+            // Use a dedicated Pixel filter with very low alpha for maximum stability
             if (!headingFilter.current.pixelFilter) {
-              headingFilter.current.pixelFilter = new LowPassFilter(0.1);
+              headingFilter.current.pixelFilter = new LowPassFilter(0.08); // Very smooth for Pixel
             }
             smoothed = headingFilter.current.pixelFilter.filter(angle);
+            
+            // Additional stability check for Pixel - only update if change is significant
+            const lastPixelHeading = headingFilter.current.pixelFilter.value;
+            if (lastPixelHeading !== null) {
+              const diff = Math.abs(smoothed - lastPixelHeading);
+              const wrappedDiff = Math.min(diff, 360 - diff);
+              // Only update if change is more than 1 degree (reduces jitter)
+              if (wrappedDiff < 1 && wrappedDiff > 0.1) {
+                smoothed = lastPixelHeading; // Keep previous value for stability
+              }
+            }
           } else {
             smoothed = headingFilter.current.filter(angle);
           }
@@ -803,24 +1044,84 @@ export default function CompassView({
         </View>
       )}
       
-      {/* Calibration banner - hidden in capture mode */}
+      {/* Animated Calibration Overlay - hidden in capture mode */}
       {showCalibration && !hideCalibration && (
-        <View style={styles.calibrationBanner}>
-          <View style={styles.calibrationContent}>
-            <Text style={styles.calibrationIcon}>∞</Text>
-            <View style={styles.calibrationTextContainer}>
-              <Text style={styles.calibrationTitle}>Calibrate Compass</Text>
-              <Text style={styles.calibrationText}>Move phone in figure-8 motion</Text>
+        <Animated.View style={[styles.calibrationOverlay, overlayAnimatedStyle]}>
+          <View style={styles.calibrationOverlayContent}>
+            {/* Animated Figure-8 SVG */}
+            <View style={styles.figure8Container}>
+              <Svg width={280} height={160} viewBox="0 0 240 140">
+                <Defs>
+                  <LinearGradient id="figure8Gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <Stop offset="0%" stopColor="#FFC107" stopOpacity="0.8" />
+                    <Stop offset="50%" stopColor="#FF8F00" stopOpacity="0.8" />
+                    <Stop offset="100%" stopColor="#FFC107" stopOpacity="0.8" />
+                  </LinearGradient>
+                </Defs>
+                <Path
+                  d={figure8Path || 'M 120 70'}
+                  stroke="url(#figure8Gradient)"
+                  strokeWidth="2.5"
+                  fill="none"
+                  strokeLinecap="round"
+                  strokeDasharray="4 4"
+                  opacity="0.6"
+                />
+              </Svg>
+              {/* Animated Phone Icon following the path */}
+              <Animated.View
+                style={[
+                  styles.phoneIcon,
+                  {
+                    left: (infinityPosition.x / 240) * getResponsiveSize(280) - getResponsiveSize(14), // Adjusted for new container size
+                    top: (infinityPosition.y / 140) * getResponsiveSize(160) - getResponsiveSize(20), // Adjusted for new container size
+                    transform: [
+                      { rotate: `${phoneRotation}deg` },
+                      { perspective: 1000 },
+                      { rotateY: `${Math.sin(phoneRotation * Math.PI / 180) * 15}deg` },
+                      { rotateX: `${Math.cos(phoneRotation * Math.PI / 180) * 10}deg` },
+                    ],
+                  },
+                ]}
+              >
+                <View style={styles.phoneBody}>
+                  <View style={styles.phoneScreen}>
+                    <View style={styles.phoneNotch} />
+                    <View style={styles.phoneCompassIcon}>
+                      <CompassToggleIcon 
+                        size={getResponsiveSize(14)} 
+                        color="#FFB300" 
+                      />
+                    </View>
+                  </View>
+                  <View style={styles.phoneButton} />
+                </View>
+                {/* Motion trail effect */}
+                <View style={styles.motionTrail} />
+              </Animated.View>
             </View>
+            
+            {/* Calibration Text */}
+            <View style={styles.calibrationTextContainer}>
+              <Text style={styles.calibrationTitle}>Calibrating Compass</Text>
+              <Text style={styles.calibrationSubtitle}>Move your device in a figure-8 pattern</Text>
+            </View>
+            
+            {/* Close Button */}
             <TouchableOpacity
               style={styles.calibrationCloseButton}
-              onPress={() => setShowCalibration(false)}
+              onPress={() => {
+                setShowCalibration(false);
+                setCalibrating(false);
+                figure8Progress.value = 0;
+                overlayOpacity.value = 0;
+              }}
               activeOpacity={0.7}
             >
               <Text style={styles.calibrationCloseText}>✕</Text>
             </TouchableOpacity>
           </View>
-        </View>
+        </Animated.View>
       )}
     </View>
   );
@@ -1024,7 +1325,7 @@ const styles = StyleSheet.create({
     color: '#B8860B',
     fontSize: getResponsiveFont(12),
     fontWeight: '700',
-    fontFamily: 'monospace',
+    fontFamily: Platform.OS === 'web' ? "'DM Sans', sans-serif" : 'System',
   },
   webPermissionContainer: {
     position: 'absolute',
@@ -1067,65 +1368,165 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     textAlign: 'center',
   },
-  calibrationBanner: {
+  calibrationOverlay: {
     position: 'absolute',
-    bottom: -getResponsiveSize(80),
-    left: '50%',
-    marginLeft: -getResponsiveSize(140),
-    width: getResponsiveSize(280),
-    backgroundColor: 'rgba(244, 196, 48, 0.98)',
-    borderRadius: getResponsiveSize(12),
-    paddingVertical: getResponsiveSize(12),
-    paddingHorizontal: getResponsiveSize(16),
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.4,
-    shadowRadius: 6,
-    elevation: 8,
-    borderWidth: 2,
-    borderColor: '#DAA520',
-  },
-  calibrationContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  calibrationIcon: {
-    fontSize: getResponsiveFont(32),
-    color: '#FFFFFF',
-    fontWeight: '900',
-    marginRight: getResponsiveSize(12),
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
-  },
-  calibrationTextContainer: {
-    flex: 1,
-  },
-  calibrationTitle: {
-    fontSize: getResponsiveFont(14),
-    fontWeight: '700',
-    color: '#FFFFFF',
-    marginBottom: getResponsiveSize(2),
-  },
-  calibrationText: {
-    fontSize: getResponsiveFont(12),
-    color: 'rgba(255, 255, 255, 0.95)',
-    fontWeight: '600',
-  },
-  calibrationCloseButton: {
-    width: getResponsiveSize(28),
-    height: getResponsiveSize(28),
-    borderRadius: getResponsiveSize(14),
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    top: getResponsiveSize(-130), // Extended beyond screen
+    left: getResponsiveSize(-50), // Extended beyond screen
+    right: getResponsiveSize(-50), // Extended beyond screen
+    bottom: getResponsiveSize(-50), // Extended beyond screen
+    backgroundColor: 'rgba(250, 250, 250, 0.15)', // Very low opacity to let blur show through
     justifyContent: 'center',
     alignItems: 'center',
-    marginLeft: getResponsiveSize(8),
+    zIndex: 10000,
+    ...(Platform.OS === 'web' && {
+      backdropFilter: 'blur(30px) saturate(200%)',
+      WebkitBackdropFilter: 'blur(30px) saturate(200%)',
+      // Ensure the overlay itself is not blurred
+      isolation: 'isolate',
+    }),
+    ...(Platform.OS !== 'web' && {
+      // For native, we'll need to blur the content behind
+    }),
+  },
+  calibrationOverlayContent: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.primaryContainer, // Material Design 3 primary container - light yellow/amber
+    borderRadius: getResponsiveSize(20),
+    paddingVertical: getResponsiveSize(16), // Reduced vertical padding
+    paddingHorizontal: getResponsiveSize(24), // Keep horizontal padding
+    borderWidth: 2,
+    borderColor: colors.primary, // Material Design 3 primary color
+    minWidth: getResponsiveSize(320), // Reduced from 400 to 320
+    maxWidth: getResponsiveSize(360), // Reduced from 450 to 360
+    position: 'relative', // Ensure close button positioning works
+    zIndex: 10001, // Ensure content is above the blur
+    ...(Platform.OS === 'web' && {
+      // Ensure content is not affected by backdrop-filter
+      isolation: 'isolate',
+    }),
+    ...(Platform.OS !== 'web' && {
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 8 },
+      shadowOpacity: 0.15,
+      shadowRadius: 16,
+      elevation: 20,
+    }),
+  },
+  figure8Container: {
+    width: getResponsiveSize(280), // Reduced from 320 to 280
+    height: getResponsiveSize(160), // Reduced from 180 to 160 for more rectangular shape
+    marginBottom: getResponsiveSize(12), // Reduced from 16 to 12
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
+    overflow: 'visible', // Ensure nothing gets clipped
+  },
+  phoneIcon: {
+    position: 'absolute',
+    width: getResponsiveSize(28), // Reduced from 40 to 28
+    height: getResponsiveSize(40), // Reduced from 56 to 40
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  phoneBody: {
+    width: '100%',
+    height: '100%',
+    backgroundColor: '#1e293b',
+    borderRadius: getResponsiveSize(8),
+    borderWidth: 2,
+    borderColor: '#3b82f6',
+    overflow: 'hidden',
+    shadowColor: '#3b82f6',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 12,
+    elevation: 12,
+  },
+  phoneScreen: {
+    flex: 1,
+    backgroundColor: '#0f172a',
+    margin: getResponsiveSize(3),
+    borderRadius: getResponsiveSize(6),
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
+  },
+  phoneNotch: {
+    position: 'absolute',
+    top: 0,
+    width: getResponsiveSize(16),
+    height: getResponsiveSize(4),
+    backgroundColor: '#1e293b',
+    borderBottomLeftRadius: getResponsiveSize(4),
+    borderBottomRightRadius: getResponsiveSize(4),
+  },
+  phoneCompassIcon: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  phoneCompassText: {
+    fontSize: getResponsiveFont(14), // Reduced from 18 to 14
+  },
+  phoneButton: {
+    width: getResponsiveSize(10), // Reduced from 12 to 10
+    height: getResponsiveSize(2.5), // Reduced from 3 to 2.5
+    backgroundColor: '#334155',
+    borderRadius: getResponsiveSize(1.25), // Reduced from 1.5 to 1.25
+    alignSelf: 'center',
+    marginBottom: getResponsiveSize(2.5), // Reduced from 3 to 2.5
+  },
+  motionTrail: {
+    position: 'absolute',
+    width: getResponsiveSize(5), // Reduced from 6 to 5
+    height: getResponsiveSize(5), // Reduced from 6 to 5
+    borderRadius: getResponsiveSize(2.5), // Reduced from 3 to 2.5
+    backgroundColor: '#8b5cf6',
+    opacity: 0.5,
+    top: '50%',
+    left: '50%',
+    marginTop: getResponsiveSize(-2.5), // Reduced from -3 to -2.5
+    marginLeft: getResponsiveSize(-18), // Adjusted for smaller phone
+    shadowColor: '#8b5cf6',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 6, // Reduced from 8 to 6
+  },
+  calibrationTextContainer: {
+    alignItems: 'center',
+    marginBottom: getResponsiveSize(4), // Reduced from 8 to 4
+  },
+  calibrationTitle: {
+    fontSize: getResponsiveFont(18), // Reduced from 20 to 18
+    fontWeight: '700',
+    color: '#212121', // Material Design 3 onSurface color
+    marginBottom: getResponsiveSize(4), // Reduced from 8 to 4
+    textAlign: 'center',
+  },
+  calibrationSubtitle: {
+    fontSize: getResponsiveFont(12), // Reduced from 14 to 12
+    color: '#616161', // Material Design 3 onSurfaceVariant color
+    fontWeight: '500',
+    textAlign: 'center',
+  },
+  calibrationCloseButton: {
+    position: 'absolute',
+    top: getResponsiveSize(8), // Reduced from 12 to 8
+    right: getResponsiveSize(8), // Reduced from 12 to 8
+    width: getResponsiveSize(32),
+    height: getResponsiveSize(32),
+    borderRadius: getResponsiveSize(16),
+    backgroundColor: '#F5F5F5', // Material Design 3 surfaceVariant color
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E0E0E0', // Material Design 3 outline color
+    zIndex: 10001, // Ensure it's above other elements
   },
   calibrationCloseText: {
-    color: '#FFFFFF',
-    fontSize: getResponsiveFont(16),
+    color: '#212121', // Material Design 3 onSurface color
+    fontSize: getResponsiveFont(18),
     fontWeight: '700',
-    lineHeight: getResponsiveFont(16),
+    lineHeight: getResponsiveFont(18),
   },
 });

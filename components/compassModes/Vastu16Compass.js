@@ -76,7 +76,7 @@ export default function Vastu16Compass({ size }) {
         </G>
         
         {/* Cardinal directions (0°, 90°, 180°, 270°) */}
-        <G fontFamily="'Segoe UI', Arial, sans-serif" fontWeight="700" fill="#B8860B">
+        <G fontFamily="'DM Sans', sans-serif" fontWeight="700" fill="#B8860B">
           <SvgText x="250" y="25" fontSize="24" textAnchor="middle">N</SvgText>
           <SvgText x="450" y="256" fontSize="22" textAnchor="start">E</SvgText>
           <SvgText x="250" y="460" fontSize="22" textAnchor="middle">S</SvgText>
@@ -84,7 +84,7 @@ export default function Vastu16Compass({ size }) {
         </G>
         
         {/* All 16 compass directions on same circle (radius ~195) */}
-        <G fontFamily="'Segoe UI', Arial, sans-serif" fontSize="11" fontWeight="600" fill="#A0826D">
+        <G fontFamily="'DM Sans', sans-serif" fontSize="11" fontWeight="600" fill="#A0826D">
           {/* NNE at 22.5° */}
           <SvgText x="324" y="73" textAnchor="middle">NNE</SvgText>
           {/* NE at 45° */}
@@ -112,7 +112,7 @@ export default function Vastu16Compass({ size }) {
         </G>
         
         {/* Vastu zone labels (in white area - inner ring) */}
-        <G fontFamily="'Segoe UI', Arial, sans-serif" fontSize="12" fontWeight="500" fill="#C9A961">
+        <G fontFamily="'DM Sans', sans-serif" fontSize="12" fontWeight="500" fill="#C9A961">
           {/* North section */}
           <SvgText x="250" y="105" textAnchor="middle">Ish</SvgText>
           <SvgText x="320" y="128" textAnchor="middle">Pit</SvgText>

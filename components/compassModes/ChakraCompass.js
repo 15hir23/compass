@@ -167,6 +167,7 @@ export default function ChakraCompass({ size }) {
             y={deity.y}
             fontSize="11"
             fontWeight="bold"
+            fontFamily="'DM Sans', sans-serif"
             fill="#8B6914"
             textAnchor="middle"
             transform={`rotate(${deity.angle}, ${deity.x}, ${deity.y})`}
@@ -197,6 +198,7 @@ export default function ChakraCompass({ size }) {
               y={label.y}
               fontSize="12"
               fontWeight="800"
+              fontFamily="'DM Sans', sans-serif"
               fill="#FFFFFF"
               textAnchor="middle"
               stroke="#FFFFFF"
@@ -210,6 +212,7 @@ export default function ChakraCompass({ size }) {
               y={label.y}
               fontSize="12"
               fontWeight="800"
+              fontFamily="'DM Sans', sans-serif"
               fill="#996515"
               textAnchor="middle"
             >

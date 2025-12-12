@@ -4,6 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import CameraIcon from './icons/CameraIcon';
 import LocationIcon from './icons/LocationIcon';
 import { useI18n } from '../utils/i18n';
+import { colors, typography, elevation } from '../utils/theme';
 
 // Get dimensions safely
 const getDimensions = () => {
@@ -53,7 +54,7 @@ export default function CompassBottomNav({ onCapturePress, onLastCapturedPress, 
         activeOpacity={0.8}
       >
         <LinearGradient
-          colors={['#DAA520', '#FFD700', '#FFA500']}
+          colors={[colors.primaryDark, colors.primary, colors.primaryLight]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
           style={styles.pillButton}
@@ -71,8 +72,8 @@ export default function CompassBottomNav({ onCapturePress, onLastCapturedPress, 
       >
         <LinearGradient
           colors={!hasCapturedImage 
-            ? ['#CCCCCC', '#B0B0B0', '#CCCCCC']
-            : ['#DAA520', '#FFD700', '#FFA500']
+            ? [colors.outline, colors.outlineVariant, colors.outline]
+            : [colors.primaryDark, colors.primary, colors.primaryLight]
           }
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
@@ -82,7 +83,7 @@ export default function CompassBottomNav({ onCapturePress, onLastCapturedPress, 
             <View style={styles.triangleUp} />
           </View>
           <Text 
-            style={[styles.buttonText, !hasCapturedImage && styles.disabledText]}
+            style={[styles.buttonText, styles.lastCapturedText, !hasCapturedImage && styles.disabledText]}
             numberOfLines={1}
             adjustsFontSizeToFit={true}
             minimumFontScale={0.65}
@@ -100,13 +101,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    gap: getResponsiveSize(12), // Increased from 10 to 12
+    gap: getResponsiveSize(12),
     paddingHorizontal: getResponsiveSize(16),
-    paddingVertical: getResponsiveSize(10), // Increased from 8 to 10
-    paddingBottom: Platform.OS === 'ios' ? getResponsiveSize(26) : getResponsiveSize(14), // Increased from 22/12
-    backgroundColor: '#FFF8E1',
+    paddingVertical: getResponsiveSize(10),
+    paddingBottom: Platform.OS === 'ios' ? getResponsiveSize(26) : getResponsiveSize(14),
+    backgroundColor: colors.primaryContainer,
     borderTopWidth: 1,
-    borderTopColor: '#F4C430',
+    borderTopColor: colors.primary,
   },
   buttonContainer: {
     flex: 1,
@@ -116,34 +117,33 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: getResponsiveSize(12), // Increased from 10 to 12
-    paddingHorizontal: getResponsiveSize(16), // Increased from 14 to 16
+    paddingVertical: getResponsiveSize(12),
+    paddingHorizontal: getResponsiveSize(16),
     borderRadius: getResponsiveSize(25),
-    gap: getResponsiveSize(8), // Increased from 6 to 8
-    elevation: 6,
-    shadowColor: '#F4C430',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-    minHeight: getResponsiveSize(46), // Increased from 42 to 46
+    gap: getResponsiveSize(8),
+    ...elevation.level2,
+    minHeight: getResponsiveSize(46),
   },
   disabledButton: {
     opacity: 0.6,
   },
   buttonText: {
-    fontSize: getResponsiveFont(15), // Increased from 14 to 15
-    color: '#FFFFFF',
-    fontWeight: '900',
+    fontSize: getResponsiveFont(15),
+    color: colors.onPrimary,
+    fontWeight: '500',
     letterSpacing: 0.5,
     textShadow: '0px 2px 4px rgba(0, 0, 0, 0.3)',
     numberOfLines: 1,
     adjustsFontSizeToFit: true,
     minimumFontScale: 0.7,
-    fontFamily: Platform.OS === 'web' ? "'DM Sans', sans-serif" : 'System',
+    ...typography.labelLarge,
+  },
+  lastCapturedText: {
+    color: '#000000',
   },
   disabledText: {
-    color: '#FFFFFF',
-    opacity: 0.7,
+    color: '#000000',
+    opacity: 0.5,
   },
   // Triangle Icon for Last Captured
   triangleIcon: {
@@ -160,7 +160,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: getResponsiveSize(10),
     borderLeftColor: 'transparent',
     borderRightColor: 'transparent',
-    borderBottomColor: '#FFFFFF',
+    borderBottomColor: '#000000',
     borderTopWidth: 0,
     borderTopColor: 'transparent',
   },

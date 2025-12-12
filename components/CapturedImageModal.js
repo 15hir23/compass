@@ -574,7 +574,7 @@ const styles = StyleSheet.create({
     color: '#B8860B',
     fontSize: getResponsiveSize(12),
     fontWeight: '700',
-    fontFamily: 'monospace',
+    fontFamily: Platform.OS === 'web' ? "'DM Sans', sans-serif" : 'System',
   },
   clearButton: {
     borderRadius: getResponsiveSize(16),

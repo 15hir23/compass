@@ -473,7 +473,7 @@ export default function MapViewModal({ visible, onClose, mode, compassType, sele
                 
                 <!-- Number -->
                 <text x="22" y="28" text-anchor="middle" fill="white" 
-                  font-size="20" font-weight="900" font-family="Arial, sans-serif">${i + 1}</text>
+                  font-size="20" font-weight="900" font-family="'DM Sans', sans-serif">${i + 1}</text>
               </svg>
             </div>
           `,
@@ -694,6 +694,7 @@ export default function MapViewModal({ visible, onClose, mode, compassType, sele
                 capturedImage={null}
                 onClearImage={() => {}}
                 onHeadingChange={setHeading}
+                hideCalibration={true}
               />
             </View>
           )}
@@ -706,115 +707,140 @@ export default function MapViewModal({ visible, onClose, mode, compassType, sele
             />
             
             <View style={styles.mapControls}>
-              <TouchableOpacity
-                style={[styles.mapControlButton, showCompass && styles.mapControlButtonActive]}
-                onPress={() => setShowCompass(!showCompass)}
-                onPressIn={() => setPressedButton('compass')}
-                onPressOut={() => setPressedButton(null)}
-                activeOpacity={0.6}
-              >
-                <CompassToggleIcon 
-                  size={getResponsiveSize(24)} 
-                  color={pressedButton === 'compass' ? "#5D4037" : "#F4C430"} 
-                />
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.mapControlButton}
-                onPress={changeMapType}
-                onPressIn={() => setPressedButton('maptype')}
-                onPressOut={() => setPressedButton(null)}
-                activeOpacity={0.6}
-              >
-                <Text style={[styles.mapControlButtonText, pressedButton === 'maptype' && { opacity: 0.7 }]}>
-                  {mapType === 'satellite' ? '🗺️' : '🛰️'}
+              <View style={styles.buttonWithLabel}>
+                <TouchableOpacity
+                  style={[styles.mapControlButton, showCompass && styles.mapControlButtonActive]}
+                  onPress={() => setShowCompass(!showCompass)}
+                  onPressIn={() => setPressedButton('compass')}
+                  onPressOut={() => setPressedButton(null)}
+                  activeOpacity={0.6}
+                >
+                  <CompassToggleIcon 
+                    size={getResponsiveSize(24)} 
+                    color={pressedButton === 'compass' ? "#5D4037" : "#F4C430"} 
+                  />
+                </TouchableOpacity>
+                <Text style={styles.buttonLabel}>
+                  {t('map.compassToggle') || 'Compass'}
                 </Text>
-              </TouchableOpacity>
+              </View>
+
+              <View style={styles.buttonWithLabel}>
+                <TouchableOpacity
+                  style={styles.mapControlButton}
+                  onPress={changeMapType}
+                  onPressIn={() => setPressedButton('maptype')}
+                  onPressOut={() => setPressedButton(null)}
+                  activeOpacity={0.6}
+                >
+                  <Text style={[styles.mapControlButtonText, pressedButton === 'maptype' && { opacity: 0.7 }]}>
+                    {mapType === 'satellite' ? '🗺️' : '🛰️'}
+                  </Text>
+                </TouchableOpacity>
+                <Text style={styles.buttonLabel}>
+                  {mapType === 'satellite' ? (t('map.mapType') || 'Map') : (t('map.satellite') || 'Satellite')}
+                </Text>
+              </View>
               
               {/* VASTU GRID BUTTON */}
               {!showVastuGrid && (
-                <TouchableOpacity
-                  style={[styles.mapControlButton, cornerSelectionMode && styles.mapControlButtonActive]}
-                  onPress={() => {
-                    console.log('🔄 Toggle corner mode');
-                    setCornerSelectionMode(!cornerSelectionMode);
-                  }}
-                  activeOpacity={0.6}
-                >
-                  <Text style={[styles.mapControlButtonText, !cornerSelectionMode && styles.omSymbolText]}>
-                    {cornerSelectionMode ? '📍' : 'ॐ'}
+                <View style={styles.buttonWithLabel}>
+                  <TouchableOpacity
+                    style={[styles.mapControlButton, cornerSelectionMode && styles.mapControlButtonActive]}
+                    onPress={() => {
+                      console.log('🔄 Toggle corner mode');
+                      setCornerSelectionMode(!cornerSelectionMode);
+                    }}
+                    activeOpacity={0.6}
+                  >
+                    <Text style={[styles.mapControlButtonText, !cornerSelectionMode && styles.omSymbolText]}>
+                      {cornerSelectionMode ? '📍' : 'ॐ'}
+                    </Text>
+                  </TouchableOpacity>
+                  <Text style={styles.buttonLabel}>
+                    {cornerSelectionMode ? (t('map.selectCorners') || 'Select Corners') : (t('map.vastuGrid') || 'Vastu Grid')}
                   </Text>
-                </TouchableOpacity>
+                </View>
               )}
               
               {/* APPLY BUTTON */}
               {cornerSelectionMode && plotCorners.length === 4 && (
-                <TouchableOpacity
-                  style={[styles.mapControlButton, styles.applyButton]}
-                  onPress={() => {
-                    console.log('✅ Apply button clicked');
-                    console.log('📍 Plot corners:', plotCorners);
-                    console.log('🗺️ Map ref exists:', !!googleMapRef.current);
-                    setCornerSelectionMode(false);
-                    console.log('🔄 Corner selection mode set to false');
-                  }}
-                  activeOpacity={0.6}
-                >
-                  <Text style={styles.applyButtonText}>✓</Text>
-                </TouchableOpacity>
+                <View style={styles.buttonWithLabel}>
+                  <TouchableOpacity
+                    style={[styles.mapControlButton, styles.applyButton]}
+                    onPress={() => {
+                      console.log('✅ Apply button clicked');
+                      console.log('📍 Plot corners:', plotCorners);
+                      console.log('🗺️ Map ref exists:', !!googleMapRef.current);
+                      setCornerSelectionMode(false);
+                      console.log('🔄 Corner selection mode set to false');
+                    }}
+                    activeOpacity={0.6}
+                  >
+                    <Text style={styles.applyButtonText}>✓</Text>
+                  </TouchableOpacity>
+                  <Text style={styles.buttonLabel}>
+                    {t('map.applyGrid') || 'Apply Grid'}
+                  </Text>
+                </View>
               )}
               
               {/* CLEAR BUTTON */}
               {showVastuGrid && (
-                <TouchableOpacity
-                  style={styles.mapControlButton}
-                  onPress={() => {
-                    console.log('🗑️ Clearing grid - removing', gridLayersRef.current.length, 'layers');
-                    
-                    // Remove all tracked grid layers
-                    gridLayersRef.current.forEach(l => {
-                      try {
-                        if (l && googleMapRef.current) {
-                          googleMapRef.current.removeLayer(l);
-                        }
-                      } catch (e) {
-                        console.log('⚠️ Error removing layer:', e);
-                      }
-                    });
-                    
-                    // Also remove any orphaned layers by checking all map layers
-                    if (googleMapRef.current && window.L) {
-                      googleMapRef.current.eachLayer((layer) => {
-                        // Remove any polylines or polygons that look like grid lines
-                        if (layer instanceof window.L.Polyline || layer instanceof window.L.Polygon) {
-                          try {
-                            // Check if it's a grid-related layer (yellow/golden colors)
-                            const options = layer.options;
-                            if (options && (
-                              options.color === '#FFD700' || 
-                              options.color === '#F4C430' ||
-                              options.fillColor === '#FFA500' ||
-                              options.fillColor === 'rgba(255, 165, 0, 0.35)'
-                            )) {
-                              googleMapRef.current.removeLayer(layer);
-                              console.log('🗑️ Removed orphaned grid layer');
-                            }
-                          } catch (e) {
-                            // Ignore errors for layers that might not have options
+                <View style={styles.buttonWithLabel}>
+                  <TouchableOpacity
+                    style={styles.mapControlButton}
+                    onPress={() => {
+                      console.log('🗑️ Clearing grid - removing', gridLayersRef.current.length, 'layers');
+                      
+                      // Remove all tracked grid layers
+                      gridLayersRef.current.forEach(l => {
+                        try {
+                          if (l && googleMapRef.current) {
+                            googleMapRef.current.removeLayer(l);
                           }
+                        } catch (e) {
+                          console.log('⚠️ Error removing layer:', e);
                         }
                       });
-                    }
-                    
-                    gridLayersRef.current = [];
-                    setPlotCorners([]);
-                    setShowVastuGrid(false);
-                    console.log('✅ Grid cleared successfully');
-                  }}
-                  activeOpacity={0.6}
-                >
-                  <Text style={styles.mapControlButtonText}>🗑️</Text>
-                </TouchableOpacity>
+                      
+                      // Also remove any orphaned layers by checking all map layers
+                      if (googleMapRef.current && window.L) {
+                        googleMapRef.current.eachLayer((layer) => {
+                          // Remove any polylines or polygons that look like grid lines
+                          if (layer instanceof window.L.Polyline || layer instanceof window.L.Polygon) {
+                            try {
+                              // Check if it's a grid-related layer (yellow/golden colors)
+                              const options = layer.options;
+                              if (options && (
+                                options.color === '#FFD700' || 
+                                options.color === '#F4C430' ||
+                                options.fillColor === '#FFA500' ||
+                                options.fillColor === 'rgba(255, 165, 0, 0.35)'
+                              )) {
+                                googleMapRef.current.removeLayer(layer);
+                                console.log('🗑️ Removed orphaned grid layer');
+                              }
+                            } catch (e) {
+                              // Ignore errors for layers that might not have options
+                            }
+                          }
+                        });
+                      }
+                      
+                      gridLayersRef.current = [];
+                      setPlotCorners([]);
+                      setShowVastuGrid(false);
+                      console.log('✅ Grid cleared successfully');
+                    }}
+                    activeOpacity={0.6}
+                  >
+                    <Text style={styles.mapControlButtonText}>🗑️</Text>
+                  </TouchableOpacity>
+                  <Text style={styles.buttonLabel}>
+                    {t('map.clearGrid') || 'Clear Grid'}
+                  </Text>
+                </View>
               )}
               
               {/* LAYER TOGGLES - Show when grid is active */}
@@ -823,31 +849,46 @@ export default function MapViewModal({ visible, onClose, mode, compassType, sele
                   <View style={styles.layerDivider} />
                   
                   {/* Outer Layer Toggle */}
-                  <TouchableOpacity
-                    style={[styles.layerButton, showOuterLayer && styles.layerButtonActive]}
-                    onPress={() => setShowOuterLayer(!showOuterLayer)}
-                    activeOpacity={0.6}
-                  >
-                    <Text style={styles.layerButtonText}>O</Text>
-                  </TouchableOpacity>
+                  <View style={styles.buttonWithLabel}>
+                    <TouchableOpacity
+                      style={[styles.layerButton, showOuterLayer && styles.layerButtonActive]}
+                      onPress={() => setShowOuterLayer(!showOuterLayer)}
+                      activeOpacity={0.6}
+                    >
+                      <Text style={styles.layerButtonText}>O</Text>
+                    </TouchableOpacity>
+                    <Text style={styles.buttonLabel}>
+                      {t('map.outerLayer') || 'Outer'}
+                    </Text>
+                  </View>
                   
                   {/* Middle Layer Toggle */}
-                  <TouchableOpacity
-                    style={[styles.layerButton, showMiddleLayer && styles.layerButtonActive]}
-                    onPress={() => setShowMiddleLayer(!showMiddleLayer)}
-                    activeOpacity={0.6}
-                  >
-                    <Text style={styles.layerButtonText}>M</Text>
-                  </TouchableOpacity>
+                  <View style={styles.buttonWithLabel}>
+                    <TouchableOpacity
+                      style={[styles.layerButton, showMiddleLayer && styles.layerButtonActive]}
+                      onPress={() => setShowMiddleLayer(!showMiddleLayer)}
+                      activeOpacity={0.6}
+                    >
+                      <Text style={styles.layerButtonText}>M</Text>
+                    </TouchableOpacity>
+                    <Text style={styles.buttonLabel}>
+                      {t('map.middleLayer') || 'Middle'}
+                    </Text>
+                  </View>
                   
                   {/* Center Layer Toggle */}
-                  <TouchableOpacity
-                    style={[styles.layerButton, showCenterLayer && styles.layerButtonActive]}
-                    onPress={() => setShowCenterLayer(!showCenterLayer)}
-                    activeOpacity={0.6}
-                  >
-                    <Text style={styles.layerButtonText}>C</Text>
-                  </TouchableOpacity>
+                  <View style={styles.buttonWithLabel}>
+                    <TouchableOpacity
+                      style={[styles.layerButton, showCenterLayer && styles.layerButtonActive]}
+                      onPress={() => setShowCenterLayer(!showCenterLayer)}
+                      activeOpacity={0.6}
+                    >
+                      <Text style={styles.layerButtonText}>C</Text>
+                    </TouchableOpacity>
+                    <Text style={styles.buttonLabel}>
+                      {t('map.centerLayer') || 'Center'}
+                    </Text>
+                  </View>
                 </>
               )}
             </View>
@@ -1174,6 +1215,37 @@ const styles = StyleSheet.create({
     gap: getResponsiveSize(12),
     zIndex: 1001,
   },
+  buttonWithLabel: {
+    alignItems: 'center',
+    gap: getResponsiveSize(4),
+  },
+  buttonLabel: {
+    fontSize: getResponsiveFont(9), // Reduced font size
+    color: '#212121', // Dark color for better contrast
+    fontWeight: '700', // Bold for visibility
+    textAlign: 'center',
+    fontFamily: Platform.OS === 'web' ? "'DM Sans', sans-serif" : 'System',
+    maxWidth: getResponsiveSize(65), // Adjusted for single line
+    backgroundColor: '#FFFFFF', // Solid white background
+    paddingVertical: getResponsiveSize(3), // Reduced padding
+    paddingHorizontal: getResponsiveSize(5), // Reduced padding
+    borderRadius: getResponsiveSize(6), // Rounded corners
+    borderWidth: 1,
+    borderColor: 'rgba(244, 196, 48, 0.3)', // Subtle border
+    ...(Platform.OS === 'web' && {
+      whiteSpace: 'nowrap', // Prevent text wrapping
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.15)', // Shadow for depth
+    }),
+    ...(Platform.OS !== 'web' && {
+      elevation: 3,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.15,
+      shadowRadius: 3,
+    }),
+  },
   mapControlButton: {
     width: getResponsiveSize(48),
     height: getResponsiveSize(48),
@@ -1243,7 +1315,9 @@ const styles = StyleSheet.create({
     borderRadius: getResponsiveSize(12),
     borderWidth: 2,
     borderColor: '#F4C430',
-    padding: getResponsiveSize(12),
+    padding: getResponsiveSize(16), // Increased from 12 to 16
+    paddingVertical: getResponsiveSize(18), // Additional vertical padding
+    paddingHorizontal: getResponsiveSize(20), // Additional horizontal padding
     elevation: 6,
     shadowColor: '#F4C430',
     shadowOffset: { width: 0, height: 3 },
@@ -1251,21 +1325,29 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
   },
   infoBox: {
-    gap: getResponsiveSize(2),
+    gap: getResponsiveSize(4), // Increased from 2 to 4
   },
   infoLabel: {
-    fontSize: getResponsiveFont(10),
+    fontSize: getResponsiveFont(11), // Increased from 10 to 11
     color: '#F4C430',
     fontWeight: '800',
-    marginBottom: getResponsiveSize(4),
+    marginBottom: getResponsiveSize(6), // Increased from 4 to 6
     letterSpacing: 0.5,
+    paddingVertical: getResponsiveSize(2), // Added padding
     fontFamily: Platform.OS === 'web' ? "'DM Sans', sans-serif" : 'System',
+    ...(Platform.OS === 'web' && {
+      textShadow: '0px 1px 2px rgba(0, 0, 0, 0.1)', // Add text shadow for better visibility
+    }),
   },
   infoValue: {
-    fontSize: getResponsiveFont(10),
-    color: '#424242',
+    fontSize: getResponsiveFont(11), // Increased from 10 to 11
+    color: '#212121', // Changed from #424242 to #212121 for better contrast
     fontWeight: '600',
+    paddingVertical: getResponsiveSize(2), // Added padding
     fontFamily: Platform.OS === 'web' ? "'DM Sans', sans-serif" : 'System',
+    ...(Platform.OS === 'web' && {
+      textShadow: '0px 1px 2px rgba(255, 255, 255, 0.8)', // Add text shadow for better visibility
+    }),
   },
   bottomControls: {
     position: 'absolute',

@@ -5,6 +5,7 @@ import SearchIcon from './icons/SearchIcon';
 import CompassIcon from './icons/CompassIcon';
 import LanguageToggle from './LanguageToggle';
 import { useI18n } from '../utils/i18n';
+import { colors, typography, elevation } from '../utils/theme';
 
 // Get dimensions safely
 const getDimensions = () => {
@@ -48,7 +49,7 @@ export default function CompassTopBar({ onMenuPress, onSearchPress, onBackPress 
 
   return (
     <LinearGradient
-      colors={['#F4C430', '#FFD700', '#F4C430']}
+      colors={[colors.primary, colors.primaryLight, colors.primary]}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       style={styles.container}
@@ -70,7 +71,7 @@ export default function CompassTopBar({ onMenuPress, onSearchPress, onBackPress 
           activeOpacity={0.8}
         >
           <View style={styles.searchContent}>
-            <SearchIcon size={getResponsiveSize(18)} color="#666666" />
+            <SearchIcon size={getResponsiveSize(18)} color={colors.onSurfaceVariant} />
             <Text style={styles.searchText}>{t('header.search')}</Text>
           </View>
         </TouchableOpacity>
@@ -96,14 +97,10 @@ export default function CompassTopBar({ onMenuPress, onSearchPress, onBackPress 
 
 const styles = StyleSheet.create({
   container: {
-    paddingTop: Platform.OS === 'ios' ? getResponsiveSize(42) : getResponsiveSize(32), // Increased from 38/28
-    paddingBottom: getResponsiveSize(10), // Increased from 8 to 10
+    paddingTop: Platform.OS === 'ios' ? getResponsiveSize(42) : getResponsiveSize(32),
+    paddingBottom: getResponsiveSize(10),
     paddingHorizontal: getResponsiveSize(12),
-    elevation: 8,
-    shadowColor: '#F4C430',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
+    ...elevation.level3,
   },
   content: {
     flexDirection: 'row',
@@ -152,18 +149,18 @@ const styles = StyleSheet.create({
   searchContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: getResponsiveSize(16), // Increased from 15 to 16
-    paddingVertical: getResponsiveSize(10), // Increased from 8 to 10
-    gap: getResponsiveSize(10), // Increased from 8 to 10
+    backgroundColor: colors.surface,
+    paddingHorizontal: getResponsiveSize(16),
+    paddingVertical: getResponsiveSize(10),
+    gap: getResponsiveSize(10),
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
+    borderColor: colors.outline,
   },
   searchText: {
-    fontSize: getResponsiveFont(14), // Increased from 13 to 14
-    color: '#999999',
+    fontSize: getResponsiveFont(14),
+    color: colors.onSurfaceVariant,
     flex: 1,
-    fontFamily: Platform.OS === 'web' ? "'DM Sans', sans-serif" : 'System',
+    ...typography.bodyMedium,
   },
   backButton: {
     justifyContent: 'center',
@@ -181,12 +178,13 @@ const styles = StyleSheet.create({
   },
   backButtonText: {
     fontSize: getResponsiveFont(28),
-    color: '#FFFFFF',
-    fontWeight: '900',
+    color: colors.onPrimary,
+    fontWeight: '500',
     textShadow: '0px 1px 3px rgba(0, 0, 0, 0.3)',
     letterSpacing: -2,
     includeFontPadding: false,
     textAlign: 'center',
     lineHeight: getResponsiveFont(28),
+    ...typography.headlineSmall,
   },
 });

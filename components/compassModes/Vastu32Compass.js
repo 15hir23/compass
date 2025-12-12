@@ -135,6 +135,7 @@ export default function Vastu32Compass({ size }) {
                 fill={pada.color}
                 fontSize="10"
                 fontWeight="600"
+                fontFamily="'DM Sans', sans-serif"
                 textAnchor="middle"
                 transform={`rotate(${midAngle + 90}, ${textX}, ${textY})`}
               >
@@ -148,10 +149,10 @@ export default function Vastu32Compass({ size }) {
         <Circle cx="300" cy="300" r="210" fill="#FFFFFF"/>
         
         {/* Cardinal direction labels */}
-        <SvgText x="300" y="20" fill="#B8860B" fontSize="36" fontWeight="700" textAnchor="middle">N</SvgText>
-        <SvgText x="580" y="300" fill="#B8860B" fontSize="36" fontWeight="700" textAnchor="middle">E</SvgText>
-        <SvgText x="300" y="580" fill="#B8860B" fontSize="36" fontWeight="700" textAnchor="middle">S</SvgText>
-        <SvgText x="20" y="300" fill="#B8860B" fontSize="36" fontWeight="700" textAnchor="middle">W</SvgText>
+        <SvgText x="300" y="20" fill="#B8860B" fontSize="36" fontWeight="700" fontFamily="'DM Sans', sans-serif" textAnchor="middle">N</SvgText>
+        <SvgText x="580" y="300" fill="#B8860B" fontSize="36" fontWeight="700" fontFamily="'DM Sans', sans-serif" textAnchor="middle">E</SvgText>
+        <SvgText x="300" y="580" fill="#B8860B" fontSize="36" fontWeight="700" fontFamily="'DM Sans', sans-serif" textAnchor="middle">S</SvgText>
+        <SvgText x="20" y="300" fill="#B8860B" fontSize="36" fontWeight="700" fontFamily="'DM Sans', sans-serif" textAnchor="middle">W</SvgText>
         
         {/* Compass needle */}
         <G>

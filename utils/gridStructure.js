@@ -125,8 +125,9 @@ export const drawVastuGrid = ({
     gridLayersRef.push(...cornerMarkersRef.filter(l => l));
     
     // Helper function for bilinear interpolation
+    // Flipped row mapping: row 0 (North) goes to top, row 8 (South) goes to bottom
     const getGridPoint = (row, col) => {
-      const rowT = row / 9;
+      const rowT = 1 - (row / 9); // Inverted: row 0 -> 1.0 (top), row 8 -> 0.0 (bottom)
       const colT = col / 9;
       
       const bl = plotCorners[0];

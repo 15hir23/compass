@@ -96,46 +96,46 @@ export default function NormalCompass({ size }) {
         </G>
         
         {/* Element labels on outer ring */}
-        <SvgText x="200" y="25" fontFamily="Arial, sans-serif" fontSize="18" fontWeight="600" 
+        <SvgText x="200" y="25" fontFamily="'DM Sans', sans-serif" fontSize="18" fontWeight="600" 
                 fill="#B8860B" textAnchor="middle" letterSpacing="2">WATER</SvgText>
         
-        <SvgText x="375" y="207" fontFamily="Arial, sans-serif" fontSize="18" fontWeight="600" 
+        <SvgText x="375" y="207" fontFamily="'DM Sans', sans-serif" fontSize="18" fontWeight="600" 
                 fill="#B8860B" textAnchor="middle" letterSpacing="2">FIRE</SvgText>
         
-        <SvgText x="200" y="385" fontFamily="Arial, sans-serif" fontSize="18" fontWeight="600" 
+        <SvgText x="200" y="385" fontFamily="'DM Sans', sans-serif" fontSize="18" fontWeight="600" 
                 fill="#B8860B" textAnchor="middle" letterSpacing="2">EARTH</SvgText>
         
-        <SvgText x="25" y="207" fontFamily="Arial, sans-serif" fontSize="18" fontWeight="600" 
+        <SvgText x="25" y="207" fontFamily="'DM Sans', sans-serif" fontSize="18" fontWeight="600" 
                 fill="#B8860B" textAnchor="middle" letterSpacing="2">AIR</SvgText>
         
         {/* Direction labels inside */}
         {/* N */}
-        <SvgText x="200" y="100" fontFamily="Arial, sans-serif" fontSize="32" fontWeight="700" 
+        <SvgText x="200" y="100" fontFamily="'DM Sans', sans-serif" fontSize="32" fontWeight="700" 
                 fill="#B8860B" textAnchor="middle">N</SvgText>
         
         {/* E */}
-        <SvgText x="300" y="207" fontFamily="Arial, sans-serif" fontSize="24" fontWeight="600" 
+        <SvgText x="300" y="207" fontFamily="'DM Sans', sans-serif" fontSize="24" fontWeight="600" 
                 fill="#8B7355" textAnchor="middle">E</SvgText>
         
         {/* S */}
-        <SvgText x="200" y="310" fontFamily="Arial, sans-serif" fontSize="24" fontWeight="600" 
+        <SvgText x="200" y="310" fontFamily="'DM Sans', sans-serif" fontSize="24" fontWeight="600" 
                 fill="#8B7355" textAnchor="middle">S</SvgText>
         
         {/* W */}
-        <SvgText x="100" y="207" fontFamily="Arial, sans-serif" fontSize="24" fontWeight="600" 
+        <SvgText x="100" y="207" fontFamily="'DM Sans', sans-serif" fontSize="24" fontWeight="600" 
                 fill="#8B7355" textAnchor="middle">W</SvgText>
         
         {/* Intercardinal labels */}
-        <SvgText x="256" y="144" fontFamily="Arial, sans-serif" fontSize="16" fontWeight="500" 
+        <SvgText x="256" y="144" fontFamily="'DM Sans', sans-serif" fontSize="16" fontWeight="500" 
                 fill="#9CA3AF" textAnchor="middle">NE</SvgText>
         
-        <SvgText x="256" y="266" fontFamily="Arial, sans-serif" fontSize="16" fontWeight="500" 
+        <SvgText x="256" y="266" fontFamily="'DM Sans', sans-serif" fontSize="16" fontWeight="500" 
                 fill="#9CA3AF" textAnchor="middle">SE</SvgText>
         
-        <SvgText x="144" y="266" fontFamily="Arial, sans-serif" fontSize="16" fontWeight="500" 
+        <SvgText x="144" y="266" fontFamily="'DM Sans', sans-serif" fontSize="16" fontWeight="500" 
                 fill="#9CA3AF" textAnchor="middle">SW</SvgText>
         
-        <SvgText x="144" y="144" fontFamily="Arial, sans-serif" fontSize="16" fontWeight="500" 
+        <SvgText x="144" y="144" fontFamily="'DM Sans', sans-serif" fontSize="16" fontWeight="500" 
                 fill="#9CA3AF" textAnchor="middle">NW</SvgText>
         
         {/* Compass needle */}

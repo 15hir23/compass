@@ -276,7 +276,7 @@ const styles = StyleSheet.create({
     color: '#000',
     textAlign: 'center',
     letterSpacing: 0.5,
-    fontFamily: Platform.OS === 'web' ? "'Oswald', sans-serif" : 'System',
+    fontFamily: Platform.OS === 'web' ? "'DM Sans', sans-serif" : 'System',
   },
   centerText: {
     // Larger text for center Brahma

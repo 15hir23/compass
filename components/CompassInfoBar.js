@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Platform, Linking
 import * as Location from 'expo-location';
 import { Magnetometer } from 'expo-sensors';
 import { useI18n } from '../utils/i18n';
+import { colors, typography } from '../utils/theme';
 
 // Get dimensions safely
 const getDimensions = () => {
@@ -171,23 +172,23 @@ export default function CompassInfoBar({ selectedLocation }) {
       <View style={styles.infoRow}>
         <View style={styles.infoItem}>
           <Text style={styles.infoLabelCompact}>{t('info.geoCoordinate')}: </Text>
-          {!hasPermission && !displayLocation ? (
-            <TouchableOpacity
+        {!hasPermission && !displayLocation ? (
+          <TouchableOpacity
               style={styles.permissionWarningCompact}
-              onPress={handlePermissionClick}
-              activeOpacity={0.7}
-            >
+            onPress={handlePermissionClick}
+            activeOpacity={0.7}
+          >
               <Text style={styles.warningIconCompact}>⚠️</Text>
               <Text style={styles.warningTextCompact}>{t('info.locationPermission')}</Text>
-            </TouchableOpacity>
-          ) : displayLocation ? (
+          </TouchableOpacity>
+        ) : displayLocation ? (
             <Text style={styles.coordinateTextCompact} numberOfLines={1}>
-              {formatCoordinate(displayLocation.coords?.latitude || displayLocation.latitude)}, {formatCoordinate(displayLocation.coords?.longitude || displayLocation.longitude)}
-            </Text>
-          ) : (
+            {formatCoordinate(displayLocation.coords?.latitude || displayLocation.latitude)}, {formatCoordinate(displayLocation.coords?.longitude || displayLocation.longitude)}
+          </Text>
+        ) : (
             <Text style={styles.coordinateTextCompact}>--, --</Text>
-          )}
-        </View>
+        )}
+      </View>
         <View style={styles.infoItem}>
           <Text style={styles.infoLabelCompact}>{t('info.magneticField')}: </Text>
           <Text style={styles.magneticValueCompact}>
@@ -204,12 +205,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingHorizontal: getResponsiveSize(12),
-    paddingVertical: getResponsiveSize(10), // Increased from 8 to 10
-    backgroundColor: '#FFF8E1',
+    paddingVertical: getResponsiveSize(10),
+    backgroundColor: colors.primaryContainer,
     borderTopWidth: 1,
-    borderTopColor: '#F4C430',
+    borderTopColor: colors.primary,
     borderBottomWidth: 1,
-    borderBottomColor: '#F4C430',
+    borderBottomColor: colors.primary,
   },
   infoRow: {
     flex: 1,
@@ -225,11 +226,11 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
   },
   infoLabelCompact: {
-    fontSize: getResponsiveFont(11), // Increased from 10 to 11
-    color: '#B8860B',
-    fontWeight: '700',
+    fontSize: getResponsiveFont(11),
+    color: colors.primaryDark,
+    fontWeight: '500',
     letterSpacing: 0.3,
-    fontFamily: Platform.OS === 'web' ? "'DM Sans', sans-serif" : 'System',
+    ...typography.labelMedium,
   },
   permissionWarningCompact: {
     flexDirection: 'row',
@@ -241,24 +242,26 @@ const styles = StyleSheet.create({
     fontSize: getResponsiveFont(12), // Increased from 11 to 12
   },
   warningTextCompact: {
-    fontSize: getResponsiveFont(11), // Increased from 10 to 11
-    color: '#FF0000',
-    fontWeight: '600',
-    fontFamily: Platform.OS === 'web' ? "'DM Sans', sans-serif" : 'System',
+    fontSize: getResponsiveFont(11),
+    color: colors.error,
+    fontWeight: '500',
+    ...typography.labelMedium,
     flex: 1,
   },
   coordinateTextCompact: {
-    fontSize: getResponsiveFont(11), // Increased from 10 to 11
-    color: '#666666',
-    fontFamily: Platform.OS === 'web' ? "'DM Sans', monospace" : 'monospace',
-    fontWeight: '500',
+    fontSize: getResponsiveFont(11),
+    color: colors.onSurfaceVariant,
+    fontFamily: Platform.OS === 'web' ? "'DM Sans', sans-serif" : 'System',
+    fontWeight: '400',
+    ...typography.bodySmall,
     flex: 1,
   },
   magneticValueCompact: {
-    fontSize: getResponsiveFont(11), // Increased from 10 to 11
-    color: '#FF0000',
-    fontWeight: '700',
-    fontFamily: Platform.OS === 'web' ? "'DM Sans', monospace" : 'monospace',
+    fontSize: getResponsiveFont(11),
+    color: colors.error,
+    fontWeight: '500',
+    fontFamily: Platform.OS === 'web' ? "'DM Sans', sans-serif" : 'System',
+    ...typography.labelMedium,
   },
 });
 

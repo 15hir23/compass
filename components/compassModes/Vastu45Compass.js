@@ -127,6 +127,7 @@ export default function Vastu45Compass({ size }) {
               y={y + 6}
               fontSize={14}
               fontWeight="bold"
+              fontFamily="'DM Sans', sans-serif"
               fill="#B8860B"
               textAnchor="middle"
             >

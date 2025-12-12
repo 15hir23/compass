@@ -145,7 +145,7 @@ const styles = StyleSheet.create({
     fontSize: getResponsiveFont(28),
     fontWeight: '700',
     color: '#F4C430',
-    fontFamily: 'monospace',
+    fontFamily: Platform.OS === 'web' ? "'DM Sans', sans-serif" : 'System',
     letterSpacing: 0.5,
   },
   secondaryDirection: {

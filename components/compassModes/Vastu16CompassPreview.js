@@ -80,6 +80,7 @@ export default function Vastu16CompassPreview({ size }) {
               y={y + 4}
               fontSize={isCardinal ? size * 0.08 : size * 0.06}
               fontWeight={isCardinal ? "bold" : "600"}
+              fontFamily="'DM Sans', sans-serif"
               fill={isCardinal ? "#B8860B" : "#8B7355"}
               textAnchor="middle"
             >

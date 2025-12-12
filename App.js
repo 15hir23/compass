@@ -131,6 +131,7 @@ const COMPASS_TYPES = {
 
 export default function App() {
   const { t } = useI18n();
+  const [calibrationModalOpen, setCalibrationModalOpen] = useState(false);
   const [showHomeScreen, setShowHomeScreen] = useState(true);
   const [compassType, setCompassType] = useState(COMPASS_TYPES.VASTU); // Default to Vastu
   const [currentMode, setCurrentMode] = useState(COMPASS_MODES.NORMAL);
@@ -413,6 +414,9 @@ export default function App() {
                 onClearImage={() => {}}
                 onHeadingChange={setHeading}
                 initialRotation={compassInitialRotation}
+                onCalibrationStateChange={(isShowing) => {
+                  setCalibrationModalOpen(isShowing);
+                }}
               />
         </View>
 
@@ -578,6 +582,20 @@ const styles = StyleSheet.create({
   blurredBackground: {
     opacity: 0.4,
   },
+  blurOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 9999,
+    pointerEvents: 'none',
+    ...(Platform.OS === 'web' && {
+      backdropFilter: 'blur(20px) saturate(200%)',
+      WebkitBackdropFilter: 'blur(20px) saturate(200%)',
+      backgroundColor: 'rgba(250, 250, 250, 0.1)',
+    }),
+  },
   gradient: {
     flex: 1,
     paddingTop: Platform.OS === 'ios' ? getResponsiveSize(10) : getResponsiveSize(20),
@@ -627,6 +645,11 @@ const styles = StyleSheet.create({
   compassScreen: {
     flex: 1,
     backgroundColor: '#FFFFFF',
+  },
+  compassScreenBlurred: {
+    filter: 'blur(20px)',
+    WebkitFilter: 'blur(20px)',
+    pointerEvents: 'none',
   },
   compassContainer: {
     flex: 1,
