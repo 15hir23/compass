@@ -1124,34 +1124,34 @@ export default function MapViewModal({ visible, onClose, mode, compassType, sele
           <View style={[styles.mapControls, { pointerEvents: 'box-none' }]}>
              {/* Compass Toggle Button */}
              <View style={styles.buttonWithLabel}>
-               <TouchableOpacity
-                 style={[styles.mapControlButton, showCompass && styles.mapControlButtonActive, { pointerEvents: 'auto' }]}
-                 onPress={() => setShowCompass(!showCompass)}
-                 onPressIn={() => setPressedButton('compass')}
-                 onPressOut={() => setPressedButton(null)}
-                 activeOpacity={0.6}
-               >
-                 <CompassToggleIcon 
-                   size={getResponsiveSize(24)} 
-                   color={pressedButton === 'compass' ? "#5D4037" : "#F4C430"} 
-                 />
-               </TouchableOpacity>
+             <TouchableOpacity
+               style={[styles.mapControlButton, showCompass && styles.mapControlButtonActive, { pointerEvents: 'auto' }]}
+               onPress={() => setShowCompass(!showCompass)}
+               onPressIn={() => setPressedButton('compass')}
+               onPressOut={() => setPressedButton(null)}
+               activeOpacity={0.6}
+             >
+               <CompassToggleIcon 
+                 size={getResponsiveSize(24)} 
+                 color={pressedButton === 'compass' ? "#5D4037" : "#F4C430"} 
+               />
+             </TouchableOpacity>
                <Text style={styles.buttonLabel}>{t('map.compassToggle') || 'Compass'}</Text>
              </View>
 
              {/* Map Type Toggle */}
              <View style={styles.buttonWithLabel}>
-               <TouchableOpacity
-                 style={styles.mapControlButton}
-                 onPress={changeMapType}
-                 onPressIn={() => setPressedButton('maptype')}
-                 onPressOut={() => setPressedButton(null)}
-                 activeOpacity={0.6}
-               >
-                 <Text style={[styles.mapControlButtonText, pressedButton === 'maptype' && { opacity: 0.7 }]}>
-                   {mapType === 'satellite' ? '🗺️' : '🛰️'}
-                 </Text>
-               </TouchableOpacity>
+             <TouchableOpacity
+               style={styles.mapControlButton}
+               onPress={changeMapType}
+               onPressIn={() => setPressedButton('maptype')}
+               onPressOut={() => setPressedButton(null)}
+               activeOpacity={0.6}
+             >
+               <Text style={[styles.mapControlButtonText, pressedButton === 'maptype' && { opacity: 0.7 }]}>
+                 {mapType === 'satellite' ? '🗺️' : '🛰️'}
+               </Text>
+             </TouchableOpacity>
                <Text style={styles.buttonLabel}>
                  {mapType === 'satellite' ? (t('map.mapView') || 'Map') : (t('map.satelliteView') || 'Satellite')}
                </Text>
@@ -1160,33 +1160,33 @@ export default function MapViewModal({ visible, onClose, mode, compassType, sele
              {/* Vastu Grid Toggle - Corner Selection */}
              {!showVastuGrid && (
                <View style={styles.buttonWithLabel}>
-                 <TouchableOpacity
-                   style={[styles.mapControlButton, cornerSelectionMode && styles.mapControlButtonActive]}
-                   onPress={() => {
-                     const newMode = !cornerSelectionMode;
-                     console.log('🔄 Toggling corner selection mode:', newMode);
-                     setCornerSelectionMode(newMode);
-                     
-                     if (isMapLocked && newMode) {
-                       // Auto-unlock map when starting selection
-                       setIsMapLocked(false);
-                       if (googleMapRef.current && window.L) {
-                         googleMapRef.current.dragging.enable();
-                         googleMapRef.current.touchZoom.enable();
-                         googleMapRef.current.doubleClickZoom.enable();
-                         googleMapRef.current.scrollWheelZoom.enable();
-                         console.log('🔓 Map unlocked for corner selection');
-                       }
+               <TouchableOpacity
+                 style={[styles.mapControlButton, cornerSelectionMode && styles.mapControlButtonActive]}
+                 onPress={() => {
+                   const newMode = !cornerSelectionMode;
+                   console.log('🔄 Toggling corner selection mode:', newMode);
+                   setCornerSelectionMode(newMode);
+                   
+                   if (isMapLocked && newMode) {
+                     // Auto-unlock map when starting selection
+                     setIsMapLocked(false);
+                     if (googleMapRef.current && window.L) {
+                       googleMapRef.current.dragging.enable();
+                       googleMapRef.current.touchZoom.enable();
+                       googleMapRef.current.doubleClickZoom.enable();
+                       googleMapRef.current.scrollWheelZoom.enable();
+                       console.log('🔓 Map unlocked for corner selection');
                      }
-                   }}
-                   onPressIn={() => setPressedButton('vastu')}
-                   onPressOut={() => setPressedButton(null)}
-                   activeOpacity={0.6}
-                 >
-                   <Text style={[styles.mapControlButtonText, pressedButton === 'vastu' && { opacity: 0.7 }]}>
-                     {cornerSelectionMode ? '📍' : '⬜'}
-                   </Text>
-                 </TouchableOpacity>
+                   }
+                 }}
+                 onPressIn={() => setPressedButton('vastu')}
+                 onPressOut={() => setPressedButton(null)}
+                 activeOpacity={0.6}
+               >
+                 <Text style={[styles.mapControlButtonText, pressedButton === 'vastu' && { opacity: 0.7 }]}>
+                   {cornerSelectionMode ? '📍' : '⬜'}
+                 </Text>
+               </TouchableOpacity>
                  <Text style={styles.buttonLabel}>
                    {cornerSelectionMode ? (t('map.selectCorners') || 'Select Corners') : (t('map.vastuGrid') || 'Vastu Grid')}
                  </Text>
@@ -1196,27 +1196,27 @@ export default function MapViewModal({ visible, onClose, mode, compassType, sele
              {/* Apply Grid Button - Show when corners are being adjusted */}
              {cornerSelectionMode && plotCorners.length === 4 && (
                <View style={styles.buttonWithLabel}>
-                 <TouchableOpacity
-                   style={[styles.mapControlButton, styles.applyButton]}
-                   onPress={() => {
-                     console.log('✅ Applying Vastu grid with final corners:', plotCorners);
-                     // Remove corner tooltips (make them non-permanent)
-                     cornerMarkersRef.current.forEach(marker => {
-                       if (marker && marker.unbindTooltip) {
-                         marker.unbindTooltip();
-                       }
-                     });
-                     setCornerSelectionMode(false);
-                     // Grid will be drawn by the existing useEffect
-                   }}
-                   onPressIn={() => setPressedButton('apply')}
-                   onPressOut={() => setPressedButton(null)}
-                   activeOpacity={0.6}
-                 >
-                   <Text style={[styles.applyButtonText, pressedButton === 'apply' && { opacity: 0.7 }]}>
-                     ✓
-                   </Text>
-                 </TouchableOpacity>
+               <TouchableOpacity
+                 style={[styles.mapControlButton, styles.applyButton]}
+                 onPress={() => {
+                   console.log('✅ Applying Vastu grid with final corners:', plotCorners);
+                   // Remove corner tooltips (make them non-permanent)
+                   cornerMarkersRef.current.forEach(marker => {
+                     if (marker && marker.unbindTooltip) {
+                       marker.unbindTooltip();
+                     }
+                   });
+                   setCornerSelectionMode(false);
+                   // Grid will be drawn by the existing useEffect
+                 }}
+                 onPressIn={() => setPressedButton('apply')}
+                 onPressOut={() => setPressedButton(null)}
+                 activeOpacity={0.6}
+               >
+                 <Text style={[styles.applyButtonText, pressedButton === 'apply' && { opacity: 0.7 }]}>
+                   ✓
+                 </Text>
+               </TouchableOpacity>
                  <Text style={styles.buttonLabel}>{t('map.applyGrid') || 'Apply Grid'}</Text>
                </View>
              )}
@@ -1224,29 +1224,29 @@ export default function MapViewModal({ visible, onClose, mode, compassType, sele
              {/* Clear Grid Button - Show when grid exists */}
              {showVastuGrid && (
                <View style={styles.buttonWithLabel}>
-                 <TouchableOpacity
-                   style={styles.mapControlButton}
-                   onPress={() => {
-                     console.log('🗑️ Clearing grid and corners');
-                     // Clear all grid layers
-                     gridLayersRef.current.forEach(layer => {
-                       if (googleMapRef.current) {
-                         googleMapRef.current.removeLayer(layer);
-                       }
-                     });
-                     gridLayersRef.current = [];
-                     setPlotCorners([]);
-                     setShowVastuGrid(false);
-                     setCornerSelectionMode(false);
-                   }}
-                   onPressIn={() => setPressedButton('clear')}
-                   onPressOut={() => setPressedButton(null)}
-                   activeOpacity={0.6}
-                 >
-                   <Text style={[styles.mapControlButtonText, pressedButton === 'clear' && { opacity: 0.7 }]}>
-                     🗑️
-                   </Text>
-                 </TouchableOpacity>
+               <TouchableOpacity
+                 style={styles.mapControlButton}
+                 onPress={() => {
+                   console.log('🗑️ Clearing grid and corners');
+                   // Clear all grid layers
+                   gridLayersRef.current.forEach(layer => {
+                     if (googleMapRef.current) {
+                       googleMapRef.current.removeLayer(layer);
+                     }
+                   });
+                   gridLayersRef.current = [];
+                   setPlotCorners([]);
+                   setShowVastuGrid(false);
+                   setCornerSelectionMode(false);
+                 }}
+                 onPressIn={() => setPressedButton('clear')}
+                 onPressOut={() => setPressedButton(null)}
+                 activeOpacity={0.6}
+               >
+                 <Text style={[styles.mapControlButtonText, pressedButton === 'clear' && { opacity: 0.7 }]}>
+                   🗑️
+                 </Text>
+               </TouchableOpacity>
                  <Text style={styles.buttonLabel}>{t('map.clearGrid') || 'Clear Grid'}</Text>
                </View>
              )}
@@ -1254,17 +1254,17 @@ export default function MapViewModal({ visible, onClose, mode, compassType, sele
              {/* Toggle Devta Labels - Show when grid exists */}
              {showVastuGrid && (
                <View style={styles.buttonWithLabel}>
-                 <TouchableOpacity
-                   style={[styles.mapControlButton, showDevtaLabels && styles.mapControlButtonActive]}
-                   onPress={() => setShowDevtaLabels(!showDevtaLabels)}
-                   onPressIn={() => setPressedButton('labels')}
-                   onPressOut={() => setPressedButton(null)}
-                   activeOpacity={0.6}
-                 >
-                   <Text style={[styles.mapControlButtonText, pressedButton === 'labels' && { opacity: 0.7 }]}>
-                     🏷️
-                   </Text>
-                 </TouchableOpacity>
+               <TouchableOpacity
+                 style={[styles.mapControlButton, showDevtaLabels && styles.mapControlButtonActive]}
+                 onPress={() => setShowDevtaLabels(!showDevtaLabels)}
+                 onPressIn={() => setPressedButton('labels')}
+                 onPressOut={() => setPressedButton(null)}
+                 activeOpacity={0.6}
+               >
+                 <Text style={[styles.mapControlButtonText, pressedButton === 'labels' && { opacity: 0.7 }]}>
+                   🏷️
+                 </Text>
+               </TouchableOpacity>
                  <Text style={styles.buttonLabel}>
                    {showDevtaLabels ? (t('map.hideLabels') || 'Hide Labels') : (t('map.showLabels') || 'Show Labels')}
                  </Text>
@@ -1274,17 +1274,17 @@ export default function MapViewModal({ visible, onClose, mode, compassType, sele
              {/* Toggle Brahmasthan - Show when grid exists */}
              {showVastuGrid && (
                <View style={styles.buttonWithLabel}>
-                 <TouchableOpacity
-                   style={[styles.mapControlButton, highlightBrahmasthan && styles.mapControlButtonActive]}
-                   onPress={() => setHighlightBrahmasthan(!highlightBrahmasthan)}
-                   onPressIn={() => setPressedButton('brahma')}
-                   onPressOut={() => setPressedButton(null)}
-                   activeOpacity={0.6}
-                 >
-                   <Text style={[styles.mapControlButtonText, pressedButton === 'brahma' && { opacity: 0.7 }]}>
-                     🕉️
-                   </Text>
-                 </TouchableOpacity>
+               <TouchableOpacity
+                 style={[styles.mapControlButton, highlightBrahmasthan && styles.mapControlButtonActive]}
+                 onPress={() => setHighlightBrahmasthan(!highlightBrahmasthan)}
+                 onPressIn={() => setPressedButton('brahma')}
+                 onPressOut={() => setPressedButton(null)}
+                 activeOpacity={0.6}
+               >
+                 <Text style={[styles.mapControlButtonText, pressedButton === 'brahma' && { opacity: 0.7 }]}>
+                   🕉️
+                 </Text>
+               </TouchableOpacity>
                  <Text style={styles.buttonLabel}>
                    {highlightBrahmasthan ? (t('map.hideBrahma') || 'Hide Brahma') : (t('map.showBrahma') || 'Show Brahma')}
                  </Text>
@@ -1375,9 +1375,9 @@ export default function MapViewModal({ visible, onClose, mode, compassType, sele
         <View style={styles.bottomControls}>
            {/* Download/Screenshot Button */}
            <View style={styles.bottomButtonWithLabel}>
-             <TouchableOpacity
-               style={styles.bottomButton}
-               onPress={async () => {
+           <TouchableOpacity
+             style={styles.bottomButton}
+             onPress={async () => {
                if (Platform.OS === 'web') {
                  try {
                    const html2canvas = (await import('html2canvas')).default;
@@ -1413,45 +1413,45 @@ export default function MapViewModal({ visible, onClose, mode, compassType, sele
                  }
                }
              }}
-               onPressIn={() => setPressedButton('download')}
-               onPressOut={() => setPressedButton(null)}
-               activeOpacity={0.6}
-             >
-               <DownloadIcon 
-                 size={getResponsiveSize(24)} 
-                 color={pressedButton === 'download' ? "#5D4037" : "#F4C430"} 
-               />
-             </TouchableOpacity>
+             onPressIn={() => setPressedButton('download')}
+             onPressOut={() => setPressedButton(null)}
+             activeOpacity={0.6}
+           >
+             <DownloadIcon 
+               size={getResponsiveSize(24)} 
+               color={pressedButton === 'download' ? "#5D4037" : "#F4C430"} 
+             />
+           </TouchableOpacity>
              <Text style={styles.bottomButtonLabel}>{t('map.download') || 'Download'}</Text>
            </View>
 
            {/* Recenter to Current Location Button */}
            <View style={styles.bottomButtonWithLabel}>
-             <TouchableOpacity
-               style={styles.bottomButton}
-               onPress={() => {
+           <TouchableOpacity
+             style={styles.bottomButton}
+             onPress={() => {
                if (googleMapRef.current && currentLocation) {
                  googleMapRef.current.setView([currentLocation.latitude, currentLocation.longitude], 18);
                  setMapLocation(null); // Reset to current location
                }
              }}
-               onPressIn={() => setPressedButton('recenter')}
-               onPressOut={() => setPressedButton(null)}
-               activeOpacity={0.6}
-             >
-               <RecenterIcon 
-                 size={getResponsiveSize(24)} 
-                 color={pressedButton === 'recenter' ? "#5D4037" : "#F4C430"} 
-               />
-             </TouchableOpacity>
+             onPressIn={() => setPressedButton('recenter')}
+             onPressOut={() => setPressedButton(null)}
+             activeOpacity={0.6}
+           >
+             <RecenterIcon 
+               size={getResponsiveSize(24)} 
+               color={pressedButton === 'recenter' ? "#5D4037" : "#F4C430"} 
+             />
+           </TouchableOpacity>
              <Text style={styles.bottomButtonLabel}>{t('map.recenter') || 'Recenter'}</Text>
            </View>
 
            {/* Lock/Unlock Map Button */}
            <View style={styles.bottomButtonWithLabel}>
-             <TouchableOpacity
-               style={[styles.bottomButton, isMapLocked && styles.bottomButtonActive]}
-               onPress={() => {
+           <TouchableOpacity
+             style={[styles.bottomButton, isMapLocked && styles.bottomButtonActive]}
+             onPress={() => {
                setIsMapLocked(!isMapLocked);
                if (googleMapRef.current && window.L) {
                  if (!isMapLocked) {
@@ -1469,16 +1469,16 @@ export default function MapViewModal({ visible, onClose, mode, compassType, sele
                  }
                }
              }}
-               onPressIn={() => setPressedButton('lock')}
-               onPressOut={() => setPressedButton(null)}
-               activeOpacity={0.6}
-             >
-               <LockIcon 
-                 size={getResponsiveSize(24)} 
-                 color={pressedButton === 'lock' ? "#5D4037" : "#F4C430"} 
-                 locked={isMapLocked} 
-               />
-             </TouchableOpacity>
+             onPressIn={() => setPressedButton('lock')}
+             onPressOut={() => setPressedButton(null)}
+             activeOpacity={0.6}
+           >
+             <LockIcon 
+               size={getResponsiveSize(24)} 
+               color={pressedButton === 'lock' ? "#5D4037" : "#F4C430"} 
+               locked={isMapLocked} 
+             />
+           </TouchableOpacity>
              <Text style={styles.bottomButtonLabel}>
                {isMapLocked ? (t('map.unlock') || 'Unlock') : (t('map.lock') || 'Lock')}
              </Text>
@@ -1486,23 +1486,23 @@ export default function MapViewModal({ visible, onClose, mode, compassType, sele
 
            {/* Go to Selected Location Button */}
            <View style={styles.bottomButtonWithLabel}>
-             <TouchableOpacity
-               style={styles.bottomButton}
-               onPress={() => {
+           <TouchableOpacity
+             style={styles.bottomButton}
+             onPress={() => {
                if (googleMapRef.current && mapLocation) {
                  googleMapRef.current.setView([mapLocation.latitude, mapLocation.longitude], 18);
                }
              }}
-               onPressIn={() => setPressedButton('pin')}
-               onPressOut={() => setPressedButton(null)}
-               activeOpacity={0.6}
-               disabled={!mapLocation}
-             >
-               <PinIcon 
-                 size={getResponsiveSize(24)} 
-                 color={pressedButton === 'pin' && mapLocation ? "#5D4037" : (mapLocation ? "#F4C430" : "#CCCCCC")} 
-               />
-             </TouchableOpacity>
+             onPressIn={() => setPressedButton('pin')}
+             onPressOut={() => setPressedButton(null)}
+             activeOpacity={0.6}
+             disabled={!mapLocation}
+           >
+             <PinIcon 
+               size={getResponsiveSize(24)} 
+               color={pressedButton === 'pin' && mapLocation ? "#5D4037" : (mapLocation ? "#F4C430" : "#CCCCCC")} 
+             />
+           </TouchableOpacity>
              <Text style={[styles.bottomButtonLabel, !mapLocation && styles.bottomButtonLabelDisabled]}>
                {t('map.goToLocation') || 'Go to Location'}
              </Text>

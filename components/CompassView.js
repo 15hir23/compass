@@ -152,12 +152,22 @@ export default function CompassView({
   const [showCalibration, setShowCalibration] = useState(true);
   const [calibrating, setCalibrating] = useState(false);
   
+  // Entrance animation for compass container
+  const containerOpacity = useSharedValue(0);
+  const containerScale = useSharedValue(0.8);
+  
   // Notify parent when calibration state changes
   useEffect(() => {
     if (onCalibrationStateChange) {
       onCalibrationStateChange(showCalibration && !hideCalibration);
     }
   }, [showCalibration, hideCalibration, onCalibrationStateChange]);
+  
+  // Entrance animation
+  useEffect(() => {
+    containerOpacity.value = withTiming(1, { duration: 800, easing: Easing.out(Easing.cubic) });
+    containerScale.value = withSpring(1, { damping: 15, stiffness: 100 });
+  }, []);
   
   // Animation values for figure-8 calibration
   const figure8Progress = useSharedValue(0);
@@ -921,6 +931,12 @@ export default function CompassView({
       transform: [{ rotate: `${rotation.value}deg` }],
     };
   });
+  
+  // Container entrance animation
+  const containerAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: containerOpacity.value,
+    transform: [{ scale: containerScale.value }],
+  }));
 
   // Render appropriate compass
   const renderCompass = () => {
@@ -947,7 +963,7 @@ export default function CompassView({
   };
 
   return (
-    <View style={styles.container}>
+    <Animated.View style={[styles.container, containerAnimatedStyle]}>
       {capturedImage && (
         <>
           <View style={[styles.imageOverlay, { 
@@ -1123,7 +1139,7 @@ export default function CompassView({
           </View>
         </Animated.View>
       )}
-    </View>
+    </Animated.View>
   );
 }
 
@@ -1370,7 +1386,7 @@ const styles = StyleSheet.create({
   },
   calibrationOverlay: {
     position: 'absolute',
-    top: getResponsiveSize(-130), // Extended beyond screen
+    top: getResponsiveSize(-100), // Extended beyond screen
     left: getResponsiveSize(-50), // Extended beyond screen
     right: getResponsiveSize(-50), // Extended beyond screen
     bottom: getResponsiveSize(-50), // Extended beyond screen

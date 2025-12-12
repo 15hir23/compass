@@ -1,6 +1,17 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  withTiming,
+  withSequence,
+  withDelay,
+  withRepeat,
+  interpolate,
+  Easing,
+} from 'react-native-reanimated';
 import CameraIcon from './icons/CameraIcon';
 import LocationIcon from './icons/LocationIcon';
 import { useI18n } from '../utils/i18n';
@@ -43,14 +54,119 @@ const getResponsiveFont = (size) => {
   return Math.max(size * scale, size * 0.85);
 };
 
+const AnimatedTouchableOpacity = Animated.createAnimatedComponent(TouchableOpacity);
+const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient);
+const AnimatedView = Animated.createAnimatedComponent(View);
+
 export default function CompassBottomNav({ onCapturePress, onLastCapturedPress, hasCapturedImage }) {
   const { t } = useI18n();
   
+  // Animation values
+  const containerOpacity = useSharedValue(0);
+  const containerTranslateY = useSharedValue(30);
+  const captureButtonScale = useSharedValue(1);
+  const lastCapturedButtonScale = useSharedValue(1);
+  const captureButtonGlow = useSharedValue(0);
+  const lastCapturedButtonGlow = useSharedValue(0);
+  const iconRotation = useSharedValue(0);
+  
+  // Entrance animations
+  useEffect(() => {
+    containerOpacity.value = withTiming(1, { duration: 600, easing: Easing.out(Easing.cubic) });
+    containerTranslateY.value = withSpring(0, { damping: 20, stiffness: 90 });
+    
+    // Staggered button animations
+    captureButtonScale.value = withDelay(100, withSpring(1, { damping: 15, stiffness: 200 }));
+    lastCapturedButtonScale.value = withDelay(200, withSpring(1, { damping: 15, stiffness: 200 }));
+    
+    // Continuous glow animations
+    captureButtonGlow.value = withRepeat(
+      withSequence(
+        withTiming(1, { duration: 2000, easing: Easing.inOut(Easing.ease) }),
+        withTiming(0, { duration: 2000, easing: Easing.inOut(Easing.ease) })
+      ),
+      -1,
+      false
+    );
+    
+    if (hasCapturedImage) {
+      lastCapturedButtonGlow.value = withRepeat(
+        withSequence(
+          withTiming(1, { duration: 2500, easing: Easing.inOut(Easing.ease) }),
+          withTiming(0, { duration: 2500, easing: Easing.inOut(Easing.ease) })
+        ),
+        -1,
+        false
+      );
+    }
+    
+    // Subtle icon rotation
+    iconRotation.value = withRepeat(
+      withSequence(
+        withTiming(5, { duration: 3000, easing: Easing.inOut(Easing.ease) }),
+        withTiming(-5, { duration: 3000, easing: Easing.inOut(Easing.ease) })
+      ),
+      -1,
+      false
+    );
+  }, [hasCapturedImage]);
+  
+  // Animated styles
+  const containerAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: containerOpacity.value,
+    transform: [{ translateY: containerTranslateY.value }],
+  }));
+  
+  const captureButtonAnimatedStyle = useAnimatedStyle(() => {
+    const scale = interpolate(captureButtonGlow.value, [0, 1], [1, 1.02]);
+    const shadowOpacity = interpolate(captureButtonGlow.value, [0, 1], [0.3, 0.5]);
+    return {
+      transform: [{ scale: captureButtonScale.value * scale }],
+      shadowOpacity,
+    };
+  });
+  
+  const lastCapturedButtonAnimatedStyle = useAnimatedStyle(() => {
+    if (!hasCapturedImage) return { transform: [{ scale: lastCapturedButtonScale.value }] };
+    const scale = interpolate(lastCapturedButtonGlow.value, [0, 1], [1, 1.02]);
+    const shadowOpacity = interpolate(lastCapturedButtonGlow.value, [0, 1], [0.3, 0.5]);
+    return {
+      transform: [{ scale: lastCapturedButtonScale.value * scale }],
+      shadowOpacity,
+    };
+  });
+  
+  const iconAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${iconRotation.value}deg` }],
+  }));
+  
+  // Button press handlers
+  const handleCapturePress = () => {
+    captureButtonScale.value = withSequence(
+      withTiming(0.95, { duration: 100 }),
+      withSpring(1, { damping: 10, stiffness: 300 })
+    );
+    iconRotation.value = withSequence(
+      withTiming(iconRotation.value + 360, { duration: 500, easing: Easing.out(Easing.ease) }),
+      withSpring(iconRotation.value + 360, { damping: 15, stiffness: 200 })
+    );
+    onCapturePress();
+  };
+  
+  const handleLastCapturedPress = () => {
+    if (!hasCapturedImage) return;
+    lastCapturedButtonScale.value = withSequence(
+      withTiming(0.95, { duration: 100 }),
+      withSpring(1, { damping: 10, stiffness: 300 })
+    );
+    onLastCapturedPress();
+  };
+  
   return (
-    <View style={styles.container}>
-      <TouchableOpacity
-        style={styles.buttonContainer}
-        onPress={onCapturePress}
+    <Animated.View style={[styles.container, containerAnimatedStyle]}>
+      <AnimatedTouchableOpacity
+        style={[styles.buttonContainer, captureButtonAnimatedStyle]}
+        onPress={handleCapturePress}
         activeOpacity={0.8}
       >
         <LinearGradient
@@ -59,14 +175,16 @@ export default function CompassBottomNav({ onCapturePress, onLastCapturedPress, 
           end={{ x: 1, y: 0 }}
           style={styles.pillButton}
         >
-          <CameraIcon size={getResponsiveSize(18)} color="#FFFFFF" />
+          <AnimatedView style={iconAnimatedStyle}>
+            <CameraIcon size={getResponsiveSize(18)} color="#FFFFFF" />
+          </AnimatedView>
           <Text style={styles.buttonText}>{t('button.capture')}</Text>
         </LinearGradient>
-      </TouchableOpacity>
+      </AnimatedTouchableOpacity>
 
-      <TouchableOpacity
-        style={styles.buttonContainer}
-        onPress={onLastCapturedPress}
+      <AnimatedTouchableOpacity
+        style={[styles.buttonContainer, lastCapturedButtonAnimatedStyle]}
+        onPress={handleLastCapturedPress}
         activeOpacity={0.8}
         disabled={!hasCapturedImage}
       >
@@ -91,8 +209,8 @@ export default function CompassBottomNav({ onCapturePress, onLastCapturedPress, 
             {t('button.lastCaptured')}
           </Text>
         </LinearGradient>
-      </TouchableOpacity>
-    </View>
+      </AnimatedTouchableOpacity>
+    </Animated.View>
   );
 }
 
@@ -123,6 +241,13 @@ const styles = StyleSheet.create({
     gap: getResponsiveSize(8),
     ...elevation.level2,
     minHeight: getResponsiveSize(46),
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 0 },
+    shadowRadius: 10,
+    ...(Platform.OS === 'web' && {
+      boxShadow: '0 0 20px rgba(244, 196, 48, 0.4)',
+      transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+    }),
   },
   disabledButton: {
     opacity: 0.6,

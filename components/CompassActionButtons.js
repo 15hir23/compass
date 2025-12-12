@@ -1,5 +1,16 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Platform } from 'react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  withTiming,
+  withSequence,
+  withDelay,
+  withRepeat,
+  interpolate,
+  Easing,
+} from 'react-native-reanimated';
 import LocationIcon from './icons/LocationIcon';
 import CameraIcon from './icons/CameraIcon';
 import { useI18n } from '../utils/i18n';
@@ -54,46 +65,155 @@ const getCardinalDirection = (degree) => {
   return 'N';
 };
 
+const AnimatedTouchableOpacity = Animated.createAnimatedComponent(TouchableOpacity);
+const AnimatedView = Animated.createAnimatedComponent(View);
+const AnimatedText = Animated.createAnimatedComponent(Text);
+
 export default function CompassActionButtons({ onMapPress, onCameraPress, heading }) {
   const { t } = useI18n();
   const degree = Math.round(heading);
+  
+  // Animation values
+  const containerOpacity = useSharedValue(0);
+  const containerTranslateY = useSharedValue(30);
+  const mapButtonScale = useSharedValue(1);
+  const cameraButtonScale = useSharedValue(1);
+  const degreeBoxScale = useSharedValue(1);
+  const degreeBoxGlow = useSharedValue(0);
+  const degreePulse = useSharedValue(0);
+  const [prevDegree, setPrevDegree] = React.useState(degree);
+  
+  // Entrance animations
+  useEffect(() => {
+    containerOpacity.value = withTiming(1, { duration: 600, easing: Easing.out(Easing.cubic) });
+    containerTranslateY.value = withSpring(0, { damping: 20, stiffness: 90 });
+    
+    // Staggered button animations
+    mapButtonScale.value = withDelay(100, withSpring(1, { damping: 15, stiffness: 200 }));
+    degreeBoxScale.value = withDelay(200, withSpring(1, { damping: 15, stiffness: 200 }));
+    cameraButtonScale.value = withDelay(300, withSpring(1, { damping: 15, stiffness: 200 }));
+    
+    // Continuous subtle glow for degree box
+    degreeBoxGlow.value = withRepeat(
+      withSequence(
+        withTiming(1, { duration: 2500, easing: Easing.inOut(Easing.ease) }),
+        withTiming(0, { duration: 2500, easing: Easing.inOut(Easing.ease) })
+      ),
+      -1,
+      false
+    );
+    
+    // Continuous pulse for degree value
+    degreePulse.value = withRepeat(
+      withSequence(
+        withTiming(1, { duration: 1500, easing: Easing.inOut(Easing.ease) }),
+        withTiming(0, { duration: 1500, easing: Easing.inOut(Easing.ease) })
+      ),
+      -1,
+      false
+    );
+  }, []);
+  
+  // Pulse animation when degree changes
+  useEffect(() => {
+    if (degree !== prevDegree) {
+      degreePulse.value = withSequence(
+        withTiming(1, { duration: 200, easing: Easing.out(Easing.ease) }),
+        withTiming(0, { duration: 400, easing: Easing.in(Easing.ease) })
+      );
+      degreeBoxScale.value = withSequence(
+        withTiming(1.05, { duration: 150, easing: Easing.out(Easing.ease) }),
+        withSpring(1, { damping: 12, stiffness: 250 })
+      );
+      setPrevDegree(degree);
+    }
+  }, [degree]);
+  
+  // Animated styles
+  const containerAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: containerOpacity.value,
+    transform: [{ translateY: containerTranslateY.value }],
+  }));
+  
+  const mapButtonAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: mapButtonScale.value }],
+  }));
+  
+  const cameraButtonAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: cameraButtonScale.value }],
+  }));
+  
+  const degreeBoxAnimatedStyle = useAnimatedStyle(() => {
+    const scale = interpolate(degreeBoxGlow.value, [0, 1], [1, 1.02]);
+    const shadowOpacity = interpolate(degreeBoxGlow.value, [0, 1], [0.2, 0.4]);
+    return {
+      transform: [{ scale: degreeBoxScale.value * scale }],
+      shadowOpacity,
+    };
+  });
+  
+  const degreeValueAnimatedStyle = useAnimatedStyle(() => {
+    const scale = interpolate(degreePulse.value, [0, 1], [1, 1.1]);
+    return {
+      transform: [{ scale }],
+    };
+  });
+  
+  // Button press handlers
+  const handleMapPress = () => {
+    mapButtonScale.value = withSequence(
+      withTiming(0.9, { duration: 100 }),
+      withSpring(1, { damping: 10, stiffness: 300 })
+    );
+    onMapPress();
+  };
+  
+  const handleCameraPress = () => {
+    cameraButtonScale.value = withSequence(
+      withTiming(0.9, { duration: 100 }),
+      withSpring(1, { damping: 10, stiffness: 300 })
+    );
+    onCameraPress();
+  };
 
   return (
-    <View style={styles.container}>
-      <TouchableOpacity
-        style={styles.actionButton}
-        onPress={onMapPress}
+    <Animated.View style={[styles.container, containerAnimatedStyle]}>
+      <AnimatedTouchableOpacity
+        style={[styles.actionButton, mapButtonAnimatedStyle]}
+        onPress={handleMapPress}
         activeOpacity={0.8}
       >
         <View style={styles.buttonCircle}>
           <LocationIcon size={getResponsiveSize(22)} color="#FFFFFF" />
         </View>
         <Text style={styles.buttonLabel}>{t('button.googleMap')}</Text>
-      </TouchableOpacity>
+      </AnimatedTouchableOpacity>
 
       <View style={styles.degreeContainer}>
-        <View style={styles.degreeBox}>
+        <Animated.View style={[styles.degreeBox, degreeBoxAnimatedStyle]}>
           <Text style={styles.degreeTitle}>{t('direction.title')}</Text>
           <View style={styles.degreeMainInfo}>
             <Text style={styles.degreeDirection}>{getCardinalDirection(degree)}</Text>
             <View style={styles.degreeDivider} />
-            <Text style={styles.degreeValue}>{degree}°</Text>
+            <AnimatedText style={[styles.degreeValue, degreeValueAnimatedStyle]}>
+              {degree}°
+            </AnimatedText>
           </View>
           <Text style={styles.degreeSecondary}>{getCardinalDirection(degree)}</Text>
-        </View>
+        </Animated.View>
       </View>
 
-      <TouchableOpacity
-        style={styles.actionButton}
-        onPress={onCameraPress}
+      <AnimatedTouchableOpacity
+        style={[styles.actionButton, cameraButtonAnimatedStyle]}
+        onPress={handleCameraPress}
         activeOpacity={0.8}
       >
         <View style={styles.buttonCircle}>
           <CameraIcon size={getResponsiveSize(22)} color="#FFFFFF" />
         </View>
         <Text style={styles.buttonLabel}>{t('button.rearCamera')}</Text>
-      </TouchableOpacity>
-    </View>
+      </AnimatedTouchableOpacity>
+    </Animated.View>
   );
 }
 
@@ -141,6 +261,13 @@ const styles = StyleSheet.create({
     minWidth: getResponsiveSize(150),
     alignItems: 'center',
     ...elevation.level2,
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 0 },
+    shadowRadius: 8,
+    ...(Platform.OS === 'web' && {
+      boxShadow: '0 0 20px rgba(244, 196, 48, 0.3)',
+      transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+    }),
   },
   degreeTitle: {
     fontSize: getResponsiveFont(10),
@@ -178,6 +305,12 @@ const styles = StyleSheet.create({
     fontFamily: Platform.OS === 'web' ? "'DM Sans', sans-serif" : 'System',
     letterSpacing: 0.5,
     ...typography.headlineSmall,
+    textShadowColor: colors.primary,
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 6,
+    ...(Platform.OS === 'web' && {
+      textShadow: '0 0 12px rgba(244, 196, 48, 0.5)',
+    }),
   },
   degreeSecondary: {
     fontSize: getResponsiveFont(10),

@@ -1,6 +1,16 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  withTiming,
+  withSequence,
+  withDelay,
+  interpolate,
+  Easing,
+} from 'react-native-reanimated';
 import SearchIcon from './icons/SearchIcon';
 import CompassIcon from './icons/CompassIcon';
 import LanguageToggle from './LanguageToggle';
@@ -44,54 +54,129 @@ const getResponsiveFont = (size) => {
   return Math.max(size * scale, size * 0.85);
 };
 
+const AnimatedTouchableOpacity = Animated.createAnimatedComponent(TouchableOpacity);
+const AnimatedView = Animated.createAnimatedComponent(View);
+
 export default function CompassTopBar({ onMenuPress, onSearchPress, onBackPress }) {
   const { t } = useI18n();
+  
+  // Animation values
+  const containerOpacity = useSharedValue(0);
+  const containerTranslateY = useSharedValue(-20);
+  const backButtonScale = useSharedValue(1);
+  const searchBarScale = useSharedValue(1);
+  const menuButtonScale = useSharedValue(1);
+  const hamburgerRotation = useSharedValue(0);
+  
+  // Entrance animations
+  useEffect(() => {
+    containerOpacity.value = withTiming(1, { duration: 600, easing: Easing.out(Easing.cubic) });
+    containerTranslateY.value = withSpring(0, { damping: 20, stiffness: 90 });
+    
+    // Staggered button animations
+    backButtonScale.value = withDelay(100, withSpring(1, { damping: 15, stiffness: 200 }));
+    searchBarScale.value = withDelay(200, withSpring(1, { damping: 15, stiffness: 200 }));
+    menuButtonScale.value = withDelay(300, withSpring(1, { damping: 15, stiffness: 200 }));
+  }, []);
+  
+  // Animated styles
+  const containerAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: containerOpacity.value,
+    transform: [{ translateY: containerTranslateY.value }],
+  }));
+  
+  const backButtonAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: backButtonScale.value }],
+  }));
+  
+  const searchBarAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: searchBarScale.value }],
+  }));
+  
+  const menuButtonAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: menuButtonScale.value }],
+  }));
+  
+  const hamburgerAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${hamburgerRotation.value}deg` }],
+  }));
+  
+  // Button press handlers with animations
+  const handleBackPress = () => {
+    backButtonScale.value = withSequence(
+      withTiming(0.9, { duration: 100 }),
+      withSpring(1, { damping: 10, stiffness: 300 })
+    );
+    onBackPress();
+  };
+  
+  const handleSearchPress = () => {
+    searchBarScale.value = withSequence(
+      withTiming(0.95, { duration: 100 }),
+      withSpring(1, { damping: 10, stiffness: 300 })
+    );
+    onSearchPress();
+  };
+  
+  const handleMenuPress = () => {
+    menuButtonScale.value = withSequence(
+      withTiming(0.9, { duration: 100 }),
+      withSpring(1, { damping: 10, stiffness: 300 })
+    );
+    hamburgerRotation.value = withSequence(
+      withTiming(hamburgerRotation.value + 180, { duration: 300, easing: Easing.inOut(Easing.ease) }),
+      withSpring(hamburgerRotation.value + 180, { damping: 15, stiffness: 200 })
+    );
+    onMenuPress();
+  };
 
   return (
-    <LinearGradient
-      colors={[colors.primary, colors.primaryLight, colors.primary]}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-      style={styles.container}
-    >
-      <View style={styles.content}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={onBackPress}
-          activeOpacity={0.7}
-        >
-          <View style={styles.backButtonCircle}>
-            <Text style={styles.backButtonText}>{t('common.back')}</Text>
-          </View>
-        </TouchableOpacity>
+    <Animated.View style={containerAnimatedStyle}>
+      <LinearGradient
+        colors={[colors.primary, colors.primaryLight, colors.primary]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.container}
+      >
+        <View style={styles.content}>
+          <AnimatedTouchableOpacity
+            style={[styles.backButton, backButtonAnimatedStyle]}
+            onPress={handleBackPress}
+            activeOpacity={0.7}
+          >
+            <View style={styles.backButtonCircle}>
+              <Text style={styles.backButtonText}>{t('common.back')}</Text>
+            </View>
+          </AnimatedTouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.searchBar}
-          onPress={onSearchPress}
-          activeOpacity={0.8}
-        >
-          <View style={styles.searchContent}>
-            <SearchIcon size={getResponsiveSize(18)} color={colors.onSurfaceVariant} />
-            <Text style={styles.searchText}>{t('header.search')}</Text>
-          </View>
-        </TouchableOpacity>
+          <AnimatedTouchableOpacity
+            style={[styles.searchBar, searchBarAnimatedStyle]}
+            onPress={handleSearchPress}
+            activeOpacity={0.8}
+          >
+            <View style={styles.searchContent}>
+              <SearchIcon size={getResponsiveSize(18)} color={colors.onSurfaceVariant} />
+              <Text style={styles.searchText}>{t('header.search')}</Text>
+            </View>
+          </AnimatedTouchableOpacity>
 
-        <View style={styles.rightButtons}>
-          <LanguageToggle />
-        <TouchableOpacity
-          style={styles.menuButton}
-          onPress={onMenuPress}
-          activeOpacity={0.7}
-        >
-          <View style={styles.hamburger}>
-            <View style={styles.hamburgerLine} />
-            <View style={styles.hamburgerLine} />
-            <View style={styles.hamburgerLine} />
+          <View style={styles.rightButtons}>
+            <LanguageToggle />
+            <AnimatedTouchableOpacity
+              style={[styles.menuButton, menuButtonAnimatedStyle]}
+              onPress={handleMenuPress}
+              activeOpacity={0.7}
+            >
+              <AnimatedView style={[styles.hamburger, hamburgerAnimatedStyle]}>
+                <View style={styles.hamburgerLine} />
+                <View style={styles.hamburgerLine} />
+                <View style={styles.hamburgerLine} />
+              </AnimatedView>
+            </AnimatedTouchableOpacity>
           </View>
-        </TouchableOpacity>
         </View>
-      </View>
-    </LinearGradient>
+      </LinearGradient>
+    </Animated.View>
   );
 }
 
@@ -145,6 +230,9 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
+    ...(Platform.OS === 'web' && {
+      transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+    }),
   },
   searchContent: {
     flexDirection: 'row',

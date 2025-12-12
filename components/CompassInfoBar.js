@@ -1,5 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Platform, Linking } from 'react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withRepeat,
+  withTiming,
+  withSequence,
+  interpolate,
+  Easing,
+} from 'react-native-reanimated';
 import * as Location from 'expo-location';
 import { Magnetometer } from 'expo-sensors';
 import { useI18n } from '../utils/i18n';
@@ -42,11 +51,80 @@ const getResponsiveFont = (size) => {
   return Math.max(size * scale, size * 0.85);
 };
 
+const AnimatedView = Animated.createAnimatedComponent(View);
+const AnimatedText = Animated.createAnimatedComponent(Text);
+
 export default function CompassInfoBar({ selectedLocation }) {
   const { t } = useI18n();
   const [location, setLocation] = useState(null);
   const [hasPermission, setHasPermission] = useState(false);
   const [magneticField, setMagneticField] = useState(null);
+  const [prevMagneticField, setPrevMagneticField] = useState(null);
+  
+  // Animation values
+  const containerOpacity = useSharedValue(0);
+  const containerTranslateY = useSharedValue(20);
+  const magneticPulse = useSharedValue(0);
+  const coordinateGlow = useSharedValue(0);
+  
+  // Entrance animation
+  useEffect(() => {
+    containerOpacity.value = withTiming(1, { duration: 500, easing: Easing.out(Easing.cubic) });
+    containerTranslateY.value = withTiming(0, { duration: 500, easing: Easing.out(Easing.cubic) });
+    
+    // Continuous subtle pulse for magnetic field
+    magneticPulse.value = withRepeat(
+      withSequence(
+        withTiming(1, { duration: 2000, easing: Easing.inOut(Easing.ease) }),
+        withTiming(0, { duration: 2000, easing: Easing.inOut(Easing.ease) })
+      ),
+      -1,
+      false
+    );
+    
+    // Continuous glow for coordinates
+    coordinateGlow.value = withRepeat(
+      withSequence(
+        withTiming(1, { duration: 3000, easing: Easing.inOut(Easing.ease) }),
+        withTiming(0, { duration: 3000, easing: Easing.inOut(Easing.ease) })
+      ),
+      -1,
+      false
+    );
+  }, []);
+  
+  // Pulse animation when magnetic field changes
+  useEffect(() => {
+    if (magneticField !== null && magneticField !== prevMagneticField && prevMagneticField !== null) {
+      magneticPulse.value = withSequence(
+        withTiming(1, { duration: 200, easing: Easing.out(Easing.ease) }),
+        withTiming(0, { duration: 400, easing: Easing.in(Easing.ease) })
+      );
+    }
+    setPrevMagneticField(magneticField);
+  }, [magneticField]);
+  
+  // Animated styles
+  const containerAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: containerOpacity.value,
+    transform: [{ translateY: containerTranslateY.value }],
+  }));
+  
+  const magneticAnimatedStyle = useAnimatedStyle(() => {
+    const scale = interpolate(magneticPulse.value, [0, 1], [1, 1.05]);
+    const opacity = interpolate(magneticPulse.value, [0, 1], [1, 0.9]);
+    return {
+      transform: [{ scale }],
+      opacity,
+    };
+  });
+  
+  const coordinateAnimatedStyle = useAnimatedStyle(() => {
+    const opacity = interpolate(coordinateGlow.value, [0, 1], [1, 0.85]);
+    return {
+      opacity,
+    };
+  });
 
   useEffect(() => {
     // Check location permission
@@ -168,7 +246,7 @@ export default function CompassInfoBar({ selectedLocation }) {
   const displayLocation = selectedLocation || location;
 
   return (
-    <View style={styles.container}>
+    <Animated.View style={[styles.container, containerAnimatedStyle]}>
       <View style={styles.infoRow}>
         <View style={styles.infoItem}>
           <Text style={styles.infoLabelCompact}>{t('info.geoCoordinate')}: </Text>
@@ -182,21 +260,23 @@ export default function CompassInfoBar({ selectedLocation }) {
               <Text style={styles.warningTextCompact}>{t('info.locationPermission')}</Text>
           </TouchableOpacity>
         ) : displayLocation ? (
-            <Text style={styles.coordinateTextCompact} numberOfLines={1}>
+            <AnimatedText style={[styles.coordinateTextCompact, coordinateAnimatedStyle]} numberOfLines={1}>
             {formatCoordinate(displayLocation.coords?.latitude || displayLocation.latitude)}, {formatCoordinate(displayLocation.coords?.longitude || displayLocation.longitude)}
-          </Text>
+          </AnimatedText>
         ) : (
-            <Text style={styles.coordinateTextCompact}>--, --</Text>
+            <AnimatedText style={[styles.coordinateTextCompact, coordinateAnimatedStyle]}>--, --</AnimatedText>
         )}
       </View>
         <View style={styles.infoItem}>
           <Text style={styles.infoLabelCompact}>{t('info.magneticField')}: </Text>
-          <Text style={styles.magneticValueCompact}>
-            {magneticField ? `${Math.round(magneticField)} µT` : '-- µT'}
-          </Text>
+          <AnimatedView style={magneticAnimatedStyle}>
+            <Text style={styles.magneticValueCompact}>
+              {magneticField ? `${Math.round(magneticField)} µT` : '-- µT'}
+            </Text>
+          </AnimatedView>
         </View>
       </View>
-    </View>
+    </Animated.View>
   );
 }
 
@@ -262,6 +342,12 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     fontFamily: Platform.OS === 'web' ? "'DM Sans', sans-serif" : 'System',
     ...typography.labelMedium,
+    textShadowColor: colors.error,
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 4,
+    ...(Platform.OS === 'web' && {
+      textShadow: '0 0 8px rgba(211, 47, 47, 0.4)',
+    }),
   },
 });
 

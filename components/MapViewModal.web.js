@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
   SafeAreaView,
   StatusBar,
+  ScrollView,
 } from 'react-native';
 import CompassView from './CompassView';
 import CompassTopBar from './CompassTopBar';
@@ -35,6 +36,7 @@ import {
   getAll45Devtas,
 } from '../utils/vastuGrid45';
 import { GRID_STRUCTURE, drawVastuGrid as drawVastuGridUtil } from '../utils/gridStructure';
+import { colors } from '../utils/theme';
 
 const getDimensions = () => {
   try {
@@ -447,8 +449,8 @@ export default function MapViewModal({ visible, onClose, mode, compassType, sele
         const icon = window.L.divIcon({
           className: `corner-marker-${i}`,
           html: `
-            <div style="position: relative; width: 60px; height: 60px; cursor: grab; padding: 8px; display: flex; align-items: center; justify-content: center;">
-              <svg width="44" height="44" viewBox="0 0 44 44">
+            <div style="position: relative; width: 64px; height: 64px; cursor: grab; display: flex; align-items: center; justify-content: center; transform: translateZ(0);">
+              <svg width="48" height="48" viewBox="0 0 44 44" style="filter: drop-shadow(0 2px 8px rgba(0,0,0,0.3));">
                 <defs>
                   <radialGradient id="grad${i}" cx="40%" cy="40%">
                     <stop offset="0%" stop-color="#FF6B6B" stop-opacity="1" />
@@ -464,21 +466,33 @@ export default function MapViewModal({ visible, onClose, mode, compassType, sele
                   </filter>
                 </defs>
                 
-                <!-- Main circle with gradient and light white glow border -->
-                <circle cx="22" cy="22" r="20" fill="url(#grad${i})" 
-                  stroke="rgba(255,255,255,0.6)" 
-                  stroke-width="2" 
-                  filter="url(#lightGlow${i})"
-                  style="filter: drop-shadow(0 0 3px rgba(255,255,255,0.4));"/>
+                <!-- Outer glow ring -->
+                <circle cx="22" cy="22" r="21" fill="none" 
+                  stroke="rgba(255,255,255,0.8)" 
+                  stroke-width="1.5" 
+                  opacity="0.6"/>
                 
-                <!-- Number -->
-                <text x="22" y="28" text-anchor="middle" fill="white" 
-                  font-size="20" font-weight="900" font-family="'DM Sans', sans-serif">${i + 1}</text>
+                <!-- Main circle with gradient -->
+                <circle cx="22" cy="22" r="18" fill="url(#grad${i})" 
+                  stroke="rgba(255,255,255,0.9)" 
+                  stroke-width="2.5" 
+                  filter="url(#lightGlow${i})"
+                  style="filter: drop-shadow(0 0 6px rgba(255,0,0,0.5)) drop-shadow(0 0 3px rgba(255,255,255,0.6));"/>
+                
+                <!-- Inner highlight -->
+                <circle cx="22" cy="22" r="14" fill="none" 
+                  stroke="rgba(255,255,255,0.4)" 
+                  stroke-width="1"/>
+                
+                <!-- Number with better styling -->
+                <text x="22" y="27" text-anchor="middle" fill="white" 
+                  font-size="18" font-weight="900" font-family="'DM Sans', sans-serif"
+                  style="text-shadow: 0 1px 3px rgba(0,0,0,0.5), 0 0 8px rgba(255,0,0,0.6);">${i + 1}</text>
               </svg>
             </div>
           `,
-          iconSize: [60, 60],
-          iconAnchor: [30, 30],
+          iconSize: [64, 64],
+          iconAnchor: [32, 32],
         });
         
         const marker = window.L.marker([corner.lat, corner.lng], {
@@ -496,29 +510,31 @@ export default function MapViewModal({ visible, onClose, mode, compassType, sele
         
         marker.bindTooltip(`
           <div style="
-            background: linear-gradient(135deg, #FF3333 0%, #E60000 100%);
+            background: linear-gradient(135deg, #FF4444 0%, #CC0000 100%);
             color: white;
-            padding: 6px 10px;
-            border-radius: 8px;
+            padding: 8px 14px;
+            border-radius: 10px;
             font-weight: 800;
-            font-size: 13px;
+            font-size: 12px;
             font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            border: 2px solid white;
-            box-shadow: 0 4px 12px rgba(255,0,0,0.4);
+            border: 2.5px solid white;
+            box-shadow: 0 4px 16px rgba(255,0,0,0.5), 0 0 8px rgba(255,255,255,0.3);
             text-align: center;
             letter-spacing: 0.5px;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 4px;
+            gap: 6px;
+            white-space: nowrap;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
           ">
             ${getArrowSVG(corner.direction)}
-            <span style="font-family: 'DM Sans', sans-serif;">${corner.name}</span>
+            <span style="font-family: 'DM Sans', sans-serif; font-weight: 900;">${corner.name}</span>
           </div>
         `, {
           permanent: true,
           direction: 'top',
-          offset: [0, -28],
+          offset: [0, -32],
           className: 'corner-tooltip'
         });
         
@@ -705,193 +721,6 @@ export default function MapViewModal({ visible, onClose, mode, compassType, sele
               onSearchPress={() => setShowLocationSearch(!showLocationSearch)}
               onBackPress={onClose}
             />
-            
-            <View style={styles.mapControls}>
-              <View style={styles.buttonWithLabel}>
-                <TouchableOpacity
-                  style={[styles.mapControlButton, showCompass && styles.mapControlButtonActive]}
-                  onPress={() => setShowCompass(!showCompass)}
-                  onPressIn={() => setPressedButton('compass')}
-                  onPressOut={() => setPressedButton(null)}
-                  activeOpacity={0.6}
-                >
-                  <CompassToggleIcon 
-                    size={getResponsiveSize(24)} 
-                    color={pressedButton === 'compass' ? "#5D4037" : "#F4C430"} 
-                  />
-                </TouchableOpacity>
-                <Text style={styles.buttonLabel}>
-                  {t('map.compassToggle') || 'Compass'}
-                </Text>
-              </View>
-
-              <View style={styles.buttonWithLabel}>
-                <TouchableOpacity
-                  style={styles.mapControlButton}
-                  onPress={changeMapType}
-                  onPressIn={() => setPressedButton('maptype')}
-                  onPressOut={() => setPressedButton(null)}
-                  activeOpacity={0.6}
-                >
-                  <Text style={[styles.mapControlButtonText, pressedButton === 'maptype' && { opacity: 0.7 }]}>
-                    {mapType === 'satellite' ? '🗺️' : '🛰️'}
-                  </Text>
-                </TouchableOpacity>
-                <Text style={styles.buttonLabel}>
-                  {mapType === 'satellite' ? (t('map.mapType') || 'Map') : (t('map.satellite') || 'Satellite')}
-                </Text>
-              </View>
-              
-              {/* VASTU GRID BUTTON */}
-              {!showVastuGrid && (
-                <View style={styles.buttonWithLabel}>
-                  <TouchableOpacity
-                    style={[styles.mapControlButton, cornerSelectionMode && styles.mapControlButtonActive]}
-                    onPress={() => {
-                      console.log('🔄 Toggle corner mode');
-                      setCornerSelectionMode(!cornerSelectionMode);
-                    }}
-                    activeOpacity={0.6}
-                  >
-                    <Text style={[styles.mapControlButtonText, !cornerSelectionMode && styles.omSymbolText]}>
-                      {cornerSelectionMode ? '📍' : 'ॐ'}
-                    </Text>
-                  </TouchableOpacity>
-                  <Text style={styles.buttonLabel}>
-                    {cornerSelectionMode ? (t('map.selectCorners') || 'Select Corners') : (t('map.vastuGrid') || 'Vastu Grid')}
-                  </Text>
-                </View>
-              )}
-              
-              {/* APPLY BUTTON */}
-              {cornerSelectionMode && plotCorners.length === 4 && (
-                <View style={styles.buttonWithLabel}>
-                  <TouchableOpacity
-                    style={[styles.mapControlButton, styles.applyButton]}
-                    onPress={() => {
-                      console.log('✅ Apply button clicked');
-                      console.log('📍 Plot corners:', plotCorners);
-                      console.log('🗺️ Map ref exists:', !!googleMapRef.current);
-                      setCornerSelectionMode(false);
-                      console.log('🔄 Corner selection mode set to false');
-                    }}
-                    activeOpacity={0.6}
-                  >
-                    <Text style={styles.applyButtonText}>✓</Text>
-                  </TouchableOpacity>
-                  <Text style={styles.buttonLabel}>
-                    {t('map.applyGrid') || 'Apply Grid'}
-                  </Text>
-                </View>
-              )}
-              
-              {/* CLEAR BUTTON */}
-              {showVastuGrid && (
-                <View style={styles.buttonWithLabel}>
-                  <TouchableOpacity
-                    style={styles.mapControlButton}
-                    onPress={() => {
-                      console.log('🗑️ Clearing grid - removing', gridLayersRef.current.length, 'layers');
-                      
-                      // Remove all tracked grid layers
-                      gridLayersRef.current.forEach(l => {
-                        try {
-                          if (l && googleMapRef.current) {
-                            googleMapRef.current.removeLayer(l);
-                          }
-                        } catch (e) {
-                          console.log('⚠️ Error removing layer:', e);
-                        }
-                      });
-                      
-                      // Also remove any orphaned layers by checking all map layers
-                      if (googleMapRef.current && window.L) {
-                        googleMapRef.current.eachLayer((layer) => {
-                          // Remove any polylines or polygons that look like grid lines
-                          if (layer instanceof window.L.Polyline || layer instanceof window.L.Polygon) {
-                            try {
-                              // Check if it's a grid-related layer (yellow/golden colors)
-                              const options = layer.options;
-                              if (options && (
-                                options.color === '#FFD700' || 
-                                options.color === '#F4C430' ||
-                                options.fillColor === '#FFA500' ||
-                                options.fillColor === 'rgba(255, 165, 0, 0.35)'
-                              )) {
-                                googleMapRef.current.removeLayer(layer);
-                                console.log('🗑️ Removed orphaned grid layer');
-                              }
-                            } catch (e) {
-                              // Ignore errors for layers that might not have options
-                            }
-                          }
-                        });
-                      }
-                      
-                      gridLayersRef.current = [];
-                      setPlotCorners([]);
-                      setShowVastuGrid(false);
-                      console.log('✅ Grid cleared successfully');
-                    }}
-                    activeOpacity={0.6}
-                  >
-                    <Text style={styles.mapControlButtonText}>🗑️</Text>
-                  </TouchableOpacity>
-                  <Text style={styles.buttonLabel}>
-                    {t('map.clearGrid') || 'Clear Grid'}
-                  </Text>
-                </View>
-              )}
-              
-              {/* LAYER TOGGLES - Show when grid is active */}
-              {showVastuGrid && (
-                <>
-                  <View style={styles.layerDivider} />
-                  
-                  {/* Outer Layer Toggle */}
-                  <View style={styles.buttonWithLabel}>
-                    <TouchableOpacity
-                      style={[styles.layerButton, showOuterLayer && styles.layerButtonActive]}
-                      onPress={() => setShowOuterLayer(!showOuterLayer)}
-                      activeOpacity={0.6}
-                    >
-                      <Text style={styles.layerButtonText}>O</Text>
-                    </TouchableOpacity>
-                    <Text style={styles.buttonLabel}>
-                      {t('map.outerLayer') || 'Outer'}
-                    </Text>
-                  </View>
-                  
-                  {/* Middle Layer Toggle */}
-                  <View style={styles.buttonWithLabel}>
-                    <TouchableOpacity
-                      style={[styles.layerButton, showMiddleLayer && styles.layerButtonActive]}
-                      onPress={() => setShowMiddleLayer(!showMiddleLayer)}
-                      activeOpacity={0.6}
-                    >
-                      <Text style={styles.layerButtonText}>M</Text>
-                    </TouchableOpacity>
-                    <Text style={styles.buttonLabel}>
-                      {t('map.middleLayer') || 'Middle'}
-                    </Text>
-                  </View>
-                  
-                  {/* Center Layer Toggle */}
-                  <View style={styles.buttonWithLabel}>
-                    <TouchableOpacity
-                      style={[styles.layerButton, showCenterLayer && styles.layerButtonActive]}
-                      onPress={() => setShowCenterLayer(!showCenterLayer)}
-                      activeOpacity={0.6}
-                    >
-                      <Text style={styles.layerButtonText}>C</Text>
-                    </TouchableOpacity>
-                    <Text style={styles.buttonLabel}>
-                      {t('map.centerLayer') || 'Center'}
-                    </Text>
-                  </View>
-                </>
-              )}
-            </View>
           </View>
           
           {/* CORNER SELECTION BANNER */}
@@ -1019,130 +848,330 @@ export default function MapViewModal({ visible, onClose, mode, compassType, sele
                     setShowLocationSearch(false);
                   }}
                 />
+                {/* Geo Coordinates in Search Area */}
+                {locationToUse && (
+                  <View style={styles.searchCoordinatesContainer}>
+                    <Text style={styles.searchCoordinatesLabel}>{t('map.geoCoordinate')}</Text>
+                    <Text style={styles.searchCoordinatesValue}>
+                      {locationToUse.latitude.toFixed(7)}, {locationToUse.longitude.toFixed(7)}
+                    </Text>
+                  </View>
+                )}
               </View>
             </View>
           )}
 
-          {locationToUse && (
-            <View style={styles.bottomInfo}>
-              <View style={styles.infoBox}>
-                <Text style={styles.infoLabel}>{t('map.geoCoordinate')}</Text>
-                <Text style={styles.infoValue}>
-                  {t('map.latitude')}: {locationToUse.latitude.toFixed(7)}
-                </Text>
-                <Text style={styles.infoValue}>
-                  {t('map.longitude')}: {locationToUse.longitude.toFixed(7)}
-                </Text>
-              </View>
+          {/* Right Side Controls - Compass Toggle */}
+          <View style={styles.mapControls}>
+            <View style={styles.buttonWithLabel}>
+              <TouchableOpacity
+                style={[styles.mapControlButton, showCompass && styles.mapControlButtonActive]}
+                onPress={() => setShowCompass(!showCompass)}
+                onPressIn={() => setPressedButton('compass')}
+                onPressOut={() => setPressedButton(null)}
+                activeOpacity={0.6}
+              >
+                <CompassToggleIcon 
+                  size={getResponsiveSize(20)} 
+                  color={pressedButton === 'compass' ? "#5D4037" : "#F4C430"} 
+                />
+              </TouchableOpacity>
+              <Text style={styles.buttonLabel}>
+                {t('map.compassToggle') || 'Compass'}
+              </Text>
             </View>
-          )}
+          </View>
 
-          <View style={styles.bottomControls}>
-            <TouchableOpacity
-              style={styles.bottomButton}
-              onPress={async () => {
-                try {
-                  const html2canvas = (await import('html2canvas')).default;
-                  const containerElement = document.querySelector('.leaflet-container')?.parentElement?.parentElement || document.body;
-                  const canvas = await html2canvas(containerElement, {
-                    useCORS: true,
-                    allowTaint: true,
-                    backgroundColor: '#000000',
-                  });
-                  
-                  canvas.toBlob((blob) => {
-                    const url = URL.createObjectURL(blob);
-                    const link = document.createElement('a');
-                    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-                    const filename = showCompass 
-                      ? `map-with-compass-${timestamp}.png`
-                      : `map-${timestamp}.png`;
-                    link.href = url;
-                    link.download = filename;
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                    URL.revokeObjectURL(url);
-                  });
-                } catch (error) {
-                  console.error('Error downloading map:', error);
-                  alert('Failed to download map. Please try again.');
-                }
-              }}
-              onPressIn={() => setPressedButton('download')}
-              onPressOut={() => setPressedButton(null)}
-              activeOpacity={0.6}
-            >
-              <DownloadIcon 
-                size={getResponsiveSize(24)} 
-                color={pressedButton === 'download' ? "#5D4037" : "#F4C430"} 
-              />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.bottomButton}
-              onPress={() => {
-                if (googleMapRef.current && currentLocation) {
-                  googleMapRef.current.setView([currentLocation.latitude, currentLocation.longitude], 18);
-                  setMapLocation(null);
-                }
-              }}
-              onPressIn={() => setPressedButton('recenter')}
-              onPressOut={() => setPressedButton(null)}
-              activeOpacity={0.6}
-            >
-              <RecenterIcon 
-                size={getResponsiveSize(24)} 
-                color={pressedButton === 'recenter' ? "#5D4037" : "#F4C430"} 
-              />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.bottomButton, isMapLocked && styles.bottomButtonActive]}
-              onPress={() => {
-                setIsMapLocked(!isMapLocked);
-                if (googleMapRef.current && window.L) {
-                  if (!isMapLocked) {
-                    googleMapRef.current.dragging.disable();
-                    googleMapRef.current.touchZoom.disable();
-                    googleMapRef.current.doubleClickZoom.disable();
-                    googleMapRef.current.scrollWheelZoom.disable();
-                  } else {
-                    googleMapRef.current.dragging.enable();
-                    googleMapRef.current.touchZoom.enable();
-                    googleMapRef.current.doubleClickZoom.enable();
-                    googleMapRef.current.scrollWheelZoom.enable();
+          {/* Bottom Navbar - Compact horizontal layout */}
+          <View style={styles.bottomNavbar}>
+            <ScrollView 
+              horizontal 
+              showsHorizontalScrollIndicator={Platform.OS !== 'web'}
+              contentContainerStyle={styles.navbarContent}
+              style={styles.navbarScrollView}
+              {...(Platform.OS === 'web' && {
+                onWheel: (e) => {
+                  // Enable horizontal scrolling with mouse wheel
+                  if (e.deltaY !== 0 && e.currentTarget) {
+                    e.currentTarget.scrollLeft += e.deltaY;
+                    e.preventDefault();
                   }
                 }
-              }}
-              onPressIn={() => setPressedButton('lock')}
-              onPressOut={() => setPressedButton(null)}
-              activeOpacity={0.6}
+              })}
             >
-              <LockIcon 
-                size={getResponsiveSize(24)} 
-                color={pressedButton === 'lock' ? "#5D4037" : "#F4C430"} 
-                locked={isMapLocked} 
-              />
-            </TouchableOpacity>
+              {/* Map Type Toggle */}
+              <TouchableOpacity
+                style={styles.navbarItem}
+                onPress={changeMapType}
+                onPressIn={() => setPressedButton('maptype')}
+                onPressOut={() => setPressedButton(null)}
+                activeOpacity={0.7}
+              >
+                <View style={styles.navbarIconContainer}>
+                  <Text style={styles.navbarIconText}>
+                    {mapType === 'satellite' ? '🗺️' : '🛰️'}
+                  </Text>
+                </View>
+                <Text style={styles.navbarLabel}>
+                  {mapType === 'satellite' ? (t('map.mapType') || 'Map') : (t('map.satellite') || 'Satellite')}
+                </Text>
+              </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.bottomButton}
-              onPress={() => {
-                if (googleMapRef.current && mapLocation) {
-                  googleMapRef.current.setView([mapLocation.latitude, mapLocation.longitude], 18);
-                }
-              }}
-              onPressIn={() => setPressedButton('pin')}
-              onPressOut={() => setPressedButton(null)}
-              activeOpacity={0.6}
-              disabled={!mapLocation}
-            >
-              <PinIcon 
-                size={getResponsiveSize(24)} 
-                color={pressedButton === 'pin' && mapLocation ? "#5D4037" : (mapLocation ? "#F4C430" : "#CCCCCC")} 
-              />
-            </TouchableOpacity>
+              {/* Vastu Grid Button */}
+              {!showVastuGrid && (
+                <TouchableOpacity
+                  style={[styles.navbarItem, cornerSelectionMode && styles.navbarItemActive]}
+                  onPress={() => {
+                    console.log('🔄 Toggle corner mode');
+                    setCornerSelectionMode(!cornerSelectionMode);
+                  }}
+                  activeOpacity={0.7}
+                >
+                  <Text style={[styles.navbarIconText, !cornerSelectionMode && styles.omSymbolText]}>
+                    {cornerSelectionMode ? '📍' : 'ॐ'}
+                  </Text>
+                  <Text style={[styles.navbarLabel, cornerSelectionMode && styles.navbarLabelActive]}>
+                    {cornerSelectionMode ? (t('map.selectCorners') || 'Select Corners') : (t('map.vastuGrid') || 'Vastu Grid')}
+                  </Text>
+                </TouchableOpacity>
+              )}
+
+              {/* Apply Button */}
+              {cornerSelectionMode && plotCorners.length === 4 && (
+                <TouchableOpacity
+                  style={[styles.navbarItem, styles.navbarItemApply]}
+                  onPress={() => {
+                    console.log('✅ Apply button clicked');
+                    setCornerSelectionMode(false);
+                  }}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.navbarIconText}>✓</Text>
+                  <Text style={styles.navbarLabel}>
+                    {t('map.applyGrid') || 'Apply Grid'}
+                  </Text>
+                </TouchableOpacity>
+              )}
+
+              {/* Clear Grid Button */}
+              {showVastuGrid && (
+                <TouchableOpacity
+                  style={styles.navbarItem}
+                  onPress={() => {
+                    console.log('🗑️ Clearing grid');
+                    gridLayersRef.current.forEach(l => {
+                      try {
+                        if (l && googleMapRef.current) {
+                          googleMapRef.current.removeLayer(l);
+                        }
+                      } catch (e) {
+                        console.log('⚠️ Error removing layer:', e);
+                      }
+                    });
+                    if (googleMapRef.current && window.L) {
+                      googleMapRef.current.eachLayer((layer) => {
+                        if (layer instanceof window.L.Polyline || layer instanceof window.L.Polygon) {
+                          try {
+                            const options = layer.options;
+                            if (options && (
+                              options.color === '#FFD700' || 
+                              options.color === '#F4C430' ||
+                              options.fillColor === '#FFA500' ||
+                              options.fillColor === 'rgba(255, 165, 0, 0.35)'
+                            )) {
+                              googleMapRef.current.removeLayer(layer);
+                            }
+                          } catch (e) {}
+                        }
+                      });
+                    }
+                    gridLayersRef.current = [];
+                    setPlotCorners([]);
+                    setShowVastuGrid(false);
+                  }}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.navbarIconText}>🗑️</Text>
+                  <Text style={styles.navbarLabel}>
+                    {t('map.clearGrid') || 'Clear Grid'}
+                  </Text>
+                </TouchableOpacity>
+              )}
+
+              {/* Layer Toggles - Show when grid is active */}
+              {showVastuGrid && (
+                <>
+                  <View style={styles.navbarDivider} />
+                  
+                  <TouchableOpacity
+                    style={[styles.navbarItem, styles.navbarItemSmall, showOuterLayer && styles.navbarItemActive]}
+                    onPress={() => setShowOuterLayer(!showOuterLayer)}
+                    activeOpacity={0.7}
+                  >
+                    <View style={styles.navbarIconContainer}>
+                      <Text style={[styles.navbarIconText, styles.navbarIconTextSmall, showOuterLayer && { color: colors.onPrimary }]}>O</Text>
+                    </View>
+                    <Text style={[styles.navbarLabel, styles.navbarLabelSmall, showOuterLayer && styles.navbarLabelActive]}>
+                      {t('map.outerLayer') || 'Outer'}
+                    </Text>
+                  </TouchableOpacity>
+                  
+                  <TouchableOpacity
+                    style={[styles.navbarItem, styles.navbarItemSmall, showMiddleLayer && styles.navbarItemActive]}
+                    onPress={() => setShowMiddleLayer(!showMiddleLayer)}
+                    activeOpacity={0.7}
+                  >
+                    <View style={styles.navbarIconContainer}>
+                      <Text style={[styles.navbarIconText, styles.navbarIconTextSmall, showMiddleLayer && { color: colors.onPrimary }]}>M</Text>
+                    </View>
+                    <Text style={[styles.navbarLabel, styles.navbarLabelSmall, showMiddleLayer && styles.navbarLabelActive]}>
+                      {t('map.middleLayer') || 'Middle'}
+                    </Text>
+                  </TouchableOpacity>
+                  
+                  <TouchableOpacity
+                    style={[styles.navbarItem, styles.navbarItemSmall, showCenterLayer && styles.navbarItemActive]}
+                    onPress={() => setShowCenterLayer(!showCenterLayer)}
+                    activeOpacity={0.7}
+                  >
+                    <View style={styles.navbarIconContainer}>
+                      <Text style={[styles.navbarIconText, styles.navbarIconTextSmall, showCenterLayer && { color: colors.onPrimary }]}>C</Text>
+                    </View>
+                    <Text style={[styles.navbarLabel, styles.navbarLabelSmall, showCenterLayer && styles.navbarLabelActive]}>
+                      {t('map.centerLayer') || 'Center'}
+                    </Text>
+                  </TouchableOpacity>
+                </>
+              )}
+
+              {/* Action Buttons */}
+              <View style={styles.navbarDivider} />
+
+              <TouchableOpacity
+                style={styles.navbarItem}
+                onPress={async () => {
+                  try {
+                    const html2canvas = (await import('html2canvas')).default;
+                    const containerElement = document.querySelector('.leaflet-container')?.parentElement?.parentElement || document.body;
+                    const canvas = await html2canvas(containerElement, {
+                      useCORS: true,
+                      allowTaint: true,
+                      backgroundColor: '#000000',
+                    });
+                    canvas.toBlob((blob) => {
+                      const url = URL.createObjectURL(blob);
+                      const link = document.createElement('a');
+                      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+                      const filename = showCompass 
+                        ? `map-with-compass-${timestamp}.png`
+                        : `map-${timestamp}.png`;
+                      link.href = url;
+                      link.download = filename;
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                      URL.revokeObjectURL(url);
+                    });
+                  } catch (error) {
+                    console.error('Error downloading map:', error);
+                    alert('Failed to download map. Please try again.');
+                  }
+                }}
+                onPressIn={() => setPressedButton('download')}
+                onPressOut={() => setPressedButton(null)}
+                activeOpacity={0.7}
+              >
+                <View style={styles.navbarIconContainer}>
+                  <DownloadIcon 
+                    size={getResponsiveSize(22)} 
+                    color={colors.primary} 
+                  />
+                </View>
+                <Text style={styles.navbarLabel}>
+                  {t('map.download') || 'Download'}
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.navbarItem}
+                onPress={() => {
+                  if (googleMapRef.current && currentLocation) {
+                    googleMapRef.current.setView([currentLocation.latitude, currentLocation.longitude], 18);
+                    setMapLocation(null);
+                  }
+                }}
+                onPressIn={() => setPressedButton('recenter')}
+                onPressOut={() => setPressedButton(null)}
+                activeOpacity={0.7}
+              >
+                <View style={styles.navbarIconContainer}>
+                  <RecenterIcon 
+                    size={getResponsiveSize(22)} 
+                    color={colors.primary} 
+                  />
+                </View>
+                <Text style={styles.navbarLabel}>
+                  {t('map.recenter') || 'Recenter'}
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.navbarItem, isMapLocked && styles.navbarItemActive]}
+                onPress={() => {
+                  setIsMapLocked(!isMapLocked);
+                  if (googleMapRef.current && window.L) {
+                    if (!isMapLocked) {
+                      googleMapRef.current.dragging.disable();
+                      googleMapRef.current.touchZoom.disable();
+                      googleMapRef.current.doubleClickZoom.disable();
+                      googleMapRef.current.scrollWheelZoom.disable();
+                    } else {
+                      googleMapRef.current.dragging.enable();
+                      googleMapRef.current.touchZoom.enable();
+                      googleMapRef.current.doubleClickZoom.enable();
+                      googleMapRef.current.scrollWheelZoom.enable();
+                    }
+                  }
+                }}
+                onPressIn={() => setPressedButton('lock')}
+                onPressOut={() => setPressedButton(null)}
+                activeOpacity={0.7}
+              >
+                <View style={styles.navbarIconContainer}>
+                  <LockIcon 
+                    size={getResponsiveSize(22)} 
+                    color={isMapLocked ? colors.onPrimary : colors.primary} 
+                    locked={isMapLocked} 
+                  />
+                </View>
+                <Text style={[styles.navbarLabel, isMapLocked && styles.navbarLabelActive]}>
+                  {isMapLocked ? (t('map.unlock') || 'Unlock') : (t('map.lock') || 'Lock')}
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.navbarItem, !mapLocation && styles.navbarItemDisabled]}
+                onPress={() => {
+                  if (googleMapRef.current && mapLocation) {
+                    googleMapRef.current.setView([mapLocation.latitude, mapLocation.longitude], 18);
+                  }
+                }}
+                onPressIn={() => setPressedButton('pin')}
+                onPressOut={() => setPressedButton(null)}
+                activeOpacity={0.7}
+                disabled={!mapLocation}
+              >
+                <View style={styles.navbarIconContainer}>
+                  <PinIcon 
+                    size={getResponsiveSize(22)} 
+                    color={mapLocation ? colors.primary : colors.onSurfaceVariant} 
+                  />
+                </View>
+                <Text style={[styles.navbarLabel, !mapLocation && styles.navbarLabelDisabled]}>
+                  {t('map.goToLocation') || 'Go to Location'}
+                </Text>
+              </TouchableOpacity>
+            </ScrollView>
           </View>
         </View>
       </SafeAreaView>
@@ -1217,39 +1246,12 @@ const styles = StyleSheet.create({
   },
   buttonWithLabel: {
     alignItems: 'center',
-    gap: getResponsiveSize(4),
-  },
-  buttonLabel: {
-    fontSize: getResponsiveFont(9), // Reduced font size
-    color: '#212121', // Dark color for better contrast
-    fontWeight: '700', // Bold for visibility
-    textAlign: 'center',
-    fontFamily: Platform.OS === 'web' ? "'DM Sans', sans-serif" : 'System',
-    maxWidth: getResponsiveSize(65), // Adjusted for single line
-    backgroundColor: '#FFFFFF', // Solid white background
-    paddingVertical: getResponsiveSize(3), // Reduced padding
-    paddingHorizontal: getResponsiveSize(5), // Reduced padding
-    borderRadius: getResponsiveSize(6), // Rounded corners
-    borderWidth: 1,
-    borderColor: 'rgba(244, 196, 48, 0.3)', // Subtle border
-    ...(Platform.OS === 'web' && {
-      whiteSpace: 'nowrap', // Prevent text wrapping
-      overflow: 'hidden',
-      textOverflow: 'ellipsis',
-      boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.15)', // Shadow for depth
-    }),
-    ...(Platform.OS !== 'web' && {
-      elevation: 3,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: 0.15,
-      shadowRadius: 3,
-    }),
+    gap: getResponsiveSize(3),
   },
   mapControlButton: {
-    width: getResponsiveSize(48),
-    height: getResponsiveSize(48),
-    borderRadius: getResponsiveSize(24),
+    width: getResponsiveSize(38),
+    height: getResponsiveSize(38),
+    borderRadius: getResponsiveSize(21),
     backgroundColor: 'rgba(255, 255, 255, 0.98)',
     justifyContent: 'center',
     alignItems: 'center',
@@ -1260,6 +1262,9 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.25,
     shadowRadius: 6,
+    ...(Platform.OS === 'web' && {
+      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+    }),
   },
   mapControlButtonActive: {
     backgroundColor: '#FFD54F',
@@ -1270,14 +1275,241 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.4,
     shadowRadius: 8,
+    ...(Platform.OS === 'web' && {
+      boxShadow: '0 4px 12px rgba(244, 196, 48, 0.4)',
+    }),
   },
-  mapControlButtonText: {
-    fontSize: getResponsiveFont(22),
+  buttonLabel: {
+    fontSize: getResponsiveFont(9),
+    color: '#212121',
+    fontWeight: '700',
+    textAlign: 'center',
     fontFamily: Platform.OS === 'web' ? "'DM Sans', sans-serif" : 'System',
+    maxWidth: getResponsiveSize(65),
+    backgroundColor: '#FFFFFF',
+    paddingVertical: getResponsiveSize(2),
+    paddingHorizontal: getResponsiveSize(4),
+    borderRadius: getResponsiveSize(8),
+    borderWidth: 1,
+    borderColor: 'rgba(244, 196, 48, 0.3)',
+    ...(Platform.OS === 'web' && {
+      whiteSpace: 'nowrap',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      boxShadow: '0px 1px 3px rgba(0, 0, 0, 0.1)',
+    }),
+    ...(Platform.OS !== 'web' && {
+      elevation: 2,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.1,
+      shadowRadius: 2,
+    }),
+  },
+  bottomControlPanel: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'rgba(255, 255, 255, 0.98)',
+    borderTopWidth: 2,
+    borderTopColor: '#F4C430',
+    paddingVertical: getResponsiveSize(12),
+    paddingHorizontal: getResponsiveSize(16),
+    zIndex: 1001,
+    ...(Platform.OS === 'web' && {
+      backdropFilter: 'blur(10px)',
+      WebkitBackdropFilter: 'blur(10px)',
+      boxShadow: '0 -4px 20px rgba(0, 0, 0, 0.15)',
+    }),
+  },
+  bottomInfoSection: {
+    marginBottom: getResponsiveSize(12),
+    paddingBottom: getResponsiveSize(12),
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(244, 196, 48, 0.2)',
+  },
+  bottomNavbar: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: colors.primaryContainer, // Light amber background
+    borderTopWidth: 3,
+    borderTopColor: colors.primary, // Material Amber 600
+    paddingTop: getResponsiveSize(4),
+    paddingBottom: getResponsiveSize(3),
+    paddingHorizontal: 0, // Remove horizontal padding to allow full-width scrolling
+    zIndex: 1001,
+    overflow: 'hidden', // Hide overflow on container
+    ...(Platform.OS === 'web' && {
+      boxShadow: '0 -4px 16px rgba(255, 179, 0, 0.25), 0 -2px 8px rgba(0, 0, 0, 0.1)',
+      background: `linear-gradient(to top, ${colors.primaryContainer} 0%, rgba(255, 248, 225, 0.95) 100%)`,
+    }),
+  },
+  navbarContent: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    flexWrap: 'nowrap',
+    gap: getResponsiveSize(6),
+    width: '100%',
+    overflowX: 'auto',
+    overflowY: 'hidden',
+    paddingHorizontal: getResponsiveSize(12),
+    paddingTop: getResponsiveSize(2),
+    paddingBottom: getResponsiveSize(2),
+    ...(Platform.OS === 'web' && {
+      scrollbarWidth: 'thin',
+      scrollbarColor: `${colors.primary} transparent`,
+      WebkitOverflowScrolling: 'touch',
+      scrollBehavior: 'smooth',
+      // Enable horizontal scrolling
+      display: 'flex',
+      flexDirection: 'row',
+      // Ensure scrolling works
+      WebkitScrollbar: {
+        height: '6px',
+      },
+      '&::-webkit-scrollbar': {
+        height: '6px',
+      },
+      '&::-webkit-scrollbar-track': {
+        background: 'transparent',
+      },
+      '&::-webkit-scrollbar-thumb': {
+        background: colors.primary,
+        borderRadius: '3px',
+      },
+    }),
+  },
+  navbarItem: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: getResponsiveSize(5),
+    paddingHorizontal: getResponsiveSize(8),
+    borderRadius: getResponsiveSize(12),
+    minWidth: getResponsiveSize(60),
+    flexShrink: 0,
+    gap: getResponsiveSize(4),
+    backgroundColor: colors.surface,
+    borderWidth: 1.5,
+    borderColor: colors.outline,
+    ...(Platform.OS === 'web' && {
+      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+      cursor: 'pointer',
+      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.08)',
+    }),
+    ...(Platform.OS !== 'web' && {
+      elevation: 2,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.1,
+      shadowRadius: 2,
+    }),
+  },
+  navbarItemActive: {
+    backgroundColor: colors.primary, // Material Amber 600
+    borderColor: colors.primaryDark, // Material Amber 700
+    borderWidth: 2.5,
+    ...(Platform.OS === 'web' && {
+      boxShadow: '0 6px 16px rgba(255, 179, 0, 0.35), 0 2px 6px rgba(255, 143, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
+      transform: 'translateY(-2px) scale(1.02)',
+      background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.primaryLight} 100%)`,
+    }),
+    ...(Platform.OS !== 'web' && {
+      elevation: 6,
+      shadowColor: colors.primary,
+      shadowOffset: { width: 0, height: 3 },
+      shadowOpacity: 0.35,
+      shadowRadius: 6,
+    }),
+  },
+  navbarItemApply: {
+    backgroundColor: colors.success, // Material Green 700
+    borderColor: '#2E7D32',
+    ...(Platform.OS === 'web' && {
+      boxShadow: '0 4px 12px rgba(56, 142, 60, 0.4)',
+    }),
+  },
+  navbarItemSmall: {
+    minWidth: getResponsiveSize(45),
+    paddingHorizontal: getResponsiveSize(6),
+  },
+  navbarItemDisabled: {
+    opacity: 0.4,
+  },
+  navbarIconText: {
+    fontSize: getResponsiveFont(18),
+    fontFamily: Platform.OS === 'web' ? "'DM Sans', sans-serif" : 'System',
+    ...(Platform.OS === 'web' && {
+      filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1))',
+      transition: 'transform 0.2s ease',
+    }),
+  },
+  navbarIconTextSmall: {
+    fontSize: getResponsiveFont(16),
+  },
+  navbarLabel: {
+    fontSize: getResponsiveFont(9),
+    color: colors.onSurface,
+    fontWeight: '600',
+    textAlign: 'center',
+    fontFamily: Platform.OS === 'web' ? "'DM Sans', sans-serif" : 'System',
+    marginTop: getResponsiveSize(2),
+    ...(Platform.OS === 'web' && {
+      whiteSpace: 'nowrap',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      maxWidth: getResponsiveSize(65),
+      transition: 'color 0.2s ease',
+    }),
+  },
+  navbarLabelActive: {
+    color: colors.onPrimary, // White text on primary
+    fontWeight: '700',
+  },
+  navbarLabelSmall: {
+    fontSize: getResponsiveFont(8),
+  },
+  navbarLabelDisabled: {
+    color: '#999999',
+  },
+  navbarDivider: {
+    width: 1.5,
+    height: getResponsiveSize(40),
+    backgroundColor: colors.outline,
+    marginHorizontal: getResponsiveSize(6),
+    borderRadius: getResponsiveSize(0.75),
+    ...(Platform.OS === 'web' && {
+      opacity: 0.5,
+    }),
+  },
+  navbarIconContainer: {
+    width: getResponsiveSize(28),
+    height: getResponsiveSize(28),
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: getResponsiveSize(6),
+    ...(Platform.OS === 'web' && {
+      display: 'flex',
+      flexShrink: 0,
+      transition: 'all 0.2s ease',
+    }),
+  },
+  compassIconContainer: {
+    width: getResponsiveSize(26),
+    height: getResponsiveSize(26),
+    ...(Platform.OS === 'web' && {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+    }),
   },
   omSymbolText: {
-    color: '#F4C430',
-    fontSize: getResponsiveFont(24),
+    color: colors.primary,
+    fontSize: getResponsiveFont(20),
     fontWeight: '900',
     fontFamily: Platform.OS === 'web' ? "'DM Sans', sans-serif" : 'System',
   },
@@ -1307,22 +1539,36 @@ const styles = StyleSheet.create({
     paddingBottom: getResponsiveSize(20),
     maxHeight: '80%',
   },
-  bottomInfo: {
-    position: 'absolute',
-    bottom: getResponsiveSize(85),
-    left: getResponsiveSize(15),
-    backgroundColor: 'rgba(255, 255, 255, 0.98)',
-    borderRadius: getResponsiveSize(12),
-    borderWidth: 2,
-    borderColor: '#F4C430',
-    padding: getResponsiveSize(16), // Increased from 12 to 16
-    paddingVertical: getResponsiveSize(18), // Additional vertical padding
-    paddingHorizontal: getResponsiveSize(20), // Additional horizontal padding
-    elevation: 6,
-    shadowColor: '#F4C430',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
+  searchCoordinatesContainer: {
+    paddingHorizontal: getResponsiveSize(16),
+    paddingVertical: getResponsiveSize(12),
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(244, 196, 48, 0.2)',
+    backgroundColor: 'rgba(244, 196, 48, 0.05)',
+  },
+  searchCoordinatesLabel: {
+    fontSize: getResponsiveFont(10),
+    color: '#F4C430',
+    fontWeight: '700',
+    marginBottom: getResponsiveSize(4),
+    fontFamily: Platform.OS === 'web' ? "'DM Sans', sans-serif" : 'System',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  searchCoordinatesValue: {
+    fontSize: getResponsiveFont(12),
+    color: '#212121',
+    fontWeight: '600',
+    fontFamily: Platform.OS === 'web' ? "'DM Sans', sans-serif" : 'System',
+    ...(Platform.OS === 'web' && {
+      fontFeatureSettings: '"tnum"',
+    }),
+  },
+  controlDivider: {
+    width: 1,
+    height: getResponsiveSize(40),
+    backgroundColor: 'rgba(244, 196, 48, 0.3)',
+    marginHorizontal: getResponsiveSize(4),
   },
   infoBox: {
     gap: getResponsiveSize(4), // Increased from 2 to 4
@@ -1349,58 +1595,8 @@ const styles = StyleSheet.create({
       textShadow: '0px 1px 2px rgba(255, 255, 255, 0.8)', // Add text shadow for better visibility
     }),
   },
-  bottomControls: {
-    position: 'absolute',
-    bottom: getResponsiveSize(20),
-    left: 0,
-    right: 0,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: getResponsiveSize(14),
-    paddingHorizontal: getResponsiveSize(15),
-    zIndex: 600,
-  },
-  bottomButton: {
-    width: getResponsiveSize(54),
-    height: getResponsiveSize(54),
-    borderRadius: getResponsiveSize(27),
-    backgroundColor: 'rgba(255, 255, 255, 0.98)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: 'rgba(244, 196, 48, 0.3)',
-    elevation: 6,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.25,
-    shadowRadius: 6,
-  },
-  bottomButtonActive: {
-    backgroundColor: '#FFD54F',
-    borderColor: '#F4C430',
-    borderWidth: 3,
-    elevation: 8,
-    shadowColor: '#F4C430',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 8,
-  },
-  applyButton: {
-    backgroundColor: '#4CAF50',
-    borderWidth: 3,
-    borderColor: '#FFFFFF',
-    width: getResponsiveSize(60),
-    height: getResponsiveSize(60),
-    borderRadius: getResponsiveSize(30),
-    elevation: 10,
-    shadowColor: '#4CAF50',
-    shadowOffset: { width: 0, height: 5 },
-    shadowOpacity: 0.5,
-    shadowRadius: 10,
-  },
   applyButtonText: {
-    fontSize: getResponsiveFont(32),
+    fontSize: getResponsiveFont(20),
     color: '#FFFFFF',
     fontWeight: '900',
     fontFamily: Platform.OS === 'web' ? "'DM Sans', sans-serif" : 'System',
