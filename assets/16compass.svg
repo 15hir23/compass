@@ -1,0 +1,164 @@
+<svg viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Gradients -->
+    <radialGradient id="bgGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#FFFBF0;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFF8E7;stop-opacity:1" />
+    </radialGradient>
+    
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFD700;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#FDB931;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#D4AF37;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="needleGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFD700;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#FFA500;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FF8C00;stop-opacity:1" />
+    </linearGradient>
+    
+    <filter id="dropShadow">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
+      <feOffset dx="0" dy="2" result="offsetblur"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.3"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
+    <filter id="softGlow">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Main background circle -->
+  <circle cx="250" cy="250" r="240" fill="url(#bgGrad)"/>
+
+  <!-- Outer golden ring -->
+  <circle cx="250" cy="250" r="235" fill="none" stroke="url(#goldGrad)" stroke-width="3" opacity="0.8"/>
+  <circle cx="250" cy="250" r="230" fill="none" stroke="#FFD700" stroke-width="1" opacity="0.5"/>
+  
+  <!-- Zone ring background (yellow area) -->
+  <circle cx="250" cy="250" r="210" fill="#FFFEF9" opacity="0.5"/>
+  <!-- Division lines for 16 zones -->
+  <g stroke="#E5C100" stroke-width="0.8" opacity="0.25">
+    <line x1="250" y1="40" x2="250" y2="460"/>
+    <line x1="40" y1="250" x2="460" y2="250"/>
+    <line x1="101.5" y1="101.5" x2="398.5" y2="398.5"/>
+    <line x1="398.5" y1="101.5" x2="101.5" y2="398.5"/>
+    <line x1="250" y1="40" x2="353.5" y2="91" transform="rotate(22.5 250 250)"/>
+    <line x1="250" y1="40" x2="353.5" y2="91" transform="rotate(67.5 250 250)"/>
+    <line x1="250" y1="40" x2="353.5" y2="91" transform="rotate(112.5 250 250)"/>
+    <line x1="250" y1="40" x2="353.5" y2="91" transform="rotate(157.5 250 250)"/>
+    <line x1="250" y1="40" x2="353.5" y2="91" transform="rotate(202.5 250 250)"/>
+    <line x1="250" y1="40" x2="353.5" y2="91" transform="rotate(247.5 250 250)"/>
+    <line x1="250" y1="40" x2="353.5" y2="91" transform="rotate(292.5 250 250)"/>
+    <line x1="250" y1="40" x2="353.5" y2="91" transform="rotate(337.5 250 250)"/>
+  </g>
+  
+  <!-- Inner clean circle (white area) -->
+  <circle cx="250" cy="250" r="175" fill="#FFFEF9"/>
+  <circle cx="250" cy="250" r="175" fill="none" stroke="#E5C100" stroke-width="1" opacity="0.3"/>
+  
+  <!-- Cardinal markers -->
+  <g fill="url(#goldGrad)">
+    <rect x="245" y="35" width="10" height="15" rx="2"/>
+    <rect x="470" y="245" width="15" height="10" rx="2"/>
+    <rect x="245" y="470" width="10" height="15" rx="2"/>
+    <rect x="15" y="245" width="15" height="10" rx="2"/>
+  </g>
+  
+  <!-- Cardinal directions (0°, 90°, 180°, 270°) - positioned away from markers -->
+  <g font-family="'Segoe UI', Arial, sans-serif" font-weight="700" fill="#B8860B">
+    <text x="250" y="25" font-size="24" text-anchor="middle" filter="url(#softGlow)">N</text>
+    <text x="450" y="256" font-size="22" text-anchor="start" filter="url(#softGlow)">E</text>
+    <text x="250" y="460" font-size="22" text-anchor="middle" filter="url(#softGlow)">S</text>
+    <text x="60" y="256" font-size="22" text-anchor="end" filter="url(#softGlow)">W</text>
+  </g>
+  
+  <!-- All 16 compass directions on same circle (radius ~195) -->
+  <g font-family="'Segoe UI', Arial, sans-serif" font-size="11" font-weight="600" fill="#A0826D">
+    <!-- NNE at 22.5° -->
+    <text x="324" y="73" text-anchor="middle">NNE</text>
+    <!-- NE at 45° -->
+    <text x="391" y="114" font-size="13" font-weight="700" text-anchor="middle">NE</text>
+    <!-- ENE at 67.5° -->
+    <text x="433" y="176" text-anchor="middle">ENE</text>
+    <!-- ESE at 112.5° -->
+    <text x="433" y="332" text-anchor="middle">ESE</text>
+    <!-- SE at 135° -->
+    <text x="391" y="394" font-size="13" font-weight="700" text-anchor="middle">SE</text>
+    <!-- SSE at 157.5° -->
+    <text x="324" y="435" text-anchor="middle">SSE</text>
+    <!-- SSW at 202.5° -->
+    <text x="176" y="435" text-anchor="middle">SSW</text>
+    <!-- SW at 225° -->
+    <text x="109" y="394" font-size="13" font-weight="700" text-anchor="middle">SW</text>
+    <!-- WSW at 247.5° -->
+    <text x="67" y="332" text-anchor="middle">WSW</text>
+    <!-- WNW at 292.5° -->
+    <text x="67" y="176" text-anchor="middle">WNW</text>
+    <!-- NW at 315° -->
+    <text x="109" y="114" font-size="13" font-weight="700" text-anchor="middle">NW</text>
+    <!-- NNW at 337.5° -->
+    <text x="176" y="73" text-anchor="middle">NNW</text>
+  </g>
+  
+  <!-- Vastu zone labels (in white area - inner ring) -->
+  <g font-family="'Segoe UI', Arial, sans-serif" font-size="12" font-weight="500" fill="#C9A961">
+    <!-- North section -->
+    <text x="250" y="105" text-anchor="middle">Ish</text>
+    <text x="320" y="128" text-anchor="middle">Pit</text>
+    <text x="180" y="128" text-anchor="middle">Adi</text>
+    
+    <!-- East section -->
+    <text x="360" y="148" text-anchor="middle">Agn</text>
+    <text x="382" y="192" text-anchor="middle">Ind</text>
+    <text x="398" y="250" text-anchor="middle">Vay</text>
+    <text x="382" y="308" text-anchor="middle">Nai</text>
+    <text x="360" y="352" text-anchor="middle">Var</text>
+    
+    <!-- South section -->
+    <text x="320" y="372" text-anchor="middle">Som</text>
+    <text x="250" y="395" text-anchor="middle">Bra</text>
+    <text x="180" y="372" text-anchor="middle">Jay</text>
+    
+    <!-- West section -->
+    <text x="140" y="352" text-anchor="middle">Sat</text>
+    <text x="118" y="308" text-anchor="middle">Vis</text>
+    <text x="102" y="250" text-anchor="middle">Rud</text>
+    <text x="118" y="192" text-anchor="middle">Pus</text>
+    <text x="140" y="148" text-anchor="middle">Gan</text>
+  </g>
+  
+  <!-- Compass needle -->
+  <g filter="url(#dropShadow)">
+    <!-- North pointer -->
+    <path d="M 250 250 L 242 260 L 250 120 L 258 260 Z" fill="url(#needleGrad)" stroke="#CC8800" stroke-width="1"/>
+    
+    <!-- South pointer -->
+    <path d="M 250 250 L 242 240 L 250 380 L 258 240 Z" fill="#FFFFFF" stroke="#D4AF37" stroke-width="1" opacity="0.9"/>
+    
+    <!-- East pointer -->
+    <path d="M 250 250 L 240 242 L 380 250 L 240 258 Z" fill="#FFF8E7" stroke="#D4AF37" stroke-width="1" opacity="0.7"/>
+    
+    <!-- West pointer -->
+    <path d="M 250 250 L 260 242 L 120 250 L 260 258 Z" fill="#FFF8E7" stroke="#D4AF37" stroke-width="1" opacity="0.7"/>
+  </g>
+  
+  <!-- Center pivot -->
+  <circle cx="250" cy="250" r="20" fill="url(#goldGrad)" filter="url(#dropShadow)"/>
+  <circle cx="250" cy="250" r="18" fill="#FFFEF9"/>
+  <circle cx="250" cy="250" r="14" fill="url(#goldGrad)"/>
+  <circle cx="250" cy="250" r="12" fill="#FFA500"/>
+  <circle cx="250" cy="250" r="8" fill="#FFD600"/>
+  <circle cx="248" cy="248" r="3" fill="#FFFEF9" opacity="0.8"/>
+</svg>

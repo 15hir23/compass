@@ -1,0 +1,661 @@
+<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Gradients -->
+    <radialGradient id="compassBg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#FFFEF7;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFF8DC;stop-opacity:1" />
+    </radialGradient>
+    
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFD700;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#FDB931;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#D4AF37;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="needleGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFD700;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#FFA500;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FF8C00;stop-opacity:1" />
+    </linearGradient>
+    
+    <radialGradient id="centerGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#6B7280;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#4B5563;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#374151;stop-opacity:1" />
+    </radialGradient>
+    
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.25"/>
+    </filter>
+    
+    <filter id="innerShadow">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="2"/>
+      <feOffset dx="0" dy="1" result="offsetblur"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.3"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Outer decorative ring -->
+  <circle cx="200" cy="200" r="190" fill="none" stroke="url(#goldGrad)" stroke-width="6" opacity="0.3"/>
+  <circle cx="200" cy="200" r="185" fill="none" stroke="#FFD700" stroke-width="2"/>
+  
+  <!-- Element color ring segments -->
+  <!-- Water (North) - Blue gradient -->
+  <path d="M 200 35 A 165 165 0 0 1 365 200 L 345 200 A 145 145 0 0 0 200 55 Z" 
+        fill="url(#goldGrad)" opacity="0.15"/>
+  
+  <!-- Fire (East) - Red gradient -->
+  <path d="M 365 200 A 165 165 0 0 1 200 365 L 200 345 A 145 145 0 0 0 345 200 Z" 
+        fill="url(#goldGrad)" opacity="0.2"/>
+  
+  <!-- Earth (South) - Green gradient -->
+  <path d="M 200 365 A 165 165 0 0 1 35 200 L 55 200 A 145 145 0 0 0 200 345 Z" 
+        fill="url(#goldGrad)" opacity="0.25"/>
+  
+  <!-- Air (West) - Gray gradient -->
+  <path d="M 35 200 A 165 165 0 0 1 200 35 L 200 55 A 145 145 0 0 0 55 200 Z" 
+        fill="url(#goldGrad)" opacity="0.18"/>
+  
+  <!-- Inner circle background -->
+  <circle cx="200" cy="200" r="145" fill="url(#compassBg)" filter="url(#innerShadow)"/>
+  
+  <!-- Subtle inner rings -->
+  <circle cx="200" cy="200" r="140" fill="none" stroke="#DAA520" stroke-width="0.5" opacity="0.3"/>
+  <circle cx="200" cy="200" r="130" fill="none" stroke="#DAA520" stroke-width="0.5" opacity="0.2"/>
+  
+  <!-- Crosshair lines -->
+  <line x1="200" y1="70" x2="200" y2="330" stroke="#DAA520" stroke-width="1" opacity="0.2"/>
+  <line x1="70" y1="200" x2="330" y2="200" stroke="#DAA520" stroke-width="1" opacity="0.2"/>
+  
+  <!-- Degree markings -->
+  <g stroke="#B8860B" stroke-width="1.5" opacity="0.6">
+    <!-- Main cardinal marks -->
+    <line x1="200" y1="55" x2="200" y2="70" stroke-width="2"/>
+    <line x1="330" y1="200" x2="345" y2="200" stroke-width="2"/>
+    <line x1="200" y1="330" x2="200" y2="345" stroke-width="2"/>
+    <line x1="55" y1="200" x2="70" y2="200" stroke-width="2"/>
+  </g>
+  
+  <g stroke="#DAA520" stroke-width="1" opacity="0.4">
+    <!-- 45 degree marks -->
+    <line x1="246" y1="76" x2="238" y2="84"/>
+    <line x1="324" y1="154" x2="316" y2="162"/>
+    <line x1="324" y1="246" x2="316" y2="238"/>
+    <line x1="246" y1="324" x2="238" y2="316"/>
+    <line x1="154" y1="324" x2="162" y2="316"/>
+    <line x1="76" y1="246" x2="84" y2="238"/>
+    <line x1="76" y1="154" x2="84" y2="162"/>
+    <line x1="154" y1="76" x2="162" y2="84"/>
+  </g>
+  
+  <!-- Element labels on outer ring -->
+  <text x="200" y="25" font-family="Arial, sans-serif" font-size="18" font-weight="600" 
+        fill="#B8860B" text-anchor="middle" letter-spacing="2">WATER</text>
+  
+  <text x="375" y="207" font-family="Arial, sans-serif" font-size="18" font-weight="600" 
+        fill="#B8860B" text-anchor="middle" letter-spacing="2">FIRE</text>
+  
+  <text x="200" y="385" font-family="Arial, sans-serif" font-size="18" font-weight="600" 
+        fill="#B8860B" text-anchor="middle" letter-spacing="2">EARTH</text>
+  
+  <text x="25" y="207" font-family="Arial, sans-serif" font-size="18" font-weight="600" 
+        fill="#B8860B" text-anchor="middle" letter-spacing="2">AIR</text>
+  
+  <!-- Direction labels inside -->
+  <!-- N -->
+  <text x="200" y="100" font-family="Arial, sans-serif" font-size="32" font-weight="700" 
+        fill="#B8860B" text-anchor="middle">N</text>
+  
+  <!-- E -->
+  <text x="300" y="207" font-family="Arial, sans-serif" font-size="24" font-weight="600" 
+        fill="#8B7355" text-anchor="middle">E</text>
+  
+  <!-- S -->
+  <text x="200" y="310" font-family="Arial, sans-serif" font-size="24" font-weight="600" 
+        fill="#8B7355" text-anchor="middle">S</text>
+  
+  <!-- W -->
+  <text x="100" y="207" font-family="Arial, sans-serif" font-size="24" font-weight="600" 
+        fill="#8B7355" text-anchor="middle">W</text>
+  
+  <!-- Intercardinal labels -->
+  <text x="256" y="144" font-family="Arial, sans-serif" font-size="16" font-weight="500" 
+        fill="#9CA3AF" text-anchor="middle">NE</text>
+  
+  <text x="256" y="266" font-family="Arial, sans-serif" font-size="16" font-weight="500" 
+        fill="#9CA3AF" text-anchor="middle">SE</text>
+  
+  <text x="144" y="266" font-family="Arial, sans-serif" font-size="16" font-weight="500" 
+        fill="#9CA3AF" text-anchor="middle">SW</text>
+  
+  <text x="144" y="144" font-family="Arial, sans-serif" font-size="16" font-weight="500" 
+        fill="#9CA3AF" text-anchor="middle">NW</text>
+  
+  <!-- Compass needle with shadow -->
+  <g filter="url(#shadow)">
+    <!-- North pointer (golden) -->
+    <path d="M 200 200 L 192 208 L 200 95 L 208 208 Z" 
+          fill="url(#needleGrad)" stroke="#CC8800" stroke-width="1"/>
+    
+    <!-- South pointer (white) -->
+    <path d="M 200 200 L 192 192 L 200 305 L 208 192 Z" 
+          fill="#FFFFFF" stroke="#D4AF37" stroke-width="1" opacity="0.9"/>
+    
+    <!-- East pointer (cream) -->
+    <path d="M 200 200 L 192 192 L 305 200 L 192 208 Z" 
+          fill="#FFF8E7" stroke="#D4AF37" stroke-width="1" opacity="0.7"/>
+    
+    <!-- West pointer (cream) -->
+    <path d="M 200 200 L 208 192 L 95 200 L 208 208 Z" 
+          fill="#FFF8E7" stroke="#D4AF37" stroke-width="1" opacity="0.7"/>
+  </g>
+  
+  <!-- Center pivot -->
+  <circle cx="200" cy="200" r="18" fill="url(#goldGrad)" filter="url(#shadow)"/>
+  <circle cx="200" cy="200" r="16" fill="#FFFEF9"/>
+  <circle cx="200" cy="200" r="12" fill="url(#goldGrad)"/>
+  <circle cx="200" cy="200" r="10" fill="#FFA500"/>
+  <circle cx="200" cy="200" r="6" fill="#FFD600"/>
+  <circle cx="198" cy="198" r="2" fill="#FFFEF9" opacity="0.8"/>
+</svg><svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Gradients -->
+    <radialGradient id="compassBg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#FFFEF7;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFF8DC;stop-opacity:1" />
+    </radialGradient>
+    
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFD700;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#FDB931;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#D4AF37;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="needleGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFD700;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#FFA500;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FF8C00;stop-opacity:1" />
+    </linearGradient>
+    
+    <radialGradient id="centerGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#6B7280;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#4B5563;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#374151;stop-opacity:1" />
+    </radialGradient>
+    
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.25"/>
+    </filter>
+    
+    <filter id="innerShadow">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="2"/>
+      <feOffset dx="0" dy="1" result="offsetblur"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.3"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Outer decorative ring -->
+  <circle cx="200" cy="200" r="190" fill="none" stroke="url(#goldGrad)" stroke-width="6" opacity="0.3"/>
+  <circle cx="200" cy="200" r="185" fill="none" stroke="#FFD700" stroke-width="2"/>
+  
+  <!-- Element color ring segments -->
+  <!-- Water (North) - Blue gradient -->
+  <path d="M 200 35 A 165 165 0 0 1 365 200 L 345 200 A 145 145 0 0 0 200 55 Z" 
+        fill="url(#goldGrad)" opacity="0.15"/>
+  
+  <!-- Fire (East) - Red gradient -->
+  <path d="M 365 200 A 165 165 0 0 1 200 365 L 200 345 A 145 145 0 0 0 345 200 Z" 
+        fill="url(#goldGrad)" opacity="0.2"/>
+  
+  <!-- Earth (South) - Green gradient -->
+  <path d="M 200 365 A 165 165 0 0 1 35 200 L 55 200 A 145 145 0 0 0 200 345 Z" 
+        fill="url(#goldGrad)" opacity="0.25"/>
+  
+  <!-- Air (West) - Gray gradient -->
+  <path d="M 35 200 A 165 165 0 0 1 200 35 L 200 55 A 145 145 0 0 0 55 200 Z" 
+        fill="url(#goldGrad)" opacity="0.18"/>
+  
+  <!-- Inner circle background -->
+  <circle cx="200" cy="200" r="145" fill="url(#compassBg)" filter="url(#innerShadow)"/>
+  
+  <!-- Subtle inner rings -->
+  <circle cx="200" cy="200" r="140" fill="none" stroke="#DAA520" stroke-width="0.5" opacity="0.3"/>
+  <circle cx="200" cy="200" r="130" fill="none" stroke="#DAA520" stroke-width="0.5" opacity="0.2"/>
+  
+  <!-- Crosshair lines -->
+  <line x1="200" y1="70" x2="200" y2="330" stroke="#DAA520" stroke-width="1" opacity="0.2"/>
+  <line x1="70" y1="200" x2="330" y2="200" stroke="#DAA520" stroke-width="1" opacity="0.2"/>
+  
+  <!-- Degree markings -->
+  <g stroke="#B8860B" stroke-width="1.5" opacity="0.6">
+    <!-- Main cardinal marks -->
+    <line x1="200" y1="55" x2="200" y2="70" stroke-width="2"/>
+    <line x1="330" y1="200" x2="345" y2="200" stroke-width="2"/>
+    <line x1="200" y1="330" x2="200" y2="345" stroke-width="2"/>
+    <line x1="55" y1="200" x2="70" y2="200" stroke-width="2"/>
+  </g>
+  
+  <g stroke="#DAA520" stroke-width="1" opacity="0.4">
+    <!-- 45 degree marks -->
+    <line x1="246" y1="76" x2="238" y2="84"/>
+    <line x1="324" y1="154" x2="316" y2="162"/>
+    <line x1="324" y1="246" x2="316" y2="238"/>
+    <line x1="246" y1="324" x2="238" y2="316"/>
+    <line x1="154" y1="324" x2="162" y2="316"/>
+    <line x1="76" y1="246" x2="84" y2="238"/>
+    <line x1="76" y1="154" x2="84" y2="162"/>
+    <line x1="154" y1="76" x2="162" y2="84"/>
+  </g>
+  
+  <!-- Element labels on outer ring -->
+  <text x="200" y="25" font-family="Arial, sans-serif" font-size="18" font-weight="600" 
+        fill="#B8860B" text-anchor="middle" letter-spacing="2">WATER</text>
+  
+  <text x="375" y="207" font-family="Arial, sans-serif" font-size="18" font-weight="600" 
+        fill="#B8860B" text-anchor="middle" letter-spacing="2">FIRE</text>
+  
+  <text x="200" y="385" font-family="Arial, sans-serif" font-size="18" font-weight="600" 
+        fill="#B8860B" text-anchor="middle" letter-spacing="2">EARTH</text>
+  
+  <text x="25" y="207" font-family="Arial, sans-serif" font-size="18" font-weight="600" 
+        fill="#B8860B" text-anchor="middle" letter-spacing="2">AIR</text>
+  
+  <!-- Direction labels inside -->
+  <!-- N -->
+  <text x="200" y="100" font-family="Arial, sans-serif" font-size="32" font-weight="700" 
+        fill="#B8860B" text-anchor="middle">N</text>
+  
+  <!-- E -->
+  <text x="300" y="207" font-family="Arial, sans-serif" font-size="24" font-weight="600" 
+        fill="#8B7355" text-anchor="middle">E</text>
+  
+  <!-- S -->
+  <text x="200" y="310" font-family="Arial, sans-serif" font-size="24" font-weight="600" 
+        fill="#8B7355" text-anchor="middle">S</text>
+  
+  <!-- W -->
+  <text x="100" y="207" font-family="Arial, sans-serif" font-size="24" font-weight="600" 
+        fill="#8B7355" text-anchor="middle">W</text>
+  
+  <!-- Intercardinal labels -->
+  <text x="256" y="144" font-family="Arial, sans-serif" font-size="16" font-weight="500" 
+        fill="#9CA3AF" text-anchor="middle">NE</text>
+  
+  <text x="256" y="266" font-family="Arial, sans-serif" font-size="16" font-weight="500" 
+        fill="#9CA3AF" text-anchor="middle">SE</text>
+  
+  <text x="144" y="266" font-family="Arial, sans-serif" font-size="16" font-weight="500" 
+        fill="#9CA3AF" text-anchor="middle">SW</text>
+  
+  <text x="144" y="144" font-family="Arial, sans-serif" font-size="16" font-weight="500" 
+        fill="#9CA3AF" text-anchor="middle">NW</text>
+  
+  <!-- Compass needle with shadow -->
+  <g filter="url(#shadow)">
+    <!-- North pointer (golden) -->
+    <path d="M 200 200 L 192 208 L 200 95 L 208 208 Z" 
+          fill="url(#needleGrad)" stroke="#CC8800" stroke-width="1"/>
+    
+    <!-- South pointer (white) -->
+    <path d="M 200 200 L 192 192 L 200 305 L 208 192 Z" 
+          fill="#FFFFFF" stroke="#D4AF37" stroke-width="1" opacity="0.9"/>
+    
+    <!-- East pointer (cream) -->
+    <path d="M 200 200 L 192 192 L 305 200 L 192 208 Z" 
+          fill="#FFF8E7" stroke="#D4AF37" stroke-width="1" opacity="0.7"/>
+    
+    <!-- West pointer (cream) -->
+    <path d="M 200 200 L 208 192 L 95 200 L 208 208 Z" 
+          fill="#FFF8E7" stroke="#D4AF37" stroke-width="1" opacity="0.7"/>
+  </g>
+  
+  <!-- Center pivot -->
+  <circle cx="200" cy="200" r="18" fill="url(#goldGrad)" filter="url(#shadow)"/>
+  <circle cx="200" cy="200" r="16" fill="#FFFEF9"/>
+  <circle cx="200" cy="200" r="12" fill="url(#goldGrad)"/>
+  <circle cx="200" cy="200" r="10" fill="#FFA500"/>
+  <circle cx="200" cy="200" r="6" fill="#FFD600"/>
+  <circle cx="198" cy="198" r="2" fill="#FFFEF9" opacity="0.8"/>
+</svg><svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Gradients -->
+    <radialGradient id="compassBg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#FFFEF7;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFF8DC;stop-opacity:1" />
+    </radialGradient>
+    
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFD700;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#FDB931;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#D4AF37;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="needleGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFD700;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#FFA500;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FF8C00;stop-opacity:1" />
+    </linearGradient>
+    
+    <radialGradient id="centerGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#6B7280;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#4B5563;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#374151;stop-opacity:1" />
+    </radialGradient>
+    
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.25"/>
+    </filter>
+    
+    <filter id="innerShadow">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="2"/>
+      <feOffset dx="0" dy="1" result="offsetblur"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.3"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Outer decorative ring -->
+  <circle cx="200" cy="200" r="190" fill="none" stroke="url(#goldGrad)" stroke-width="6" opacity="0.3"/>
+  <circle cx="200" cy="200" r="185" fill="none" stroke="#FFD700" stroke-width="2"/>
+  
+  <!-- Element color ring segments -->
+  <!-- Water (North) - Blue gradient -->
+  <path d="M 200 35 A 165 165 0 0 1 365 200 L 345 200 A 145 145 0 0 0 200 55 Z" 
+        fill="url(#goldGrad)" opacity="0.15"/>
+  
+  <!-- Fire (East) - Red gradient -->
+  <path d="M 365 200 A 165 165 0 0 1 200 365 L 200 345 A 145 145 0 0 0 345 200 Z" 
+        fill="url(#goldGrad)" opacity="0.2"/>
+  
+  <!-- Earth (South) - Green gradient -->
+  <path d="M 200 365 A 165 165 0 0 1 35 200 L 55 200 A 145 145 0 0 0 200 345 Z" 
+        fill="url(#goldGrad)" opacity="0.25"/>
+  
+  <!-- Air (West) - Gray gradient -->
+  <path d="M 35 200 A 165 165 0 0 1 200 35 L 200 55 A 145 145 0 0 0 55 200 Z" 
+        fill="url(#goldGrad)" opacity="0.18"/>
+  
+  <!-- Inner circle background -->
+  <circle cx="200" cy="200" r="145" fill="url(#compassBg)" filter="url(#innerShadow)"/>
+  
+  <!-- Subtle inner rings -->
+  <circle cx="200" cy="200" r="140" fill="none" stroke="#DAA520" stroke-width="0.5" opacity="0.3"/>
+  <circle cx="200" cy="200" r="130" fill="none" stroke="#DAA520" stroke-width="0.5" opacity="0.2"/>
+  
+  <!-- Crosshair lines -->
+  <line x1="200" y1="70" x2="200" y2="330" stroke="#DAA520" stroke-width="1" opacity="0.2"/>
+  <line x1="70" y1="200" x2="330" y2="200" stroke="#DAA520" stroke-width="1" opacity="0.2"/>
+  
+  <!-- Degree markings -->
+  <g stroke="#B8860B" stroke-width="1.5" opacity="0.6">
+    <!-- Main cardinal marks -->
+    <line x1="200" y1="55" x2="200" y2="70" stroke-width="2"/>
+    <line x1="330" y1="200" x2="345" y2="200" stroke-width="2"/>
+    <line x1="200" y1="330" x2="200" y2="345" stroke-width="2"/>
+    <line x1="55" y1="200" x2="70" y2="200" stroke-width="2"/>
+  </g>
+  
+  <g stroke="#DAA520" stroke-width="1" opacity="0.4">
+    <!-- 45 degree marks -->
+    <line x1="246" y1="76" x2="238" y2="84"/>
+    <line x1="324" y1="154" x2="316" y2="162"/>
+    <line x1="324" y1="246" x2="316" y2="238"/>
+    <line x1="246" y1="324" x2="238" y2="316"/>
+    <line x1="154" y1="324" x2="162" y2="316"/>
+    <line x1="76" y1="246" x2="84" y2="238"/>
+    <line x1="76" y1="154" x2="84" y2="162"/>
+    <line x1="154" y1="76" x2="162" y2="84"/>
+  </g>
+  
+  <!-- Element labels on outer ring -->
+  <text x="200" y="25" font-family="Arial, sans-serif" font-size="18" font-weight="600" 
+        fill="#B8860B" text-anchor="middle" letter-spacing="2">WATER</text>
+  
+  <text x="375" y="207" font-family="Arial, sans-serif" font-size="18" font-weight="600" 
+        fill="#B8860B" text-anchor="middle" letter-spacing="2">FIRE</text>
+  
+  <text x="200" y="385" font-family="Arial, sans-serif" font-size="18" font-weight="600" 
+        fill="#B8860B" text-anchor="middle" letter-spacing="2">EARTH</text>
+  
+  <text x="25" y="207" font-family="Arial, sans-serif" font-size="18" font-weight="600" 
+        fill="#B8860B" text-anchor="middle" letter-spacing="2">AIR</text>
+  
+  <!-- Direction labels inside -->
+  <!-- N -->
+  <text x="200" y="100" font-family="Arial, sans-serif" font-size="32" font-weight="700" 
+        fill="#B8860B" text-anchor="middle">N</text>
+  
+  <!-- E -->
+  <text x="300" y="207" font-family="Arial, sans-serif" font-size="24" font-weight="600" 
+        fill="#8B7355" text-anchor="middle">E</text>
+  
+  <!-- S -->
+  <text x="200" y="310" font-family="Arial, sans-serif" font-size="24" font-weight="600" 
+        fill="#8B7355" text-anchor="middle">S</text>
+  
+  <!-- W -->
+  <text x="100" y="207" font-family="Arial, sans-serif" font-size="24" font-weight="600" 
+        fill="#8B7355" text-anchor="middle">W</text>
+  
+  <!-- Intercardinal labels -->
+  <text x="256" y="144" font-family="Arial, sans-serif" font-size="16" font-weight="500" 
+        fill="#9CA3AF" text-anchor="middle">NE</text>
+  
+  <text x="256" y="266" font-family="Arial, sans-serif" font-size="16" font-weight="500" 
+        fill="#9CA3AF" text-anchor="middle">SE</text>
+  
+  <text x="144" y="266" font-family="Arial, sans-serif" font-size="16" font-weight="500" 
+        fill="#9CA3AF" text-anchor="middle">SW</text>
+  
+  <text x="144" y="144" font-family="Arial, sans-serif" font-size="16" font-weight="500" 
+        fill="#9CA3AF" text-anchor="middle">NW</text>
+  
+  <!-- Compass needle with shadow -->
+  <g filter="url(#shadow)">
+    <!-- North pointer (golden) -->
+    <path d="M 200 200 L 192 208 L 200 95 L 208 208 Z" 
+          fill="url(#needleGrad)" stroke="#CC8800" stroke-width="1"/>
+    
+    <!-- South pointer (white) -->
+    <path d="M 200 200 L 192 192 L 200 305 L 208 192 Z" 
+          fill="#FFFFFF" stroke="#D4AF37" stroke-width="1" opacity="0.9"/>
+    
+    <!-- East pointer (cream) -->
+    <path d="M 200 200 L 192 192 L 305 200 L 192 208 Z" 
+          fill="#FFF8E7" stroke="#D4AF37" stroke-width="1" opacity="0.7"/>
+    
+    <!-- West pointer (cream) -->
+    <path d="M 200 200 L 208 192 L 95 200 L 208 208 Z" 
+          fill="#FFF8E7" stroke="#D4AF37" stroke-width="1" opacity="0.7"/>
+  </g>
+  
+  <!-- Center pivot -->
+  <circle cx="200" cy="200" r="18" fill="url(#goldGrad)" filter="url(#shadow)"/>
+  <circle cx="200" cy="200" r="16" fill="#FFFEF9"/>
+  <circle cx="200" cy="200" r="12" fill="url(#goldGrad)"/>
+  <circle cx="200" cy="200" r="10" fill="#FFA500"/>
+  <circle cx="200" cy="200" r="6" fill="#FFD600"/>
+  <circle cx="198" cy="198" r="2" fill="#FFFEF9" opacity="0.8"/>
+</svg><svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Gradients -->
+    <radialGradient id="compassBg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#FFFEF7;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFF8DC;stop-opacity:1" />
+    </radialGradient>
+    
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFD700;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#FDB931;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#D4AF37;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="needleGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFD700;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#FFA500;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FF8C00;stop-opacity:1" />
+    </linearGradient>
+    
+    <radialGradient id="centerGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#6B7280;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#4B5563;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#374151;stop-opacity:1" />
+    </radialGradient>
+    
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.25"/>
+    </filter>
+    
+    <filter id="innerShadow">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="2"/>
+      <feOffset dx="0" dy="1" result="offsetblur"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.3"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Outer decorative ring -->
+  <circle cx="200" cy="200" r="190" fill="none" stroke="url(#goldGrad)" stroke-width="6" opacity="0.3"/>
+  <circle cx="200" cy="200" r="185" fill="none" stroke="#FFD700" stroke-width="2"/>
+  
+  <!-- Element color ring segments -->
+  <!-- Water (North) - Blue gradient -->
+  <path d="M 200 35 A 165 165 0 0 1 365 200 L 345 200 A 145 145 0 0 0 200 55 Z" 
+        fill="url(#goldGrad)" opacity="0.15"/>
+  
+  <!-- Fire (East) - Red gradient -->
+  <path d="M 365 200 A 165 165 0 0 1 200 365 L 200 345 A 145 145 0 0 0 345 200 Z" 
+        fill="url(#goldGrad)" opacity="0.2"/>
+  
+  <!-- Earth (South) - Green gradient -->
+  <path d="M 200 365 A 165 165 0 0 1 35 200 L 55 200 A 145 145 0 0 0 200 345 Z" 
+        fill="url(#goldGrad)" opacity="0.25"/>
+  
+  <!-- Air (West) - Gray gradient -->
+  <path d="M 35 200 A 165 165 0 0 1 200 35 L 200 55 A 145 145 0 0 0 55 200 Z" 
+        fill="url(#goldGrad)" opacity="0.18"/>
+  
+  <!-- Inner circle background -->
+  <circle cx="200" cy="200" r="145" fill="url(#compassBg)" filter="url(#innerShadow)"/>
+  
+  <!-- Subtle inner rings -->
+  <circle cx="200" cy="200" r="140" fill="none" stroke="#DAA520" stroke-width="0.5" opacity="0.3"/>
+  <circle cx="200" cy="200" r="130" fill="none" stroke="#DAA520" stroke-width="0.5" opacity="0.2"/>
+  
+  <!-- Crosshair lines -->
+  <line x1="200" y1="70" x2="200" y2="330" stroke="#DAA520" stroke-width="1" opacity="0.2"/>
+  <line x1="70" y1="200" x2="330" y2="200" stroke="#DAA520" stroke-width="1" opacity="0.2"/>
+  
+  <!-- Degree markings -->
+  <g stroke="#B8860B" stroke-width="1.5" opacity="0.6">
+    <!-- Main cardinal marks -->
+    <line x1="200" y1="55" x2="200" y2="70" stroke-width="2"/>
+    <line x1="330" y1="200" x2="345" y2="200" stroke-width="2"/>
+    <line x1="200" y1="330" x2="200" y2="345" stroke-width="2"/>
+    <line x1="55" y1="200" x2="70" y2="200" stroke-width="2"/>
+  </g>
+  
+  <g stroke="#DAA520" stroke-width="1" opacity="0.4">
+    <!-- 45 degree marks -->
+    <line x1="246" y1="76" x2="238" y2="84"/>
+    <line x1="324" y1="154" x2="316" y2="162"/>
+    <line x1="324" y1="246" x2="316" y2="238"/>
+    <line x1="246" y1="324" x2="238" y2="316"/>
+    <line x1="154" y1="324" x2="162" y2="316"/>
+    <line x1="76" y1="246" x2="84" y2="238"/>
+    <line x1="76" y1="154" x2="84" y2="162"/>
+    <line x1="154" y1="76" x2="162" y2="84"/>
+  </g>
+  
+  <!-- Element labels on outer ring -->
+  <text x="200" y="25" font-family="Arial, sans-serif" font-size="18" font-weight="600" 
+        fill="#B8860B" text-anchor="middle" letter-spacing="2">WATER</text>
+  
+  <text x="375" y="207" font-family="Arial, sans-serif" font-size="18" font-weight="600" 
+        fill="#B8860B" text-anchor="middle" letter-spacing="2">FIRE</text>
+  
+  <text x="200" y="385" font-family="Arial, sans-serif" font-size="18" font-weight="600" 
+        fill="#B8860B" text-anchor="middle" letter-spacing="2">EARTH</text>
+  
+  <text x="25" y="207" font-family="Arial, sans-serif" font-size="18" font-weight="600" 
+        fill="#B8860B" text-anchor="middle" letter-spacing="2">AIR</text>
+  
+  <!-- Direction labels inside -->
+  <!-- N -->
+  <text x="200" y="100" font-family="Arial, sans-serif" font-size="32" font-weight="700" 
+        fill="#B8860B" text-anchor="middle">N</text>
+  
+  <!-- E -->
+  <text x="300" y="207" font-family="Arial, sans-serif" font-size="24" font-weight="600" 
+        fill="#8B7355" text-anchor="middle">E</text>
+  
+  <!-- S -->
+  <text x="200" y="310" font-family="Arial, sans-serif" font-size="24" font-weight="600" 
+        fill="#8B7355" text-anchor="middle">S</text>
+  
+  <!-- W -->
+  <text x="100" y="207" font-family="Arial, sans-serif" font-size="24" font-weight="600" 
+        fill="#8B7355" text-anchor="middle">W</text>
+  
+  <!-- Intercardinal labels -->
+  <text x="256" y="144" font-family="Arial, sans-serif" font-size="16" font-weight="500" 
+        fill="#9CA3AF" text-anchor="middle">NE</text>
+  
+  <text x="256" y="266" font-family="Arial, sans-serif" font-size="16" font-weight="500" 
+        fill="#9CA3AF" text-anchor="middle">SE</text>
+  
+  <text x="144" y="266" font-family="Arial, sans-serif" font-size="16" font-weight="500" 
+        fill="#9CA3AF" text-anchor="middle">SW</text>
+  
+  <text x="144" y="144" font-family="Arial, sans-serif" font-size="16" font-weight="500" 
+        fill="#9CA3AF" text-anchor="middle">NW</text>
+  
+  <!-- Compass needle with shadow -->
+  <g filter="url(#shadow)">
+    <!-- North pointer (golden) -->
+    <path d="M 200 200 L 192 208 L 200 95 L 208 208 Z" 
+          fill="url(#needleGrad)" stroke="#CC8800" stroke-width="1"/>
+    
+    <!-- South pointer (white) -->
+    <path d="M 200 200 L 192 192 L 200 305 L 208 192 Z" 
+          fill="#FFFFFF" stroke="#D4AF37" stroke-width="1" opacity="0.9"/>
+    
+    <!-- East pointer (cream) -->
+    <path d="M 200 200 L 192 192 L 305 200 L 192 208 Z" 
+          fill="#FFF8E7" stroke="#D4AF37" stroke-width="1" opacity="0.7"/>
+    
+    <!-- West pointer (cream) -->
+    <path d="M 200 200 L 208 192 L 95 200 L 208 208 Z" 
+          fill="#FFF8E7" stroke="#D4AF37" stroke-width="1" opacity="0.7"/>
+  </g>
+  
+  <!-- Center pivot -->
+  <circle cx="200" cy="200" r="18" fill="url(#goldGrad)" filter="url(#shadow)"/>
+  <circle cx="200" cy="200" r="16" fill="#FFFEF9"/>
+  <circle cx="200" cy="200" r="12" fill="url(#goldGrad)"/>
+  <circle cx="200" cy="200" r="10" fill="#FFA500"/>
+  <circle cx="200" cy="200" r="6" fill="#FFD600"/>
+  <circle cx="198" cy="198" r="2" fill="#FFFEF9" opacity="0.8"/>
+</svg>
