@@ -19,7 +19,7 @@ const SplashScreen = ({ onComplete }) => {
       <div className="decorative-corner top-right" />
       <div className="decorative-corner bottom-left" />
       <div className="decorative-corner bottom-right" />
-      <img src={omImage} alt="Om" className="om-symbol" />
+      <div className="om-symbol">ॐ</div>
       <div className="compass-container">
         <div className="compass-outer">
           <div className="compass-outer-inner" />
@@ -455,10 +455,10 @@ const SplashScreen = ({ onComplete }) => {
         .om-symbol {
           position: absolute;
           top: 40px;
-          width: 40px;
-          height: 40px;
-          object-fit: contain;
+          font-size: 32px;
+          color: #6B7280; /* Slate */
           animation: fadeInUp 1.5s ease-out 1.2s both;
+          text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
         }
       `}</style>
     </div>
