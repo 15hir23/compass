@@ -12,7 +12,6 @@ import Animated, {
   Easing,
 } from 'react-native-reanimated';
 import LocationIcon from './icons/LocationIcon';
-import CameraIcon from './icons/CameraIcon';
 import { useI18n } from '../utils/i18n';
 import { colors, typography, elevation } from '../utils/theme';
 
@@ -69,7 +68,7 @@ const AnimatedTouchableOpacity = Animated.createAnimatedComponent(TouchableOpaci
 const AnimatedView = Animated.createAnimatedComponent(View);
 const AnimatedText = Animated.createAnimatedComponent(Text);
 
-export default function CompassActionButtons({ onMapPress, onCameraPress, heading }) {
+export default function CompassActionButtons({ onMapPress, heading }) {
   const { t } = useI18n();
   // Show 0 instead of 360 for North
   const degree = Math.round(heading) % 360;
@@ -78,7 +77,6 @@ export default function CompassActionButtons({ onMapPress, onCameraPress, headin
   const containerOpacity = useSharedValue(0);
   const containerTranslateY = useSharedValue(30);
   const mapButtonScale = useSharedValue(1);
-  const cameraButtonScale = useSharedValue(1);
   const degreeBoxScale = useSharedValue(1);
   const degreeBoxGlow = useSharedValue(0);
   const degreePulse = useSharedValue(0);
@@ -92,7 +90,6 @@ export default function CompassActionButtons({ onMapPress, onCameraPress, headin
     // Staggered button animations
     mapButtonScale.value = withDelay(100, withSpring(1, { damping: 15, stiffness: 200 }));
     degreeBoxScale.value = withDelay(200, withSpring(1, { damping: 15, stiffness: 200 }));
-    cameraButtonScale.value = withDelay(300, withSpring(1, { damping: 15, stiffness: 200 }));
     
     // Continuous subtle glow for degree box
     degreeBoxGlow.value = withRepeat(
@@ -140,10 +137,6 @@ export default function CompassActionButtons({ onMapPress, onCameraPress, headin
     transform: [{ scale: mapButtonScale.value }],
   }));
   
-  const cameraButtonAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: cameraButtonScale.value }],
-  }));
-  
   const degreeBoxAnimatedStyle = useAnimatedStyle(() => {
     const scale = interpolate(degreeBoxGlow.value, [0, 1], [1, 1.02]);
     const shadowOpacity = interpolate(degreeBoxGlow.value, [0, 1], [0.2, 0.4]);
@@ -169,27 +162,10 @@ export default function CompassActionButtons({ onMapPress, onCameraPress, headin
     onMapPress();
   };
   
-  const handleCameraPress = () => {
-    cameraButtonScale.value = withSequence(
-      withTiming(0.9, { duration: 100 }),
-      withSpring(1, { damping: 10, stiffness: 300 })
-    );
-    onCameraPress();
-  };
 
   return (
     <Animated.View style={[styles.container, containerAnimatedStyle]}>
-      <AnimatedTouchableOpacity
-        style={[styles.actionButton, mapButtonAnimatedStyle]}
-        onPress={handleMapPress}
-        activeOpacity={0.8}
-        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-      >
-        <View style={styles.buttonCircle} pointerEvents="none">
-          <LocationIcon size={getResponsiveSize(22)} color="#3B2F2F" />
-        </View>
-        <Text style={styles.buttonLabel} pointerEvents="none">{t('button.googleMap')}</Text>
-      </AnimatedTouchableOpacity>
+      <View style={styles.placeholder} />
 
       <View style={styles.degreeContainer}>
         <Animated.View style={[styles.degreeBox, degreeBoxAnimatedStyle]}>
@@ -206,15 +182,15 @@ export default function CompassActionButtons({ onMapPress, onCameraPress, headin
       </View>
 
       <AnimatedTouchableOpacity
-        style={[styles.actionButton, cameraButtonAnimatedStyle]}
-        onPress={handleCameraPress}
+        style={[styles.actionButton, mapButtonAnimatedStyle]}
+        onPress={handleMapPress}
         activeOpacity={0.8}
         hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
       >
         <View style={styles.buttonCircle} pointerEvents="none">
-          <CameraIcon size={getResponsiveSize(22)} color="#3B2F2F" />
+          <LocationIcon size={getResponsiveSize(22)} color="#3B2F2F" />
         </View>
-        <Text style={styles.buttonLabel} pointerEvents="none">{t('button.rearCamera')}</Text>
+        <Text style={styles.buttonLabel} pointerEvents="none">{t('button.googleMap')}</Text>
       </AnimatedTouchableOpacity>
     </Animated.View>
   );
@@ -229,6 +205,9 @@ const styles = StyleSheet.create({
     paddingVertical: getResponsiveSize(8), // Increased from 6 to 8
     zIndex: 10,
     elevation: 10,
+  },
+  placeholder: {
+    width: getResponsiveSize(50),
   },
   actionButton: {
     alignItems: 'center',

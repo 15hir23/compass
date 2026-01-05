@@ -105,6 +105,7 @@ export const drawVastuGrid = ({
   VASTU_GRID_9X9,
   setShowVastuGrid,
   setShowGridBanner,
+  onPadaClick, // Callback for pada clicks
 }) => {
   try {
     if (!mapRef || plotCorners.length !== 4 || !window.L) {
@@ -353,17 +354,12 @@ export const drawVastuGrid = ({
           zIndexOffset: 2000
         }).addTo(mapRef);
         
-        marker.bindTooltip(`
-          <div style="text-align: center; font-family: 'DM Sans', sans-serif; padding: 6px;">
-            <strong style="font-size: 14px; color: #222;">${translatedDevtaName}</strong><br/>
-            <span style="font-size: 12px; color: #666; font-weight: 600;">Size: ${cell.rowSpan}×${cell.colSpan}</span><br/>
-            ${devtaInfo.zone ? `<span style="font-size: 11px; color: #555;">Zone: ${devtaInfo.zone}</span><br/>` : ''}
-            <span style="font-size: 11px; color: #555;">Energy: ${devtaInfo.energy}</span>
-          </div>
-        `, { 
-          direction: 'top',
-          offset: [0, -8]
-        });
+        // Add click handler instead of tooltip
+        if (onPadaClick) {
+          marker.on('click', () => {
+            onPadaClick(cell.name, devtaInfo, translatedDevtaName);
+          });
+        }
         
         gridLayersRef.push(marker);
     });

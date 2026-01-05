@@ -50,6 +50,7 @@ const translations = {
     'map.recenter': 'Recenter',
     'map.lock': 'Lock',
     'map.unlock': 'Unlock',
+    'map.talkToExpert': 'Talk to Expert',
     'map.goToLocation': 'Go to Location',
     
     // Instructions
@@ -135,6 +136,7 @@ const translations = {
     'map.recenter': 'केंद्रित करें',
     'map.lock': 'लॉक',
     'map.unlock': 'अनलॉक',
+    'map.talkToExpert': 'विशेषज्ञ से बात करें',
     'map.goToLocation': 'स्थान पर जाएं',
     
     // Instructions

@@ -114,6 +114,23 @@ const InfoIcon = ({ size = 20, color = "#2C2C2C" }) => (
   </Svg>
 );
 
+const ExpertIcon = ({ size = 20, color = "#2C2C2C" }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Circle cx="12" cy="8" r="4" stroke={color} strokeWidth="2" fill="none" />
+    <Path d="M6 21C6 17 8 15 12 15C16 15 18 17 18 21" stroke={color} strokeWidth="2" strokeLinecap="round" />
+    <Path d="M12 11V13M12 5V7" stroke={color} strokeWidth="1.5" strokeLinecap="round" />
+  </Svg>
+);
+
+const BlogIcon = ({ size = 20, color = "#2C2C2C" }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Path d="M4 19.5C4 18.6716 4.67157 18 5.5 18H18.5C19.3284 18 20 18.6716 20 19.5V20.5C20 21.3284 19.3284 22 18.5 22H5.5C4.67157 22 4 21.3284 4 20.5V19.5Z" stroke={color} strokeWidth="1.5" fill="none" />
+    <Path d="M4 5.5C4 4.67157 4.67157 4 5.5 4H18.5C19.3284 4 20 4.67157 20 5.5V16.5C20 17.3284 19.3284 18 18.5 18H5.5C4.67157 18 4 17.3284 4 16.5V5.5Z" stroke={color} strokeWidth="1.5" fill="none" />
+    <Path d="M8 8H16M8 11H14M8 14H12" stroke={color} strokeWidth="1.5" strokeLinecap="round" />
+    <Circle cx="17" cy="7" r="1.5" fill={color} />
+  </Svg>
+);
+
 function MenuItem({ title, onPress, icon, isActive }) {
   const [isPressed, setIsPressed] = useState(false);
   const scale = useSharedValue(1);
@@ -121,14 +138,14 @@ function MenuItem({ title, onPress, icon, isActive }) {
 
   const handlePressIn = () => {
     setIsPressed(true);
-    scale.value = withSpring(0.98, { damping: 15, stiffness: 300 });
-    backgroundColor.value = withTiming(1, { duration: 150 });
+    scale.value = withSpring(0.99, { damping: 20, stiffness: 400 });
+    backgroundColor.value = withTiming(1, { duration: 100 });
   };
 
   const handlePressOut = () => {
     setIsPressed(false);
-    scale.value = withSpring(1, { damping: 15, stiffness: 300 });
-    backgroundColor.value = withTiming(0, { duration: 200 });
+    scale.value = withSpring(1, { damping: 20, stiffness: 400 });
+    backgroundColor.value = withTiming(0, { duration: 150 });
   };
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -145,7 +162,7 @@ function MenuItem({ title, onPress, icon, isActive }) {
       onPress={onPress}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
-      activeOpacity={1}
+      activeOpacity={0.8}
     >
       <Animated.View style={[styles.menuItemContent, animatedStyle]}>
         <Animated.View style={[styles.menuItemBackground, backgroundStyle]} />
@@ -157,7 +174,8 @@ function MenuItem({ title, onPress, icon, isActive }) {
 }
 
 export default function Sidebar({ visible, onClose, onShowHowToUse, compassType, onCompassTypeChange }) {
-  const translateX = useSharedValue(-getDimensions().width * 0.75);
+  const sidebarWidth = getDimensions().width * 0.85;
+  const translateX = useSharedValue(-sidebarWidth);
   const hasOpenedOnce = React.useRef(false);
 
   React.useEffect(() => {
@@ -171,7 +189,7 @@ export default function Sidebar({ visible, onClose, onShowHowToUse, compassType,
         translateX.value = withTiming(0, { duration: 300, easing: Easing.out(Easing.cubic) });
       }
     } else {
-      translateX.value = withTiming(-getDimensions().width * 0.75, { duration: 300 });
+      translateX.value = withTiming(-sidebarWidth, { duration: 300 });
     }
   }, [visible]);
 
@@ -237,6 +255,22 @@ export default function Sidebar({ visible, onClose, onShowHowToUse, compassType,
     }
   };
 
+  const handleOpenBlog = async () => {
+    try {
+      const url = 'https://www.niraliveastro.com/blog';
+      const canOpen = await Linking.canOpenURL(url);
+      if (canOpen) {
+        await Linking.openURL(url);
+      } else {
+        alert('Unable to open blog. Please check your internet connection.');
+      }
+    } catch (error) {
+      console.log('Error opening blog:', error);
+      alert('Unable to open blog. Please try again later.');
+    }
+    onClose();
+  };
+
   if (!visible) return null;
 
   return (
@@ -263,7 +297,7 @@ export default function Sidebar({ visible, onClose, onShowHowToUse, compassType,
               <Text style={styles.sectionTitle}>Compass Types</Text>
               <MenuItem
                 title="Classic Compass"
-                icon={<ClassicCompassIcon size={getResponsiveSize(20)} color={compassType === 'classic' ? "#B8860B" : "#2C2C2C"} />}
+                icon={<ClassicCompassIcon size={getResponsiveSize(22)} color={compassType === 'classic' ? "#F4B000" : "#6B7280"} />}
                 onPress={() => {
                   onCompassTypeChange('classic');
                 }}
@@ -271,7 +305,7 @@ export default function Sidebar({ visible, onClose, onShowHowToUse, compassType,
               />
               <MenuItem
                 title="Feng Shui Compass"
-                icon={<YinYangIcon size={getResponsiveSize(20)} color={compassType === 'fengshui' ? "#B8860B" : "#2C2C2C"} />}
+                icon={<YinYangIcon size={getResponsiveSize(22)} color={compassType === 'fengshui' ? "#F4B000" : "#6B7280"} />}
                 onPress={() => {
                   onCompassTypeChange('fengshui');
                 }}
@@ -279,7 +313,7 @@ export default function Sidebar({ visible, onClose, onShowHowToUse, compassType,
               />
               <MenuItem
                 title="Vastu Compass"
-                icon={<VastuIcon size={getResponsiveSize(20)} color={compassType === 'vastu' ? "#B8860B" : "#2C2C2C"} />}
+                icon={<VastuIcon size={getResponsiveSize(22)} color={compassType === 'vastu' ? "#F4B000" : "#6B7280"} />}
                 onPress={() => {
                   onCompassTypeChange('vastu');
                 }}
@@ -287,11 +321,74 @@ export default function Sidebar({ visible, onClose, onShowHowToUse, compassType,
               />
               <MenuItem
                 title="Map Compass"
-                icon={<MapIcon size={getResponsiveSize(20)} color={compassType === 'map' ? "#B8860B" : "#2C2C2C"} />}
+                icon={<MapIcon size={getResponsiveSize(22)} color={compassType === 'map' ? "#F4B000" : "#6B7280"} />}
                 onPress={() => {
                   onCompassTypeChange('map');
                 }}
                 isActive={compassType === 'map'}
+              />
+            </View>
+
+            {/* Divider */}
+            <View style={styles.divider} />
+
+            {/* Experts Section */}
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Experts</Text>
+              <MenuItem
+                title="Talk to a Vastu Consultant"
+                icon={<ExpertIcon size={getResponsiveSize(22)} color="#6B7280" />}
+                onPress={async () => {
+                  try {
+                    const phoneNumber = '7259926494';
+                    let url;
+                    
+                    if (Platform.OS === 'web') {
+                      // For web, use WhatsApp Web
+                      url = `https://wa.me/${phoneNumber}`;
+                    } else {
+                      // For mobile, try WhatsApp app first, fallback to web
+                      url = `whatsapp://send?phone=${phoneNumber}`;
+                    }
+                    
+                    const canOpen = await Linking.canOpenURL(url);
+                    if (canOpen) {
+                      await Linking.openURL(url);
+                    } else {
+                      // Fallback to WhatsApp Web if app is not available
+                      const webUrl = `https://wa.me/${phoneNumber}`;
+                      const canOpenWeb = await Linking.canOpenURL(webUrl);
+                      if (canOpenWeb) {
+                        await Linking.openURL(webUrl);
+                      } else {
+                        alert('Unable to open WhatsApp. Please install WhatsApp or check your internet connection.');
+                      }
+                    }
+                    onClose();
+                  } catch (error) {
+                    console.log('Error opening WhatsApp:', error);
+                    // Fallback to WhatsApp Web
+                    try {
+                      await Linking.openURL(`https://wa.me/7259926494`);
+                      onClose();
+                    } catch (fallbackError) {
+                      alert('Unable to open WhatsApp. Please try again later.');
+                    }
+                  }
+                }}
+              />
+            </View>
+
+            {/* Divider */}
+            <View style={styles.divider} />
+
+            {/* Blog Section */}
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Resources</Text>
+              <MenuItem
+                title="Blog"
+                icon={<BlogIcon size={getResponsiveSize(22)} color="#6B7280" />}
+                onPress={handleOpenBlog}
               />
             </View>
 
@@ -303,17 +400,17 @@ export default function Sidebar({ visible, onClose, onShowHowToUse, compassType,
               <Text style={styles.sectionTitle}>Settings</Text>
             <MenuItem
               title="Share App"
-                icon={<ShareIcon size={getResponsiveSize(20)} color="#2C2C2C" />}
+                icon={<ShareIcon size={getResponsiveSize(22)} color="#6B7280" />}
               onPress={handleShareApp}
             />
             <MenuItem
               title="Manage Permissions"
-                icon={<SettingsIcon size={getResponsiveSize(20)} color="#2C2C2C" />}
+                icon={<SettingsIcon size={getResponsiveSize(22)} color="#6B7280" />}
               onPress={handleManagePermissions}
             />
             <MenuItem
               title="How to Use Vastu Compass"
-                icon={<InfoIcon size={getResponsiveSize(20)} color="#2C2C2C" />}
+                icon={<InfoIcon size={getResponsiveSize(22)} color="#6B7280" />}
               onPress={handleHowToUse}
             />
             </View>
@@ -341,98 +438,106 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     left: 0,
-    width: getDimensions().width * 0.75,
-    maxWidth: 280,
+    width: getDimensions().width * 0.85,
+    maxWidth: 400,
     height: '100%',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#FFFFFF', // Warm White
     zIndex: 999,
-    elevation: 16,
-    shadowColor: '#F4C430',
-    shadowOffset: { width: 4, height: 0 },
-    shadowOpacity: 0.4,
-    shadowRadius: 16,
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.08,
+    shadowRadius: 24,
     borderRightWidth: 1,
-    borderRightColor: 'rgba(244, 196, 48, 0.2)',
+    borderRightColor: '#E9E2D6', // Sand Line
+    ...(Platform.OS === 'web' && {
+      boxShadow: '4px 0 24px rgba(0, 0, 0, 0.08)',
+    }),
   },
   sidebarContent: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#FFFFFF', // Warm White
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingTop: Platform.OS === 'ios' ? getResponsiveSize(50) : getResponsiveSize(40),
-    paddingBottom: getResponsiveSize(15),
-    paddingHorizontal: getResponsiveSize(20),
+    paddingTop: Platform.OS === 'ios' ? getResponsiveSize(12) : getResponsiveSize(8),
+    paddingBottom: getResponsiveSize(20),
+    paddingHorizontal: getResponsiveSize(24),
     borderBottomWidth: 1,
-    borderBottomColor: '#E0E0E0',
+    borderBottomColor: '#E9E2D6', // Sand Line
+    backgroundColor: '#FAFAF7', // Porcelain
   },
   headerTitle: {
-    fontSize: getResponsiveFont(22),
-    fontWeight: '900',
-    color: '#2C2C2C',
-    letterSpacing: 0.8,
-    fontFamily: Platform.OS === 'web' ? "'DM Sans', sans-serif" : 'System',
+    fontSize: getResponsiveFont(20),
+    fontWeight: '600', // SemiBold
+    color: '#1F2328', // Charcoal
+    letterSpacing: 0.3,
+    fontFamily: "'DM Sans', sans-serif",
   },
   closeButton: {
-    width: getResponsiveSize(32),
-    height: getResponsiveSize(32),
-    borderRadius: getResponsiveSize(16),
-    backgroundColor: '#FFF8E1',
+    width: getResponsiveSize(36),
+    height: getResponsiveSize(36),
+    borderRadius: getResponsiveSize(18),
+    backgroundColor: '#FFFFFF', // Warm White
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(244, 196, 48, 0.3)',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
+    borderColor: '#E9E2D6', // Sand Line
+    ...(Platform.OS !== 'web' && {
+      elevation: 1,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.05,
+      shadowRadius: 2,
+    }),
   },
   closeButtonText: {
-    fontSize: getResponsiveFont(16),
-    color: '#666666',
-    fontWeight: '600',
+    fontSize: getResponsiveFont(18),
+    color: '#6B7280', // Slate
+    fontWeight: '400',
+    fontFamily: "'DM Sans', sans-serif",
   },
   content: {
     flex: 1,
-    paddingTop: getResponsiveSize(8),
+    paddingTop: getResponsiveSize(12),
+    backgroundColor: '#FFFFFF', // Warm White
   },
   section: {
-    marginBottom: getResponsiveSize(4),
+    marginBottom: getResponsiveSize(8),
   },
   sectionTitle: {
-    fontSize: getResponsiveFont(12),
-    fontWeight: '900',
-    color: '#8B7355',
+    fontSize: getResponsiveFont(11),
+    fontWeight: '600',
+    color: '#6B7280', // Slate
     textTransform: 'uppercase',
-    letterSpacing: 1.2,
-    paddingHorizontal: getResponsiveSize(20),
-    paddingTop: getResponsiveSize(14),
-    paddingBottom: getResponsiveSize(8),
-    fontFamily: Platform.OS === 'web' ? "'DM Sans', sans-serif" : 'System',
+    letterSpacing: 1,
+    paddingHorizontal: getResponsiveSize(24),
+    paddingTop: getResponsiveSize(16),
+    paddingBottom: getResponsiveSize(10),
+    fontFamily: "'DM Sans', sans-serif",
   },
   divider: {
     height: 1,
-    backgroundColor: '#E0E0E0',
-    marginVertical: getResponsiveSize(8),
-    marginHorizontal: getResponsiveSize(20),
+    backgroundColor: '#E9E2D6', // Sand Line
+    marginVertical: getResponsiveSize(12),
+    marginHorizontal: getResponsiveSize(24),
   },
   menuItem: {
-    marginHorizontal: getResponsiveSize(12),
-    marginBottom: getResponsiveSize(2),
-    borderRadius: getResponsiveSize(8),
+    marginHorizontal: getResponsiveSize(16),
+    marginBottom: getResponsiveSize(4),
+    borderRadius: getResponsiveSize(12),
     overflow: 'hidden',
   },
   menuItemActive: {
-    backgroundColor: '#FFF8E1',
+    backgroundColor: '#FAFAF7', // Porcelain
     borderWidth: 1,
-    borderColor: '#F4C430',
+    borderColor: '#E9E2D6', // Sand Line
   },
   menuItemContent: {
-    paddingVertical: getResponsiveSize(10),
-    paddingHorizontal: getResponsiveSize(16),
+    paddingVertical: getResponsiveSize(14),
+    paddingHorizontal: getResponsiveSize(18),
     position: 'relative',
     overflow: 'hidden',
     flexDirection: 'row',
@@ -444,27 +549,31 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: '#FFF8E1',
+    backgroundColor: '#FAFAF7', // Porcelain
   },
   menuItemIcon: {
-    marginRight: getResponsiveSize(12),
+    marginRight: getResponsiveSize(14),
     position: 'relative',
     zIndex: 1,
-    width: getResponsiveSize(20),
-    height: getResponsiveSize(20),
+    width: getResponsiveSize(24),
+    height: getResponsiveSize(24),
     justifyContent: 'center',
     alignItems: 'center',
   },
+  menuItemIconActive: {
+    // Icon color is handled by the icon component itself
+  },
   menuItemText: {
     fontSize: getResponsiveFont(15),
-    fontWeight: '600',
-    color: '#2C2C2C',
+    fontWeight: '500',
+    color: '#1F2328', // Charcoal
     position: 'relative',
     zIndex: 1,
-    fontFamily: Platform.OS === 'web' ? "'DM Sans', sans-serif" : 'System',
+    letterSpacing: 0.1,
+    fontFamily: "'DM Sans', sans-serif",
   },
   menuItemTextActive: {
-    color: '#B8860B',
-    fontWeight: '900',
+    color: '#1F2328', // Charcoal
+    fontWeight: '600',
   },
 });

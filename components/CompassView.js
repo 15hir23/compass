@@ -1072,7 +1072,7 @@ export default function CompassView({
           <View style={styles.calibrationOverlayContent}>
             {/* Animated Figure-8 SVG */}
             <View style={styles.figure8Container}>
-              <Svg width={280} height={160} viewBox="0 0 240 140">
+              <Svg width="100%" height="100%" viewBox="0 0 240 140" preserveAspectRatio="xMidYMid meet">
                 <Defs>
                   <LinearGradient id="figure8Gradient" x1="0%" y1="0%" x2="100%" y2="0%">
                     <Stop offset="0%" stopColor="#6B7280" stopOpacity="0.6" />
@@ -1095,8 +1095,10 @@ export default function CompassView({
                 style={[
                   styles.phoneIcon,
                   {
-                    left: (infinityPosition.x / 240) * getResponsiveSize(280) - getResponsiveSize(14), // Adjusted for new container size
-                    top: (infinityPosition.y / 140) * getResponsiveSize(160) - getResponsiveSize(20), // Adjusted for new container size
+                    left: `${(infinityPosition.x / 240) * 100}%`,
+                    marginLeft: -getResponsiveSize(14),
+                    top: `${(infinityPosition.y / 140) * 100}%`,
+                    marginTop: -getResponsiveSize(20),
                     transform: [
                       { rotate: `${phoneRotation}deg` },
                       { perspective: 1000 },
@@ -1417,10 +1419,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: getResponsiveSize(24), // Keep horizontal padding
     borderWidth: 1,
     borderColor: '#E9E2D6', // Sand Line
-    minWidth: getResponsiveSize(320), // Reduced from 400 to 320
-    maxWidth: getResponsiveSize(360), // Reduced from 450 to 360
+    width: width * 0.6, // 60% of screen width
+    maxWidth: width * 0.6, // Ensure it doesn't exceed 60%
     position: 'relative', // Ensure close button positioning works
     zIndex: 10001, // Ensure content is above the blur
+    overflow: 'hidden', // Prevent content from overflowing
     ...(Platform.OS === 'web' && {
       // Ensure content is not affected by backdrop-filter
       isolation: 'isolate',
@@ -1434,13 +1437,13 @@ const styles = StyleSheet.create({
     }),
   },
   figure8Container: {
-    width: getResponsiveSize(280), // Reduced from 320 to 280
-    height: getResponsiveSize(160), // Reduced from 180 to 160 for more rectangular shape
+    width: '100%', // Use full width of parent container (which is 60% of screen)
+    aspectRatio: 280 / 160, // Maintain the 280:160 aspect ratio
     marginBottom: getResponsiveSize(12), // Reduced from 16 to 12
     justifyContent: 'center',
     alignItems: 'center',
     position: 'relative',
-    overflow: 'visible', // Ensure nothing gets clipped
+    overflow: 'hidden', // Prevent phone icon from overflowing
   },
   phoneIcon: {
     position: 'absolute',

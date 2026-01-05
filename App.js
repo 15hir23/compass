@@ -355,6 +355,7 @@ export default function App() {
           mode={currentMode}
           compassType={compassType}
           selectedLocation={selectedLocation}
+          onCompassTypeChange={handleCompassTypeChange}
         />
 
         {/* Sidebar - available from home screen */}
@@ -409,7 +410,6 @@ export default function App() {
                 onMapPress={() => {
                   setShowMapView(true);
                 }}
-                onCameraPress={handleCameraToggle}
                 heading={heading}
               />
             )}

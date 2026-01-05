@@ -178,7 +178,7 @@ export default function CompassTopBar({ onMenuPress, onSearchPress, onBackPress 
 const styles = StyleSheet.create({
   container: {
     backgroundColor: '#FAFAF7', // Porcelain
-    paddingTop: Platform.OS === 'ios' ? getResponsiveSize(42) : getResponsiveSize(32),
+    paddingTop: Platform.OS === 'ios' ? getResponsiveSize(12) : getResponsiveSize(8),
     paddingBottom: getResponsiveSize(10),
     paddingHorizontal: getResponsiveSize(12),
     borderBottomWidth: 1,

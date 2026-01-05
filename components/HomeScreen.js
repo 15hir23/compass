@@ -8,6 +8,7 @@ import {
   Dimensions,
   Platform,
   Modal,
+  Linking,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, {
@@ -276,10 +277,12 @@ function CompassCard({ compass, onPress, delay = 0 }) {
                 <Text style={styles.cardTitle} numberOfLines={2}>{compass.title}</Text>
                 <Text style={styles.cardSubtitle} numberOfLines={1}>{compass.subtitle}</Text>
               </View>
-              <Animated.View style={[styles.arrowContainer, arrowButtonAnimatedStyle]}>
-                <Text style={styles.arrow}>Explore →</Text>
-              </Animated.View>
             </View>
+            
+            {/* Explore button at bottom right */}
+            <Animated.View style={[styles.arrowContainerBottomRight, arrowButtonAnimatedStyle]}>
+              <Text style={styles.arrow}>Explore →</Text>
+            </Animated.View>
           </View>
         </View>
       </TouchableOpacity>
@@ -295,6 +298,21 @@ export default function HomeScreen({ onSelectCompass, onServicePress, compassTyp
   const headerTranslateY = useSharedValue(-15);
   
   const COMPASS_TYPES = getCompassTypes(t);
+
+  const handleReadMore = async () => {
+    try {
+      const url = 'https://www.niraliveastro.com/blog';
+      const canOpen = await Linking.canOpenURL(url);
+      if (canOpen) {
+        await Linking.openURL(url);
+      } else {
+        alert('Unable to open blog. Please check your internet connection.');
+      }
+    } catch (error) {
+      console.log('Error opening blog:', error);
+      alert('Unable to open blog. Please try again later.');
+    }
+  };
 
   React.useEffect(() => {
     headerOpacity.value = withTiming(1, { duration: 500, easing: Easing.out(Easing.cubic) });
@@ -351,6 +369,36 @@ export default function HomeScreen({ onSelectCompass, onServicePress, compassTyp
                 delay={150 + index * 80}
               />
             ))}
+            
+            {/* Separator after 4th card */}
+            <View style={styles.separator}>
+              <View style={styles.separatorLine} />
+            </View>
+            
+            {/* Vastu Consultant Card */}
+            <Animated.View style={[styles.cardContainer, { opacity: headerOpacity, transform: [{ translateY: headerTranslateY }] }]}>
+              <TouchableOpacity
+                style={styles.consultantCard}
+                activeOpacity={0.8}
+              >
+                <View style={styles.consultantCardGradient}>
+                  <View style={styles.consultantCardInner}>
+                    <View style={styles.consultantContent}>
+                      <Text style={styles.consultantTitle}>Talk to Vastu Consultant</Text>
+                      <Text style={styles.consultantSubtitle}>Consult Top Indian Vastu Consultant</Text>
+                      <Text style={styles.consultantName}>Acharya Mahendra Tiwari</Text>
+                      <TouchableOpacity 
+                        style={styles.readMoreContainer}
+                        onPress={handleReadMore}
+                        activeOpacity={0.7}
+                      >
+                        <Text style={styles.readMoreText}>Read more →</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </View>
+              </TouchableOpacity>
+            </Animated.View>
           </View>
 
           {/* Footer */}
@@ -358,7 +406,7 @@ export default function HomeScreen({ onSelectCompass, onServicePress, compassTyp
             <View style={styles.footerLogo}>
               <View style={styles.logoCircle}>
               <View style={styles.logoInnerCircle}>
-                <CompassIcon size={getResponsiveSize(22)} color="#FFFFFF" />
+                <CompassIcon size={getResponsiveSize(22)} color="#F4B000" />
               </View>
               </View>
               <View style={styles.footerTextContainer}>
@@ -457,7 +505,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FAFAF7', // Porcelain
   },
   header: {
-    paddingTop: Platform.OS === 'ios' ? getResponsiveSize(50) : getResponsiveSize(40),
+    paddingTop: Platform.OS === 'ios' ? getResponsiveSize(12) : getResponsiveSize(8),
     paddingBottom: getResponsiveSize(16),
     paddingHorizontal: getResponsiveSize(12),
     elevation: 12,
@@ -533,6 +581,17 @@ const styles = StyleSheet.create({
   compassList: {
     paddingHorizontal: getResponsiveSize(12),
     gap: getResponsiveSize(8),
+  },
+  separator: {
+    width: '100%',
+    alignItems: 'center',
+    paddingVertical: getResponsiveSize(16),
+    marginVertical: getResponsiveSize(8),
+  },
+  separatorLine: {
+    width: '85%',
+    height: 1,
+    backgroundColor: '#E9E2D6', // Sand Line
   },
   cardContainer: {
     width: '100%',
@@ -660,15 +719,12 @@ const styles = StyleSheet.create({
   },
   titleContainer: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
     paddingLeft: getResponsiveSize(8),
     paddingRight: getResponsiveSize(8),
+    paddingBottom: getResponsiveSize(32), // Space for button at bottom
   },
   titleTextContainer: {
     flex: 1,
-    marginRight: getResponsiveSize(8),
   },
   compassCirclePlaceholder: {
     position: 'absolute',
@@ -712,6 +768,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginLeft: getResponsiveSize(8),
     paddingHorizontal: getResponsiveSize(8),
+    ...(Platform.OS === 'web' && {
+      transition: 'all 0.3s ease',
+    }),
+  },
+  arrowContainerBottomRight: {
+    position: 'absolute',
+    bottom: getResponsiveSize(12),
+    right: getResponsiveSize(12),
+    minWidth: getResponsiveSize(65),
+    height: getResponsiveSize(28),
+    borderRadius: getResponsiveSize(14),
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: 'transparent',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: getResponsiveSize(8),
+    zIndex: 10,
     ...(Platform.OS === 'web' && {
       transition: 'all 0.3s ease',
     }),
@@ -874,6 +948,73 @@ const styles = StyleSheet.create({
     color: '#6B7280', // Slate
     lineHeight: getResponsiveFont(21), // Improved line-height
     fontWeight: '500', // Consistent weight
+    fontFamily: Platform.OS === 'web' ? "'DM Sans', sans-serif" : 'System',
+  },
+  consultantCard: {
+    borderRadius: getResponsiveSize(18),
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#E9E2D6', // Sand Line
+    backgroundColor: '#FFFFFF', // Warm White
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    ...(Platform.OS === 'web' && {
+      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+      transition: 'all 0.3s ease',
+    }),
+  },
+  consultantCardGradient: {
+    backgroundColor: '#FFFFFF', // Warm White
+    borderRadius: getResponsiveSize(18),
+    overflow: 'hidden',
+  },
+  consultantCardInner: {
+    padding: getResponsiveSize(20),
+    minHeight: getResponsiveSize(124),
+    justifyContent: 'center',
+  },
+  consultantContent: {
+    flex: 1,
+  },
+  consultantTitle: {
+    fontSize: getResponsiveFont(17), // Title size
+    fontWeight: '600', // SemiBold
+    color: '#1F2328', // Charcoal
+    letterSpacing: 0.2,
+    lineHeight: getResponsiveFont(24),
+    marginBottom: getResponsiveSize(8),
+    fontFamily: Platform.OS === 'web' ? "'DM Sans', sans-serif" : 'System',
+  },
+  consultantSubtitle: {
+    fontSize: getResponsiveFont(13), // Body size
+    fontWeight: '400', // Regular
+    color: '#6B7280', // Slate
+    letterSpacing: 0.1,
+    lineHeight: getResponsiveFont(19),
+    marginBottom: getResponsiveSize(10),
+    fontFamily: Platform.OS === 'web' ? "'DM Sans', sans-serif" : 'System',
+  },
+  consultantName: {
+    fontSize: getResponsiveFont(15), // Title size
+    fontWeight: '600', // SemiBold
+    color: '#F4B000', // Saffron Gold
+    letterSpacing: 0.2,
+    lineHeight: getResponsiveFont(22),
+    marginBottom: getResponsiveSize(10),
+    fontFamily: Platform.OS === 'web' ? "'DM Sans', sans-serif" : 'System',
+  },
+  readMoreContainer: {
+    alignSelf: 'flex-start',
+  },
+  readMoreText: {
+    fontSize: getResponsiveFont(13), // Body size
+    color: '#F4B000', // Saffron Gold
+    fontWeight: '500', // Medium
+    letterSpacing: 0.2,
+    lineHeight: getResponsiveFont(19),
     fontFamily: Platform.OS === 'web' ? "'DM Sans', sans-serif" : 'System',
   },
 });

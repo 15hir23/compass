@@ -19,7 +19,7 @@ const SplashScreen = ({ onComplete }) => {
       <div className="decorative-corner top-right" />
       <div className="decorative-corner bottom-left" />
       <div className="decorative-corner bottom-right" />
-      <div className="om-symbol">🕉</div>
+      <img src={omImage} alt="Om" className="om-symbol" />
       <div className="compass-container">
         <div className="compass-outer">
           <div className="compass-outer-inner" />
@@ -64,7 +64,7 @@ const SplashScreen = ({ onComplete }) => {
         .container {
           font-family: 'Georgia', serif;
           overflow: hidden;
-          background: #FFFDFA;
+          background: #FAFAF7; /* Porcelain */
           display: flex;
           flex-direction: column;
           justify-content: center;
@@ -81,7 +81,7 @@ const SplashScreen = ({ onComplete }) => {
           transform: translate(-50%, -50%);
           width: 700px;
           height: 700px;
-          background: radial-gradient(circle, rgba(255, 215, 0, 0.25) 0%, rgba(255, 200, 0, 0.15) 40%, transparent 70%);
+          background: radial-gradient(circle, rgba(244, 176, 0, 0.15) 0%, rgba(200, 138, 0, 0.08) 40%, transparent 70%);
           border-radius: 50%;
           animation: pulse-bg 3s ease-in-out infinite;
         }
@@ -101,11 +101,11 @@ const SplashScreen = ({ onComplete }) => {
           position: absolute;
           width: 100%;
           height: 100%;
-          opacity: 0.08;
+          opacity: 0.05;
           background-image: 
-            radial-gradient(circle at 20% 30%, rgba(255, 200, 0, 0.15) 0%, transparent 50%),
-            radial-gradient(circle at 80% 70%, rgba(255, 200, 0, 0.1) 0%, transparent 50%),
-            repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(255, 200, 0, .1) 35px, rgba(255, 200, 0, .1) 70px);
+            radial-gradient(circle at 20% 30%, rgba(244, 176, 0, 0.08) 0%, transparent 50%),
+            radial-gradient(circle at 80% 70%, rgba(200, 138, 0, 0.05) 0%, transparent 50%),
+            repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(233, 226, 214, .15) 35px, rgba(233, 226, 214, .15) 70px);
         }
 
         .compass-container {
@@ -130,13 +130,12 @@ const SplashScreen = ({ onComplete }) => {
           position: absolute;
           width: 100%;
           height: 100%;
-          border: 4px solid rgba(251, 191, 36, 0.6);
+          border: 2px solid #E9E2D6; /* Sand Line */
           border-radius: 50%;
-          background: radial-gradient(circle, rgba(255, 252, 245, 0.95) 0%, rgba(255, 248, 235, 0.9) 100%);
+          background: #FFFFFF; /* Warm White */
           box-shadow: 
-            0 10px 40px rgba(251, 191, 36, 0.25),
-            inset 0 0 40px rgba(252, 211, 77, 0.15),
-            0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+            0 4px 16px rgba(0, 0, 0, 0.08),
+            inset 0 0 20px rgba(233, 226, 214, 0.1);
         }
 
         .compass-outer-inner {
@@ -146,8 +145,8 @@ const SplashScreen = ({ onComplete }) => {
           right: 12px;
           bottom: 12px;
           border-radius: 50%;
-          border: 2px solid rgba(251, 191, 36, 0.5);
-          box-shadow: 0 0 10px rgba(251, 191, 36, 0.1);
+          border: 1px solid #E9E2D6; /* Sand Line */
+          box-shadow: 0 0 8px rgba(0, 0, 0, 0.05);
         }
 
         .compass-inner {
@@ -172,9 +171,9 @@ const SplashScreen = ({ onComplete }) => {
         .direction-label {
           position: absolute;
           font-size: 20px;
-          font-weight: bold;
-          color: #F59E0B;
-          text-shadow: 0 2px 8px rgba(251, 191, 36, 0.4);
+          font-weight: 600;
+          color: #1F2328; /* Charcoal */
+          text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
         }
 
         .north-label {
@@ -231,11 +230,11 @@ const SplashScreen = ({ onComplete }) => {
           height: 0;
           border-left: 8px solid transparent;
           border-right: 8px solid transparent;
-          border-bottom: 70px solid #FBBF24;
+          border-bottom: 70px solid #F4B000; /* Saffron Gold */
           top: 0;
           left: 50%;
           transform: translateX(-50%);
-          filter: drop-shadow(0 2px 10px rgba(251, 191, 36, 0.7));
+          filter: drop-shadow(0 2px 8px rgba(244, 176, 0, 0.4));
         }
 
         .needle-south {
@@ -244,34 +243,34 @@ const SplashScreen = ({ onComplete }) => {
           height: 0;
           border-left: 8px solid transparent;
           border-right: 8px solid transparent;
-          border-top: 70px solid #9CA3AF;
+          border-top: 70px solid #3B2F2F; /* Espresso */
           bottom: 0;
           left: 50%;
           transform: translateX(-50%);
-          filter: drop-shadow(0 2px 5px rgba(156, 163, 175, 0.4));
+          filter: drop-shadow(0 2px 4px rgba(59, 47, 47, 0.3));
         }
 
         .center-dot {
           position: absolute;
           width: 20px;
           height: 20px;
-          background: radial-gradient(circle, #FBBF24 0%, #F59E0B 100%);
+          background: radial-gradient(circle, #F4B000 0%, #C88A00 100%);
           border-radius: 50%;
           top: 50%;
           left: 50%;
           transform: translate(-50%, -50%);
-          box-shadow: 0 0 20px rgba(251, 191, 36, 0.7);
+          box-shadow: 0 0 16px rgba(244, 176, 0, 0.5);
           animation: glow 2s ease-in-out infinite;
-          border: 2px solid rgba(255, 255, 255, 0.5);
+          border: 2px solid rgba(255, 255, 255, 0.6);
         }
 
         @keyframes glow {
           0%, 100% { 
-            box-shadow: 0 0 20px rgba(251, 191, 36, 0.7);
+            box-shadow: 0 0 16px rgba(244, 176, 0, 0.5);
             transform: translate(-50%, -50%) scale(1);
           }
           50% { 
-            box-shadow: 0 0 30px rgba(251, 191, 36, 1);
+            box-shadow: 0 0 24px rgba(244, 176, 0, 0.7);
             transform: translate(-50%, -50%) scale(1.1);
           }
         }
@@ -295,38 +294,25 @@ const SplashScreen = ({ onComplete }) => {
 
         .app-name h1 {
           font-size: 48px;
-          font-weight: 300;
+          font-weight: 600;
           letter-spacing: 2px;
-          background: linear-gradient(90deg, #F59E0B 0%, #FBBF24 25%, #FCD34D 50%, #FBBF24 75%, #F59E0B 100%);
-          background-size: 200% auto;
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
+          color: #1F2328; /* Charcoal */
           margin-bottom: 10px;
-          filter: drop-shadow(0 2px 4px rgba(251, 191, 36, 0.2));
-          animation: shineText 3s linear infinite;
+          text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
         }
 
-        @keyframes shineText {
-          0% {
-            background-position: 0% center;
-          }
-          100% {
-            background-position: 200% center;
-          }
-        }
 
         .app-name p {
           font-size: 16px;
-          color: #F59E0B;
+          color: #6B7280; /* Slate */
           letter-spacing: 3px;
-          font-weight: 300;
+          font-weight: 400;
         }
 
         .tagline {
           margin-top: 20px;
           font-size: 14px;
-          color: rgba(120, 80, 40, 0.8);
+          color: #6B7280; /* Slate */
           font-style: italic;
           animation: fadeInUp 1.5s ease-out 0.8s both;
         }
@@ -346,10 +332,10 @@ const SplashScreen = ({ onComplete }) => {
         .dot {
           width: 8px;
           height: 8px;
-          background: #FBBF24;
+          background: #F4B000; /* Saffron Gold */
           border-radius: 50%;
           animation: bounce 1.4s ease-in-out infinite;
-          box-shadow: 0 0 8px rgba(251, 191, 36, 0.4);
+          box-shadow: 0 0 8px rgba(244, 176, 0, 0.3);
         }
 
         .dot:nth-child(2) {
@@ -375,7 +361,7 @@ const SplashScreen = ({ onComplete }) => {
           position: absolute;
           width: 60px;
           height: 60px;
-          border: 3px solid rgba(251, 191, 36, 0.5);
+          border: 2px solid #E9E2D6; /* Sand Line */
         }
 
         .decorative-corner::before {
@@ -383,7 +369,7 @@ const SplashScreen = ({ onComplete }) => {
           position: absolute;
           width: 12px;
           height: 12px;
-          background: rgba(251, 191, 36, 0.5);
+          background: #E9E2D6; /* Sand Line */
           border-radius: 50%;
         }
 
@@ -391,8 +377,8 @@ const SplashScreen = ({ onComplete }) => {
           content: '';
           position: absolute;
           width: 20px;
-          height: 3px;
-          background: linear-gradient(90deg, rgba(251, 191, 36, 0.7), transparent);
+          height: 2px;
+          background: linear-gradient(90deg, #E9E2D6, transparent);
         }
 
         .top-left {
@@ -469,10 +455,10 @@ const SplashScreen = ({ onComplete }) => {
         .om-symbol {
           position: absolute;
           top: 40px;
-          font-size: 32px;
-          color: rgba(251, 191, 36, 0.6);
+          width: 40px;
+          height: 40px;
+          object-fit: contain;
           animation: fadeInUp 1.5s ease-out 1.2s both;
-          text-shadow: 0 2px 4px rgba(251, 191, 36, 0.3);
         }
       `}</style>
     </div>
