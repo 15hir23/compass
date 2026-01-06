@@ -119,7 +119,9 @@ export const drawVastuGrid = ({
       if (mapRef && layer && !cornerMarkersRef.includes(layer)) {
         try {
           mapRef.removeLayer(layer);
-        } catch (e) {}
+        } catch (e) {
+          // Ignore layer removal errors
+        }
       }
     });
     gridLayersRef.length = 0;

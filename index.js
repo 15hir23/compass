@@ -1,6 +1,8 @@
 import { registerRootComponent } from 'expo';
 
+// eslint-disable-next-line no-unused-vars
 import App from './App';
+// eslint-disable-next-line no-unused-vars
 import { I18nProvider } from './utils/i18n';
 
 // Wrapper component with i18n provider

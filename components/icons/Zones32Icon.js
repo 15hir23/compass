@@ -1,4 +1,3 @@
-import React from 'react';
 import Svg, { Circle, Line } from 'react-native-svg';
 
 export default function Zones32Icon({ size = 24, color = '#B8860B' }) {

@@ -521,7 +521,9 @@ export default function MapViewModal({ visible, onClose, mode, compassType, sele
       if (googleMapRef.current) {
         try {
           googleMapRef.current.removeLayer(m);
-        } catch (e) {}
+        } catch (e) {
+          // Ignore layer removal errors
+        }
       }
     });
     cornerMarkersRef.current = [];

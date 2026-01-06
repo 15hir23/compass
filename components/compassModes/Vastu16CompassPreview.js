@@ -1,6 +1,6 @@
-import React from 'react';
-import { View, StyleSheet } from 'react-native';
-import Svg, { Circle, Line, Text as SvgText, G, Path, Defs, LinearGradient, Stop } from 'react-native-svg';
+import { StyleSheet } from 'react-native';
+// eslint-disable-next-line no-unused-vars
+import Svg, { Circle, Text as SvgText, G, Path, Defs, LinearGradient, Stop } from 'react-native-svg';
 
 export default function Vastu16CompassPreview({ size }) {
   // Match ChakraCompass scale calculation (size / 500)
@@ -33,8 +33,7 @@ export default function Vastu16CompassPreview({ size }) {
   ];
 
   return (
-    <View style={[styles.container, { width: size, height: size }]}>
-      <Svg width={size} height={size}>
+    <Svg width={size} height={size} style={[styles.container, { width: size, height: size }]}>
         <Defs>
           <LinearGradient id="needleGradVastu16" x1="0%" y1="0%" x2="0%" y2="100%">
             <Stop offset="0%" stopColor="#FFD700" stopOpacity="1" />
@@ -150,8 +149,7 @@ export default function Vastu16CompassPreview({ size }) {
             </SvgText>
           );
         })}
-      </Svg>
-    </View>
+    </Svg>
   );
 }
 

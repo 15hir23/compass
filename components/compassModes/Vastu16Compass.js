@@ -1,5 +1,6 @@
-import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
+/* eslint-disable no-unused-vars */
+// All SVG components below are used in JSX - ESLint false positive
 import Svg, { 
   Circle, 
   Line, 
@@ -12,12 +13,12 @@ import Svg, {
   RadialGradient,
   Rect
 } from 'react-native-svg';
+/* eslint-enable no-unused-vars */
 
 export default function Vastu16Compass({ size }) {
   return (
-    <View style={[styles.container, { width: size, height: size }]}>
-      <Svg width={size} height={size} viewBox="0 0 500 500" preserveAspectRatio="xMidYMid meet">
-        <Defs>
+    <Svg width={size} height={size} viewBox="0 0 500 500" preserveAspectRatio="xMidYMid meet" style={[styles.container, { width: size, height: size }]}>
+      <Defs>
           {/* Gradients */}
           <RadialGradient id="bgGrad" cx="50%" cy="50%" r="50%">
             <Stop offset="0%" stopColor="#FFFBF0" stopOpacity="1" />
@@ -160,8 +161,7 @@ export default function Vastu16Compass({ size }) {
         <Circle cx="250" cy="250" r="12" fill="#FFA500"/>
         <Circle cx="250" cy="250" r="8" fill="#FFD600"/>
         <Circle cx="248" cy="248" r="3" fill="#FFFEF9" opacity="0.8"/>
-      </Svg>
-    </View>
+    </Svg>
   );
 }
 

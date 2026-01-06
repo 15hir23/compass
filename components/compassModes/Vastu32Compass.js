@@ -1,5 +1,4 @@
-import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
 import Svg, { 
   Circle, 
   Line, 
@@ -16,7 +15,6 @@ export default function Vastu32Compass({ size }) {
   // Scale to match ChakraCompass visual size (based on 500 viewBox)
   // ChakraCompass uses size/500, so adjust vastu32 to match
   const scale = size / 500; // Changed from 600 to 500 to match ChakraCompass
-  const center = size / 2;
   
   // 32 Pada data with colors from SVG
   const padas = [
@@ -54,14 +52,11 @@ export default function Vastu32Compass({ size }) {
     { name: "Ahi", color: "#B8860B" }
   ];
 
-  const outerRadius = 285 * scale;
-  const innerRadius = 210 * scale;
   const anglePerSegment = 360 / 32;
   const startAngle = -90; // Start from top
 
   return (
-    <View style={[styles.container, { width: size, height: size }]}>
-      <Svg width={size} height={size} viewBox="0 0 600 600" preserveAspectRatio="xMidYMid meet">
+    <Svg width={size} height={size} viewBox="0 0 600 600" preserveAspectRatio="xMidYMid meet" style={[styles.container, { width: size, height: size }]}>
         <Defs>
           <RadialGradient id="bgGrad" cx="50%" cy="50%" r="50%">
             <Stop offset="0%" stopColor="#FFFFFF" stopOpacity="1" />
@@ -178,8 +173,7 @@ export default function Vastu32Compass({ size }) {
         <Circle cx="300" cy="300" r="20" fill="#FFFFFF" stroke="#FFD700" strokeWidth="2"/>
         <Circle cx="300" cy="300" r="12" fill="#FFD700"/>
         <Circle cx="298" cy="298" r="4" fill="#FFFFFF" opacity="0.8"/>
-      </Svg>
-    </View>
+    </Svg>
   );
 }
 
