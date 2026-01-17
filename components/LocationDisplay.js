@@ -66,7 +66,7 @@ export default function LocationDisplay({ selectedLocation }) {
           accuracy: null,
         },
       });
-      opacity.value = withSpring(1, { damping: 15 });
+      opacity.value = withTiming(1, { duration: 300, easing: Easing.out(Easing.cubic) });
       setLoading(false);
       setErrorMsg(null);
       return;
@@ -87,7 +87,7 @@ export default function LocationDisplay({ selectedLocation }) {
             accuracy: Location.Accuracy.Highest,
           });
           setLocation(location);
-          opacity.value = withSpring(1, { damping: 15 });
+          opacity.value = withTiming(1, { duration: 300, easing: Easing.out(Easing.cubic) });
         } catch (error) {
           console.error('Location error:', error);
           setErrorMsg('Unable to get location. Check GPS settings.');

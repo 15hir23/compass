@@ -8,7 +8,7 @@ import {
   Dimensions,
   Platform,
   Modal,
-  Linking,
+  Image,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, {
@@ -25,7 +25,7 @@ import Animated, {
 import Svg, { Path } from 'react-native-svg';
 import NormalCompassPreview from './compassModes/NormalCompassPreview';
 import Vastu16CompassPreview from './compassModes/Vastu16CompassPreview';
-import Vastu32Compass from './compassModes/Vastu32Compass';
+import Vastu32CompassPreview from './compassModes/Vastu32CompassPreview';
 import ChakraCompass from './compassModes/ChakraCompass';
 import Sidebar from './Sidebar';
 import CompassIcon from './icons/CompassIcon';
@@ -33,6 +33,7 @@ import LanguageToggle from './LanguageToggle';
 import { useI18n } from '../utils/i18n';
 import LeftBehindCompass from './leftcomponent';
 import BorderComponent from './border';
+import ConsultationModal from './ConsultationModal';
 
 // Get dimensions safely
 const getDimensions = () => {
@@ -126,7 +127,7 @@ const getCompassTypes = (t) => [
     id: 'vastu32',
     title: t('compass.vastu32'),
     subtitle: t('compass.vastu32.subtitle'),
-    CompassComponent: Vastu32Compass,
+    CompassComponent: Vastu32CompassPreview,
     // Gradient ending with #EACB72
     colors: ['#FFF8E1', '#FFE082', '#EACB72'],
   },
@@ -148,21 +149,21 @@ function CompassCard({ compass, onPress, delay = 0 }) {
   React.useEffect(() => {
     opacity.value = withDelay(
       delay,
-      withTiming(1, { duration: 400, easing: Easing.out(Easing.cubic) })
+      withTiming(1, { duration: 300, easing: Easing.out(Easing.cubic) })
     );
     translateX.value = withDelay(
       delay,
-      withSpring(0, { damping: 15, stiffness: 100 })
+      withTiming(0, { duration: 300, easing: Easing.out(Easing.cubic) })
     );
     scale.value = withDelay(
       delay,
-      withSpring(1, { damping: 15, stiffness: 100 })
+      withTiming(1, { duration: 300, easing: Easing.out(Easing.cubic) })
     );
     
     // Arrow button entrance animation
     arrowButtonScale.value = withDelay(
-      delay + 200,
-      withSpring(1, { damping: 15, stiffness: 200 })
+      delay + 100,
+      withTiming(1, { duration: 300, easing: Easing.out(Easing.cubic) })
     );
     
     // Continuous glow animation for arrow button
@@ -290,33 +291,20 @@ function CompassCard({ compass, onPress, delay = 0 }) {
   );
 }
 
-export default function HomeScreen({ onSelectCompass, onServicePress, compassType, onCompassTypeChange }) {
+export default function HomeScreen({ onSelectCompass, onServicePress, compassType, onCompassTypeChange, onShowVastuGrid }) {
   const { t } = useI18n();
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [showHowToUse, setShowHowToUse] = useState(false);
+  const [showConsultation, setShowConsultation] = useState(false);
+  const [expandedFaq, setExpandedFaq] = useState(null);
   const headerOpacity = useSharedValue(0);
   const headerTranslateY = useSharedValue(-15);
   
   const COMPASS_TYPES = getCompassTypes(t);
 
-  const handleReadMore = async () => {
-    try {
-      const url = 'https://www.niraliveastro.com/blog';
-      const canOpen = await Linking.canOpenURL(url);
-      if (canOpen) {
-        await Linking.openURL(url);
-      } else {
-        alert('Unable to open blog. Please check your internet connection.');
-      }
-    } catch (error) {
-      console.log('Error opening blog:', error);
-      alert('Unable to open blog. Please try again later.');
-    }
-  };
-
   React.useEffect(() => {
-    headerOpacity.value = withTiming(1, { duration: 500, easing: Easing.out(Easing.cubic) });
-    headerTranslateY.value = withSpring(0, { damping: 15, stiffness: 100 });
+    headerOpacity.value = withTiming(1, { duration: 300, easing: Easing.out(Easing.cubic) });
+    headerTranslateY.value = withTiming(0, { duration: 300, easing: Easing.out(Easing.cubic) });
   }, []);
 
   const headerStyle = useAnimatedStyle(() => ({
@@ -380,8 +368,17 @@ export default function HomeScreen({ onSelectCompass, onServicePress, compassTyp
               <TouchableOpacity
                 style={styles.consultantCard}
                 activeOpacity={0.8}
+                onPress={() => setShowConsultation(true)}
               >
                 <View style={styles.consultantCardGradient}>
+                  {/* Peacock Icon - Decorative */}
+                  <View style={styles.peacockIconContainer}>
+                    <Image
+                      source={require('../assets/peacock.png')}
+                      style={styles.peacockIcon}
+                      resizeMode="contain"
+                    />
+                  </View>
                   <View style={styles.consultantCardInner}>
                     <View style={styles.consultantContent}>
                       <Text style={styles.consultantTitle}>Talk to Vastu Consultant</Text>
@@ -389,7 +386,7 @@ export default function HomeScreen({ onSelectCompass, onServicePress, compassTyp
                       <Text style={styles.consultantName}>Acharya Mahendra Tiwari</Text>
                       <TouchableOpacity 
                         style={styles.readMoreContainer}
-                        onPress={handleReadMore}
+                        onPress={() => setShowConsultation(true)}
                         activeOpacity={0.7}
                       >
                         <Text style={styles.readMoreText}>Read more →</Text>
@@ -398,6 +395,76 @@ export default function HomeScreen({ onSelectCompass, onServicePress, compassTyp
                   </View>
                 </View>
               </TouchableOpacity>
+            </Animated.View>
+            
+            {/* Description & FAQ Card */}
+            <Animated.View style={[styles.cardContainer, { opacity: headerOpacity, transform: [{ translateY: headerTranslateY }] }]}>
+              <View style={styles.descriptionCard}>
+                <View style={styles.descriptionCardInner}>
+                  {/* Title */}
+                  <Text style={styles.descriptionTitle}>{t('description.title')}</Text>
+                  
+                  {/* Description Text */}
+                  <Text style={styles.descriptionText}>
+                    {t('description.text').split('**').map((part, index) => {
+                      if (index % 2 === 1) {
+                        return <Text key={index} style={styles.descriptionBold}>{part}</Text>;
+                      }
+                      return part;
+                    })}
+                  </Text>
+                  
+                  {/* FAQ Section */}
+                  <View style={styles.faqSection}>
+                    <Text style={styles.faqTitle}>{t('faq.title')}</Text>
+                    
+                    {/* FAQ Item 1 */}
+                    <TouchableOpacity
+                      style={styles.faqItem}
+                      onPress={() => setExpandedFaq(expandedFaq === 1 ? null : 1)}
+                      activeOpacity={0.7}
+                    >
+                      <View style={styles.faqQuestionRow}>
+                        <Text style={styles.faqQuestion}>{t('faq.q1')}</Text>
+                        <Text style={styles.faqToggle}>{expandedFaq === 1 ? '−' : '+'}</Text>
+                      </View>
+                      {expandedFaq === 1 && (
+                        <Text style={styles.faqAnswer}>{t('faq.a1')}</Text>
+                      )}
+                    </TouchableOpacity>
+                    
+                    {/* FAQ Item 2 */}
+                    <TouchableOpacity
+                      style={styles.faqItem}
+                      onPress={() => setExpandedFaq(expandedFaq === 2 ? null : 2)}
+                      activeOpacity={0.7}
+                    >
+                      <View style={styles.faqQuestionRow}>
+                        <Text style={styles.faqQuestion}>{t('faq.q2')}</Text>
+                        <Text style={styles.faqToggle}>{expandedFaq === 2 ? '−' : '+'}</Text>
+                      </View>
+                      {expandedFaq === 2 && (
+                        <Text style={styles.faqAnswer}>{t('faq.a2')}</Text>
+                      )}
+                    </TouchableOpacity>
+                    
+                    {/* FAQ Item 3 */}
+                    <TouchableOpacity
+                      style={styles.faqItem}
+                      onPress={() => setExpandedFaq(expandedFaq === 3 ? null : 3)}
+                      activeOpacity={0.7}
+                    >
+                      <View style={styles.faqQuestionRow}>
+                        <Text style={styles.faqQuestion}>{t('faq.q3')}</Text>
+                        <Text style={styles.faqToggle}>{expandedFaq === 3 ? '−' : '+'}</Text>
+                      </View>
+                      {expandedFaq === 3 && (
+                        <Text style={styles.faqAnswer}>{t('faq.a3')}</Text>
+                      )}
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </View>
             </Animated.View>
           </View>
 
@@ -425,6 +492,7 @@ export default function HomeScreen({ onSelectCompass, onServicePress, compassTyp
         onShowHowToUse={() => setShowHowToUse(true)}
         compassType={compassType}
         onCompassTypeChange={onCompassTypeChange}
+        onShowVastuGrid={onShowVastuGrid}
       />
 
       {/* How to Use Modal */}
@@ -486,6 +554,12 @@ export default function HomeScreen({ onSelectCompass, onServicePress, compassTyp
           </View>
         </View>
       </Modal>
+
+      {/* Consultation Modal */}
+      <ConsultationModal
+        visible={showConsultation}
+        onClose={() => setShowConsultation(false)}
+      />
     </>
   );
 }
@@ -596,6 +670,7 @@ const styles = StyleSheet.create({
   cardContainer: {
     width: '100%',
     marginBottom: getResponsiveSize(8),
+    marginHorizontal: 0, // Ensure no horizontal margins for consistent gaps
   },
   card: {
     borderRadius: getResponsiveSize(18), // 16-20px range
@@ -1015,6 +1090,108 @@ const styles = StyleSheet.create({
     fontWeight: '500', // Medium
     letterSpacing: 0.2,
     lineHeight: getResponsiveFont(19),
+    fontFamily: Platform.OS === 'web' ? "'DM Sans', sans-serif" : 'System',
+  },
+  peacockIconContainer: {
+    position: 'absolute',
+    top: getResponsiveSize(12),
+    right: getResponsiveSize(12),
+    width: getResponsiveSize(50),
+    height: getResponsiveSize(50),
+    zIndex: 1,
+    opacity: 1,
+  },
+  peacockIcon: {
+    width: '100%',
+    height: '100%',
+  },
+  descriptionCard: {
+    borderRadius: getResponsiveSize(18),
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#E9E2D6', // Sand Line
+    backgroundColor: '#FFFFFF', // Warm White
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    ...(Platform.OS === 'web' && {
+      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+      transition: 'all 0.3s ease',
+    }),
+  },
+  descriptionCardInner: {
+    padding: getResponsiveSize(20),
+  },
+  descriptionTitle: {
+    fontSize: getResponsiveFont(20), // Title size
+    fontWeight: '600', // SemiBold
+    color: '#1F2328', // Charcoal
+    letterSpacing: 0.2,
+    lineHeight: getResponsiveFont(28),
+    marginBottom: getResponsiveSize(16),
+    fontFamily: Platform.OS === 'web' ? "'DM Sans', sans-serif" : 'System',
+  },
+  descriptionText: {
+    fontSize: getResponsiveFont(14), // Body size
+    color: '#6B7280', // Slate
+    lineHeight: getResponsiveFont(21),
+    fontWeight: '400', // Regular
+    marginBottom: getResponsiveSize(24),
+    fontFamily: Platform.OS === 'web' ? "'DM Sans', sans-serif" : 'System',
+  },
+  descriptionBold: {
+    fontWeight: '600',
+    color: '#1F2328', // Charcoal
+  },
+  faqSection: {
+    marginTop: getResponsiveSize(8),
+  },
+  faqTitle: {
+    fontSize: getResponsiveFont(18), // Title size
+    fontWeight: '600', // SemiBold
+    color: '#1F2328', // Charcoal
+    letterSpacing: 0.2,
+    lineHeight: getResponsiveFont(25),
+    marginBottom: getResponsiveSize(16),
+    fontFamily: Platform.OS === 'web' ? "'DM Sans', sans-serif" : 'System',
+  },
+  faqItem: {
+    marginBottom: getResponsiveSize(12),
+    paddingBottom: getResponsiveSize(12),
+    borderBottomWidth: 1,
+    borderBottomColor: '#E9E2D6', // Sand Line
+  },
+  faqQuestionRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  faqQuestion: {
+    flex: 1,
+    fontSize: getResponsiveFont(15), // Body size
+    fontWeight: '500', // Medium
+    color: '#1F2328', // Charcoal
+    lineHeight: getResponsiveFont(22),
+    marginRight: getResponsiveSize(12),
+    fontFamily: Platform.OS === 'web' ? "'DM Sans', sans-serif" : 'System',
+  },
+  faqToggle: {
+    fontSize: getResponsiveFont(20),
+    fontWeight: '600',
+    color: '#F4B000', // Saffron Gold
+    width: getResponsiveSize(24),
+    height: getResponsiveSize(24),
+    textAlign: 'center',
+    lineHeight: getResponsiveSize(24),
+  },
+  faqAnswer: {
+    fontSize: getResponsiveFont(14), // Body size
+    color: '#6B7280', // Slate
+    lineHeight: getResponsiveFont(21),
+    marginTop: getResponsiveSize(8),
+    paddingLeft: getResponsiveSize(4),
     fontFamily: Platform.OS === 'web' ? "'DM Sans', sans-serif" : 'System',
   },
 });

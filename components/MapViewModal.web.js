@@ -26,7 +26,7 @@ import {
   CompassToggleIcon, 
   MapLayerIcon 
 } from './svgs';
-import Svg, { Path, Circle } from 'react-native-svg';
+import Svg, { Path, Circle, Line } from 'react-native-svg';
 
 // Expert Icon Component
 const ExpertIcon = ({ size = 20, color = "#2C2C2C" }) => (
@@ -89,10 +89,11 @@ const getResponsiveFont = (size) => {
   return Math.max(size * scale, size * 0.85);
 };
 
-export default function MapViewModal({ visible, onClose, mode, compassType, selectedLocation, onCompassTypeChange }) {
+export default function MapViewModal({ visible, onClose, mode, compassType, selectedLocation, onCompassTypeChange, initialGridState = false, onOpen }) {
   const { t, language, translateDevta } = useI18n();
   const [currentLocation, setCurrentLocation] = useState(null);
   const [heading, setHeading] = useState(0);
+  const [mapBearing, setMapBearing] = useState(0);
   
   // Use Classic Compass as default fallback if no compass type specified
   const effectiveCompassType = compassType || 'classic';
@@ -122,7 +123,7 @@ export default function MapViewModal({ visible, onClose, mode, compassType, sele
   // VASTU GRID STATE
   const [plotCorners, setPlotCorners] = useState([]);
   const [cornerSelectionMode, setCornerSelectionMode] = useState(false);
-  const [showVastuGrid, setShowVastuGrid] = useState(false);
+  const [showVastuGrid, setShowVastuGrid] = useState(initialGridState);
   
   // Check sessionStorage for guide visibility (only show once per session)
   const getSessionBannerState = (key, defaultValue) => {
@@ -204,8 +205,21 @@ export default function MapViewModal({ visible, onClose, mode, compassType, sele
       setLoading(true);
       setMapReady(false);
       setPlotCorners([]);
-      setShowVastuGrid(false);
-      setCornerSelectionMode(false);
+      // Only reset grid if not opening with initial grid state
+      if (!initialGridState) {
+        setShowVastuGrid(false);
+        setCornerSelectionMode(false);
+      } else {
+        // When opened with grid enabled, enable corner selection mode automatically
+        setShowVastuGrid(true);
+        setCornerSelectionMode(true);
+        // Call onOpen callback after component is mounted
+        if (onOpen) {
+          setTimeout(() => {
+            onOpen();
+          }, 100);
+        }
+      }
       cornerMarkersRef.current = [];
       gridLayersRef.current = [];
       plotOutlineRef.current = null;
@@ -337,48 +351,48 @@ export default function MapViewModal({ visible, onClose, mode, compassType, sele
 
   // Pada descriptions based on Vastu Shastra
   const padaDescriptions = {
-    'Vayu': 'Vayu pada represents the wind element. Ideal for ventilation, air circulation, and maintaining fresh energy flow. Best for windows, doors, or open spaces.',
-    'Naag': 'Naag pada is associated with serpents and hidden energies. Should be kept clean and avoid heavy construction. Suitable for storage or utility areas.',
+    'Rog': 'Rog pada represents the wind element. Ideal for ventilation, air circulation, and maintaining fresh energy flow. Best for windows, doors, or open spaces.',
+    'Nag': 'Nag pada is associated with serpents and hidden energies. Should be kept clean and avoid heavy construction. Suitable for storage or utility areas.',
     'Mukhya': 'Mukhya pada means "chief" or "main". Represents leadership and authority. Good for main entrances or important rooms. Maintains positive energy flow.',
-    'Bhallat': 'Bhallat pada is neutral in nature. Can be used for general purposes. Avoid placing heavy objects or creating obstructions here.',
-    'Som': 'Som pada represents the moon and is very positive. Excellent for bedrooms, meditation areas, or places requiring peace and tranquility.',
-    'Charak': 'Charak pada is neutral. Suitable for general living spaces. Keep this area clean and well-maintained for balanced energy.',
+    'Bhalla': 'Bhalla pada is neutral in nature. Can be used for general purposes. Avoid placing heavy objects or creating obstructions here.',
+    'Soma': 'Soma pada represents the moon (चंद्र). Very positive energy. Excellent for bedrooms, meditation areas, and places requiring peace and tranquility.',
+    'Bhujang': 'Bhujang pada is neutral. Suitable for general living spaces. Keep this area clean and well-maintained for balanced energy.',
     'Aditi': 'Aditi pada is very positive, representing the mother goddess. Ideal for kitchen, dining areas, or spaces where family gathers. Promotes harmony.',
-    'Uditi': 'Uditi pada is positive and represents upward energy. Good for study rooms, libraries, or areas requiring mental clarity and focus.',
-    'Isha': 'Isha pada is very positive, representing the divine. Excellent for prayer rooms, meditation spaces, or spiritual areas. Maintains purity and peace.',
-    'Rog': 'Rog pada means "disease" and is negative. Should be kept clean, avoid heavy construction. Best for storage or utility areas. Requires remedies if used for living spaces.',
+    'Diti': 'Diti pada is positive and represents upward energy. Good for study rooms, libraries, or areas requiring mental clarity and focus.',
+    'Shikhi': 'Shikhi pada is very positive, representing the divine. Excellent for prayer rooms, meditation spaces, or spiritual areas. Maintains purity and peace.',
+    'Papa Yaksha': 'Papa Yaksha pada is negative. Should be kept clean, avoid heavy construction. Best for storage or utility areas. Requires remedies if used for living spaces.',
     'Rudrajay': 'Rudrajay pada is neutral. Represents transformation and change. Suitable for transitional spaces or areas that need periodic renewal.',
-    'Bhoodhar': 'Bhoodhar pada is positive and represents earth element. Excellent for foundation, storage, or areas requiring stability. Good for heavy furniture placement.',
+    'Prithvidhara': 'Prithvidhara pada is positive and represents earth element. Excellent for foundation, storage, or areas requiring stability. Good for heavy furniture placement.',
     'Aap': 'Aap pada is very positive, representing water element. Ideal for bathrooms, water features, or areas related to purification. Promotes flow and prosperity.',
     'Parjanya': 'Parjanya pada is positive, representing rain and fertility. Good for gardens, plants, or areas requiring growth and abundance.',
-    'Sosh': 'Sosh pada is negative, meaning "drying" or "withering". Should be kept clean and avoid placing important items here. Best for utility or storage.',
+    'Sosha': 'Sosha pada is negative, meaning "drying" or "withering". Should be kept clean and avoid placing important items here. Best for utility or storage.',
     'Rudra': 'Rudra pada is neutral. Represents transformation and change. Suitable for areas that need periodic renewal or modification.',
-    'Aapvatsa': 'Aapvatsa pada is positive, related to water and flow. Good for areas requiring movement and circulation. Ideal for hallways or passages.',
-    'Jayant': 'Jayant pada is positive, meaning "victorious". Excellent for study rooms, offices, or areas requiring success and achievement.',
-    'Asur': 'Asur pada is negative, representing negative forces. Should be kept clean and minimal. Avoid placing important rooms here. Requires Vastu remedies.',
+    'Aapvatsa': 'Aapvatsa (आपवत्स), also known as Uma (उमा), is the embodiment of Goddess Parvati, the consort of Lord Shiva. This pada represents the Goddess of Creative Power, Marriage, Children, Fertility, Beauty, Purity, Energy, Love, and Devotion. Located in the Northeast (NE) direction, ruled by planet Ketu, and associated with Career attributes. Aapvatsa brings ideas and carries them towards practical application. This zone is ideal for areas related to nutrition, creativity, and feminine energy. If this zone has problems, the womenfolk of the house may suffer. Keep this area clean, positive, and well-maintained to harness the divine feminine energy of Parvati.',
+    'Jayanta': 'Jayanta pada is positive, meaning "victorious". Excellent for study rooms, offices, or areas requiring success and achievement.',
+    'Asura': 'Asura pada is negative, representing negative forces. Should be kept clean and minimal. Avoid placing important rooms here. Requires Vastu remedies.',
     'Mitra': 'Mitra pada is positive, meaning "friend". Excellent for living rooms, guest areas, or spaces for social interaction. Promotes friendship and harmony.',
     'Brahma': 'Brahma pada is divine, representing the creator. This is the most sacred center (Brahmasthan). Should remain open and uncluttered. Never place heavy objects, pillars, or construction here. Ideal for meditation or open space.',
     'Aryama': 'Aryama pada is positive, representing the sun and leadership. Excellent for master bedrooms, offices, or areas requiring authority and respect.',
     'Mahendra': 'Mahendra pada is very positive, representing Indra (king of gods). Ideal for main entrances, living rooms, or important spaces. Promotes prosperity and power.',
-    'Varun': 'Varun pada is neutral, representing water god. Suitable for bathrooms, water-related areas, or spaces requiring purification.',
-    'Aditya': 'Aditya pada is positive, representing the sun. Excellent for east-facing rooms, study areas, or spaces requiring energy and vitality.',
-    'Pushpdant': 'Pushpdant pada is positive, meaning "flower-toothed". Good for decorative areas, gardens, or spaces requiring beauty and aesthetics.',
-    'Satyak': 'Satyak pada is positive, meaning "truthful". Excellent for study rooms, libraries, or areas requiring honesty and clarity of thought.',
-    'Sugreev': 'Sugreev pada is neutral. Represents strength and courage. Suitable for areas requiring determination and willpower.',
+    'Varuna': 'Varuna pada represents the water god (वरुण). Suitable for bathrooms, water-related areas, and spaces requiring purification.',
+    'Surya': 'Surya pada represents the sun (सूर्य). Excellent for east-facing rooms, study areas, and spaces requiring energy and vitality.',
+    'Pushpadanta': 'Pushpadanta pada is positive, meaning "flower-toothed". Good for decorative areas, gardens, or spaces requiring beauty and aesthetics.',
+    'Satya': 'Satya pada is positive, meaning "truthful". Excellent for study rooms, libraries, or areas requiring honesty and clarity of thought.',
+    'Sugriva': 'Sugriva pada is neutral. Represents strength and courage. Suitable for areas requiring determination and willpower.',
     'Indraraj': 'Indraraj pada is positive, representing the king of gods. Excellent for master bedrooms, offices, or areas requiring leadership and authority.',
-    'Vivasvan': 'Vivasvan pada is positive, representing the sun god. Ideal for east-facing rooms, study areas, or spaces requiring brightness and energy.',
+    'Vivaswan': 'Vivaswan pada is positive, representing the sun god. Ideal for east-facing rooms, study areas, or spaces requiring brightness and energy.',
     'Svitra': 'Svitra pada is positive. Represents purity and cleanliness. Good for bathrooms, kitchens, or areas requiring hygiene.',
-    'Bhusha': 'Bhusha pada is neutral. Suitable for general purposes. Keep clean and well-maintained for balanced energy flow.',
-    'Dauwarik': 'Dauwarik pada is neutral. Represents gatekeepers. Suitable for entrance areas, doorways, or transitional spaces.',
+    'Bhrusha': 'Bhrusha pada is neutral. Suitable for general purposes. Keep clean and well-maintained for balanced energy flow.',
+    'Dwarika': 'Dwarika pada is neutral. Represents gatekeepers. Suitable for entrance areas, doorways, or transitional spaces.',
     'Indra': 'Indra pada is positive, representing the king of gods. Excellent for important rooms, offices, or areas requiring power and prosperity.',
     'Savitra': 'Savitra pada is positive, representing the sun. Ideal for east-facing areas, study rooms, or spaces requiring illumination and knowledge.',
-    'Antrix': 'Antrix pada is neutral, representing space or sky. Suitable for open areas, balconies, or spaces requiring openness and freedom.',
-    'Pitru': 'Pitru pada is negative, representing ancestors. Should be kept clean and respectful. Avoid placing bedrooms or important rooms here. Best for storage.',
-    'Mrig': 'Mrig pada is neutral, representing deer. Suitable for general purposes. Keep clean and avoid heavy construction.',
-    'Bhujang': 'Bhujang pada is negative, representing serpents. Should be kept minimal and clean. Avoid important placements. Requires Vastu remedies.',
+    'Aakash': 'Aakash pada is neutral, representing space or sky. Suitable for open areas, balconies, or spaces requiring openness and freedom.',
+    'Pitru Gana': 'Pitru Gana pada is negative, representing ancestors. Should be kept clean and respectful. Avoid placing bedrooms or important rooms here. Best for storage.',
+    'Mriga': 'Mriga pada is neutral, representing deer. Suitable for general purposes. Keep clean and avoid heavy construction.',
+    'Bhringaraj': 'Bhringaraj pada is negative, representing serpents. Should be kept minimal and clean. Avoid important placements. Requires Vastu remedies.',
     'Gandharva': 'Gandharva pada is neutral, representing celestial musicians. Suitable for entertainment areas, music rooms, or spaces for creativity.',
-    'Yama': 'Yama pada is negative, representing death. Should be kept clean and minimal. Avoid placing bedrooms or important rooms here. Best for storage or utility.',
-    'Gkhawat': 'Gkhawat pada is neutral. Suitable for general purposes. Keep clean and well-maintained.',
+    'Yama': 'Yama pada represents death (यम). Keep clean and minimal. Avoid placing bedrooms or important rooms here. Best for storage or utility.',
+    'Bhratsata': 'Bhratsata pada is neutral. Suitable for general purposes. Keep clean and well-maintained.',
     'Vitath': 'Vitath pada is neutral. Represents falsehood or illusion. Should be kept clean. Avoid placing important items here.',
     'Pusha': 'Pusha pada is positive, representing nourishment. Good for kitchens, dining areas, or spaces related to food and sustenance.',
     'Agni': 'Agni pada is positive, representing fire. Excellent for kitchens, fireplaces, or areas requiring heat and transformation. Promotes energy and activity.',
@@ -696,23 +710,23 @@ export default function MapViewModal({ visible, onClose, mode, compassType, sele
             position: 'bottomright'
           }).addTo(map);
 
-          const goldIcon = window.L.divIcon({
+          // Blue dot marker (like Google Maps)
+          const blueDotIcon = window.L.divIcon({
             className: 'custom-marker',
             html: `<div style="
-              width: 30px;
-              height: 30px;
-              background-color: #F4C430;
-              border: 3px solid white;
-              border-radius: 50% 50% 50% 0;
-              transform: rotate(-45deg);
-              box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+              width: 12px;
+              height: 12px;
+              background-color: #4285F4;
+              border: 2px solid white;
+              border-radius: 50%;
+              box-shadow: 0 2px 6px rgba(0,0,0,0.3);
             "></div>`,
-            iconSize: [30, 30],
-            iconAnchor: [15, 30],
+            iconSize: [12, 12],
+            iconAnchor: [6, 6],
           });
 
           const marker = window.L.marker([locationToUse.latitude, locationToUse.longitude], {
-            icon: goldIcon
+            icon: blueDotIcon
           }).addTo(map);
           
           marker.bindPopup(t('info.currentLocation')).openPopup();
@@ -821,6 +835,7 @@ export default function MapViewModal({ visible, onClose, mode, compassType, sele
                 backgroundColor: '#E5E5E5',
                 position: 'relative',
                 zIndex: 1,
+                overflow: 'visible',
               }}
               onError={(e) => {
                 console.error('Map container error:', e);
@@ -832,8 +847,39 @@ export default function MapViewModal({ visible, onClose, mode, compassType, sele
             </View>
           )}
 
+          {/* Crosshair Overlay - Neon Red Lines */}
+          {locationToUse && (
+            <View style={styles.crosshairOverlay} pointerEvents="none">
+              {/* Horizontal line - full width, centered vertically */}
+              <View style={styles.crosshairHorizontal} />
+              {/* Vertical line - full height, centered horizontally */}
+              <View style={styles.crosshairVertical} />
+              {/* "N" label at top of vertical line */}
+              <View style={styles.crosshairNLabel}>
+                <Text style={styles.crosshairNText}>N</Text>
+              </View>
+              {/* Yellow pointer at center intersection */}
+              <View style={styles.yellowPointer}>
+                <Svg width={getResponsiveSize(28)} height={getResponsiveSize(36)} viewBox="0 0 24 32" style={styles.yellowPointerSvg}>
+                  <Path
+                    d="M12 0C5.373 0 0 5.373 0 12c0 8.5 12 20 12 20s12-11.5 12-20C24 5.373 18.627 0 12 0z"
+                    fill="#FFD700"
+                    stroke="#FFFFFF"
+                    strokeWidth="2"
+                  />
+                  <Circle
+                    cx="12"
+                    cy="10"
+                    r="3.5"
+                    fill="#FFFFFF"
+                  />
+                </Svg>
+              </View>
+            </View>
+          )}
+
           {showCompass && locationToUse && (
-            <View style={styles.compassOverlay}>
+            <View style={[styles.compassOverlay, { opacity: 0.55 }]}>
               <CompassView
                 mode={mode}
                 compassType={effectiveCompassType}
@@ -841,6 +887,7 @@ export default function MapViewModal({ visible, onClose, mode, compassType, sele
                 onClearImage={() => {}}
                 onHeadingChange={setHeading}
                 hideCalibration={true}
+                externalHeading={null}
               />
             </View>
           )}
@@ -1424,6 +1471,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#000000',
+    overflow: 'visible',
   },
   loadingContainer: {
     flex: 1,
@@ -1450,6 +1498,99 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontFamily: Platform.OS === 'web' ? "'DM Sans', sans-serif" : 'System',
   },
+  crosshairOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    width: '100%',
+    height: '100%',
+    zIndex: 400,
+    pointerEvents: 'none',
+    overflow: 'visible',
+  },
+  crosshairHorizontal: {
+    position: 'absolute',
+    top: '50%',
+    left: 0,
+    right: 0,
+    width: '100%',
+    height: 2,
+    backgroundColor: 'rgba(255, 0, 0, 0.5)',
+    transform: [{ translateY: -1 }],
+    ...(Platform.OS === 'web' && {
+      boxShadow: '0 0 4px rgba(255, 0, 0, 0.4), 0 0 2px rgba(255, 0, 0, 0.3)',
+    }),
+  },
+  crosshairVertical: {
+    position: 'absolute',
+    left: '50%',
+    top: 0,
+    bottom: 0,
+    width: 2,
+    height: '100%',
+    backgroundColor: 'rgba(255, 0, 0, 0.5)',
+    transform: [{ translateX: -1 }],
+    ...(Platform.OS === 'web' && {
+      boxShadow: '0 0 4px rgba(255, 0, 0, 0.4), 0 0 2px rgba(255, 0, 0, 0.3)',
+    }),
+  },
+  crosshairNLabel: {
+    position: 'absolute',
+    top: getResponsiveSize(70),
+    left: '50%',
+    transform: [{ translateX: -getResponsiveSize(10) }],
+    width: getResponsiveSize(20),
+    height: getResponsiveSize(20),
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 401,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderRadius: getResponsiveSize(10),
+    ...(Platform.OS === 'web' && {
+      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)',
+    }),
+  },
+  crosshairNText: {
+    fontSize: getResponsiveFont(16),
+    fontWeight: '900',
+    color: '#FF0000',
+    fontFamily: Platform.OS === 'web' ? "'DM Sans', sans-serif" : 'System',
+    textAlign: 'center',
+    lineHeight: getResponsiveFont(16),
+    ...(Platform.OS === 'web' && {
+      textShadow: '0 0 4px rgba(255, 0, 0, 0.8), 0 0 2px rgba(255, 255, 255, 1)',
+    }),
+  },
+  yellowPointer: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    width: getResponsiveSize(28),
+    height: getResponsiveSize(36),
+    transform: [
+      { translateX: -getResponsiveSize(14) },
+      { translateY: -getResponsiveSize(36) } // Pin point at center intersection
+    ],
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 401,
+    pointerEvents: 'none',
+    overflow: 'visible',
+  },
+  yellowPointerSvg: {
+    ...(Platform.OS === 'web' && {
+      filter: 'drop-shadow(0 0 6px rgba(255, 215, 0, 0.7)) drop-shadow(0 0 3px rgba(255, 215, 0, 0.5)) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.25))',
+    }),
+    ...(Platform.OS !== 'web' && {
+      shadowColor: '#FFD700',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.8,
+      shadowRadius: 6,
+      elevation: 8,
+    }),
+  },
   compassOverlay: {
     position: 'absolute',
     top: '50%',
@@ -1475,11 +1616,14 @@ const styles = StyleSheet.create({
   },
   mapControls: {
     position: 'absolute',
-    top: getResponsiveSize(90),
+    top: getResponsiveSize(85),
     right: getResponsiveSize(15),
     flexDirection: 'column',
     gap: getResponsiveSize(12),
     zIndex: 1001,
+    width: getDimensions().width < 768 ? '45%' : 'auto',
+    maxWidth: getDimensions().width >= 768 ? getResponsiveSize(220) : '100%',
+    alignItems: 'flex-end',
   },
   buttonWithLabel: {
     alignItems: 'center',
@@ -1506,19 +1650,22 @@ const styles = StyleSheet.create({
   expertButtonContainer: {
     alignItems: 'center',
     justifyContent: 'center',
+    width: '100%',
   },
   expertButton: {
-    minWidth: getResponsiveSize(190),
-    height: getResponsiveSize(58),
-    paddingVertical: getResponsiveSize(8),
-    paddingHorizontal: getResponsiveSize(16),
+    width: getDimensions().width < 768 ? '100%' : 'auto',
+    minWidth: getDimensions().width < 768 ? 0 : getResponsiveSize(190),
+    maxWidth: getDimensions().width >= 768 ? getResponsiveSize(220) : '100%',
+    height: getDimensions().width < 768 ? getResponsiveSize(50) : getResponsiveSize(58),
+    paddingVertical: getDimensions().width < 768 ? getResponsiveSize(6) : getResponsiveSize(8),
+    paddingHorizontal: getDimensions().width < 768 ? getResponsiveSize(10) : getResponsiveSize(12),
     borderRadius: getResponsiveSize(12),
     backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
-    gap: getResponsiveSize(4),
+    gap: getDimensions().width < 768 ? getResponsiveSize(3) : getResponsiveSize(4),
     ...(Platform.OS === 'web' && {
-      background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.primaryDark} 100%)`,
+      backgroundImage: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.primaryDark} 100%)`,
       transition: 'all 0.3s ease',
       cursor: 'pointer',
     }),
@@ -1535,7 +1682,7 @@ const styles = StyleSheet.create({
     gap: getResponsiveSize(8),
   },
   expertButtonTitle: {
-    fontSize: getResponsiveFont(15),
+    fontSize: getDimensions().width < 768 ? getResponsiveFont(12) : getResponsiveFont(15),
     color: '#FFFFFF',
     fontWeight: '600',
     fontFamily: Platform.OS === 'web' ? "'DM Sans', sans-serif" : 'System',
@@ -1566,7 +1713,9 @@ const styles = StyleSheet.create({
     fontSize: getResponsiveFont(11),
     color: 'rgba(255, 255, 255, 0.9)',
     ...(Platform.OS === 'web' && {
-      animation: 'blink 1s infinite',
+      animationName: 'blink',
+      animationDuration: '1s',
+      animationIterationCount: 'infinite',
     }),
   },
   mapControlButtonActive: {
@@ -1647,7 +1796,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden', // Hide overflow on container
     ...(Platform.OS === 'web' && {
       boxShadow: '0 -4px 16px rgba(255, 179, 0, 0.25), 0 -2px 8px rgba(0, 0, 0, 0.1)',
-      background: `linear-gradient(to top, ${colors.primaryContainer} 0%, rgba(255, 248, 225, 0.95) 100%)`,
+      backgroundImage: `linear-gradient(to top, ${colors.primaryContainer} 0%, rgba(255, 248, 225, 0.95) 100%)`,
     }),
   },
   navbarContent: {
@@ -1678,10 +1827,10 @@ const styles = StyleSheet.create({
         height: '6px',
       },
       '&::-webkit-scrollbar-track': {
-        background: 'transparent',
+        backgroundColor: 'transparent',
       },
       '&::-webkit-scrollbar-thumb': {
-        background: colors.primary,
+        backgroundColor: colors.primary,
         borderRadius: '3px',
       },
     }),
@@ -1719,7 +1868,7 @@ const styles = StyleSheet.create({
     ...(Platform.OS === 'web' && {
       boxShadow: '0 6px 16px rgba(255, 179, 0, 0.35), 0 2px 6px rgba(255, 143, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
       transform: 'translateY(-2px) scale(1.02)',
-      background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.primaryLight} 100%)`,
+      backgroundImage: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.primaryLight} 100%)`,
     }),
     ...(Platform.OS !== 'web' && {
       elevation: 6,

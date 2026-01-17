@@ -10,15 +10,15 @@
 export const OUTER_LAYER = {
   // Top row (North) - 9 devtas
   north: [
-    { devta: 'Vayu', zone: 'NW', energy: 'positive', color: '#87CEEB' },
+    { devta: 'Rog', zone: 'NW', energy: 'positive', color: '#87CEEB' },
     { devta: 'Naga', zone: 'NNW', energy: 'neutral', color: '#87CEEB' },
     { devta: 'Mukhya', zone: 'NNW', energy: 'neutral', color: '#87CEEB' },
-    { devta: 'Bhallat', zone: 'N', energy: 'neutral', color: '#87CEEB' },
+    { devta: 'Bhalla', zone: 'N', energy: 'neutral', color: '#87CEEB' },
     { devta: 'Soma', zone: 'N', energy: 'positive', color: '#4169E1' },
     { devta: 'Aap', zone: 'N', energy: 'positive', color: '#87CEEB' },
     { devta: 'Aditi', zone: 'NNE', energy: 'very positive', color: '#4169E1' },
     { devta: 'Diti', zone: 'NNE', energy: 'positive', color: '#4169E1' },
-    { devta: 'Isha', zone: 'NE', energy: 'divine', color: '#0000CD' },
+    { devta: 'Shikhi', zone: 'NE', energy: 'divine', color: '#0000CD' },
   ],
   
   // Right column (East) - 7 devtas (excluding corners)
@@ -26,7 +26,7 @@ export const OUTER_LAYER = {
     { devta: 'Parjanya', zone: 'ENE', energy: 'positive', color: '#90EE90' },
     { devta: 'Jayanta', zone: 'E', energy: 'positive', color: '#90EE90' },
     { devta: 'Mahendra', zone: 'E', energy: 'very positive', color: '#32CD32' },
-    { devta: 'Aditya', zone: 'E', energy: 'positive', color: '#90EE90' },
+    { devta: 'Surya', zone: 'E', energy: 'positive', color: '#90EE90' },
     { devta: 'Satya', zone: 'ESE', energy: 'positive', color: '#90EE90' },
     { devta: 'Bhrisha', zone: 'ESE', energy: 'neutral', color: '#90EE90' },
     { devta: 'Antariksh', zone: 'SE', energy: 'neutral', color: '#FFD700' },
@@ -40,9 +40,9 @@ export const OUTER_LAYER = {
     { devta: 'Gruhakshat', zone: 'S', energy: 'neutral', color: '#FFA500' },
     { devta: 'Yama', zone: 'S', energy: 'negative', color: '#CD853F' },
     { devta: 'Gandharva', zone: 'S', energy: 'neutral', color: '#FFA500' },
-    { devta: 'Bhujang', zone: 'SSW', energy: 'negative', color: '#A0522D' },
+    { devta: 'Bhringaraj', zone: 'SSW', energy: 'negative', color: '#A0522D' },
     { devta: 'Mriga', zone: 'SSW', energy: 'neutral', color: '#A0522D' },
-    { devta: 'Pitru', zone: 'SW', energy: 'negative', color: '#8B4513' },
+    { devta: 'Pitru Gana', zone: 'SW', energy: 'negative', color: '#8B4513' },
   ],
   
   // Left column (West) - 7 devtas (excluding corners)

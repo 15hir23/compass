@@ -70,13 +70,13 @@ export default function CompassTopBar({ onMenuPress, onSearchPress, onBackPress 
   
   // Entrance animations
   useEffect(() => {
-    containerOpacity.value = withTiming(1, { duration: 600, easing: Easing.out(Easing.cubic) });
-    containerTranslateY.value = withSpring(0, { damping: 20, stiffness: 90 });
+    containerOpacity.value = withTiming(1, { duration: 300, easing: Easing.out(Easing.cubic) });
+    containerTranslateY.value = withTiming(0, { duration: 300, easing: Easing.out(Easing.cubic) });
     
     // Staggered button animations
-    backButtonScale.value = withDelay(100, withSpring(1, { damping: 15, stiffness: 200 }));
-    searchBarScale.value = withDelay(200, withSpring(1, { damping: 15, stiffness: 200 }));
-    menuButtonScale.value = withDelay(300, withSpring(1, { damping: 15, stiffness: 200 }));
+    backButtonScale.value = withDelay(50, withTiming(1, { duration: 250, easing: Easing.out(Easing.cubic) }));
+    searchBarScale.value = withDelay(100, withTiming(1, { duration: 250, easing: Easing.out(Easing.cubic) }));
+    menuButtonScale.value = withDelay(150, withTiming(1, { duration: 250, easing: Easing.out(Easing.cubic) }));
   }, []);
   
   // Animated styles

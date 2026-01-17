@@ -142,7 +142,8 @@ export default function CompassView({
   onImageSizeChange, 
   initialRotation,
   hideCalibration = false,
-  onCalibrationStateChange
+  onCalibrationStateChange,
+  externalHeading = null
 }) {
   const [heading, setHeading] = useState(0);
   const [imageContainerSize, setImageContainerSize] = useState(COMPASS_SIZE);
@@ -165,8 +166,8 @@ export default function CompassView({
   
   // Entrance animation
   useEffect(() => {
-    containerOpacity.value = withTiming(1, { duration: 800, easing: Easing.out(Easing.cubic) });
-    containerScale.value = withSpring(1, { damping: 15, stiffness: 100 });
+    containerOpacity.value = withTiming(1, { duration: 300, easing: Easing.out(Easing.cubic) });
+    containerScale.value = withTiming(1, { duration: 300, easing: Easing.out(Easing.cubic) });
   }, []);
   
   // Animation values for figure-8 calibration
@@ -388,6 +389,21 @@ export default function CompassView({
     }
   }, [initialRotation]);
 
+  // Handle external heading (e.g., from map bearing)
+  useEffect(() => {
+    if (externalHeading !== null && externalHeading !== undefined) {
+      const normalizedHeading = (externalHeading + 360) % 360;
+      setHeading(normalizedHeading);
+      rotation.value = withTiming(-normalizedHeading, {
+        duration: 300,
+        easing: Easing.out(Easing.cubic),
+      });
+      if (onHeadingChange) {
+        onHeadingChange(normalizedHeading);
+      }
+    }
+  }, [externalHeading]);
+
   // Auto-hide calibration banner
   useEffect(() => {
     if (showCalibration) {
@@ -607,6 +623,8 @@ export default function CompassView({
   // Main sensor effect
   useEffect(() => {
     if (!initialRotationComplete) return;
+    // Skip device sensors if externalHeading is provided
+    if (externalHeading !== null && externalHeading !== undefined) return;
 
     // WEB: Device Orientation API
     if (Platform.OS === 'web') {
@@ -1190,10 +1208,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#F4B000', // Saffron Gold
     borderRadius: getResponsiveSize(3),
     zIndex: 1000,
-    shadowColor: '#F4B000',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
+    ...(Platform.OS === 'web' ? {
+      boxShadow: '0 0 8px rgba(244, 176, 0, 0.3)',
+    } : {
+      shadowColor: '#F4B000',
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0.3,
+      shadowRadius: 8,
+    }),
     borderWidth: 1,
     borderColor: '#C88A00',
     alignSelf: 'center',
@@ -1216,10 +1238,14 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     borderWidth: 1,
     borderColor: '#FFFFFF',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
+    ...(Platform.OS === 'web' ? {
+      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)',
+    } : {
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.2,
+      shadowRadius: 4,
+    }),
   },
   headingArrow: {
     position: 'absolute',
@@ -1234,9 +1260,13 @@ const styles = StyleSheet.create({
     borderLeftColor: 'transparent',
     borderRightColor: 'transparent',
     borderBottomColor: '#F4B000', // Saffron Gold
-    shadowColor: '#F4B000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
+    ...(Platform.OS === 'web' ? {
+      boxShadow: '0 2px 4px rgba(244, 176, 0, 0.3)',
+    } : {
+      shadowColor: '#F4B000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.3,
+    }),
     shadowRadius: 4,
   },
   stabilityIndicator: {

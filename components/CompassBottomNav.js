@@ -72,12 +72,12 @@ export default function CompassBottomNav({ onCapturePress, onLastCapturedPress, 
   
   // Entrance animations
   useEffect(() => {
-    containerOpacity.value = withTiming(1, { duration: 600, easing: Easing.out(Easing.cubic) });
-    containerTranslateY.value = withSpring(0, { damping: 20, stiffness: 90 });
+    containerOpacity.value = withTiming(1, { duration: 300, easing: Easing.out(Easing.cubic) });
+    containerTranslateY.value = withTiming(0, { duration: 300, easing: Easing.out(Easing.cubic) });
     
     // Staggered button animations
-    captureButtonScale.value = withDelay(100, withSpring(1, { damping: 15, stiffness: 200 }));
-    lastCapturedButtonScale.value = withDelay(200, withSpring(1, { damping: 15, stiffness: 200 }));
+    captureButtonScale.value = withDelay(50, withTiming(1, { duration: 250, easing: Easing.out(Easing.cubic) }));
+    lastCapturedButtonScale.value = withDelay(100, withTiming(1, { duration: 250, easing: Easing.out(Easing.cubic) }));
     
     // Continuous glow animations
     captureButtonGlow.value = withRepeat(

@@ -12,6 +12,7 @@ import Animated, {
   Easing,
 } from 'react-native-reanimated';
 import LocationIcon from './icons/LocationIcon';
+import { ImageIcon } from './svgs';
 import { useI18n } from '../utils/i18n';
 import { colors, typography, elevation } from '../utils/theme';
 
@@ -68,7 +69,7 @@ const AnimatedTouchableOpacity = Animated.createAnimatedComponent(TouchableOpaci
 const AnimatedView = Animated.createAnimatedComponent(View);
 const AnimatedText = Animated.createAnimatedComponent(Text);
 
-export default function CompassActionButtons({ onMapPress, heading }) {
+export default function CompassActionButtons({ onMapPress, heading, onUploadPress }) {
   const { t } = useI18n();
   // Show 0 instead of 360 for North
   const degree = Math.round(heading) % 360;
@@ -84,12 +85,12 @@ export default function CompassActionButtons({ onMapPress, heading }) {
   
   // Entrance animations
   useEffect(() => {
-    containerOpacity.value = withTiming(1, { duration: 600, easing: Easing.out(Easing.cubic) });
-    containerTranslateY.value = withSpring(0, { damping: 20, stiffness: 90 });
+    containerOpacity.value = withTiming(1, { duration: 300, easing: Easing.out(Easing.cubic) });
+    containerTranslateY.value = withTiming(0, { duration: 300, easing: Easing.out(Easing.cubic) });
     
     // Staggered button animations
-    mapButtonScale.value = withDelay(100, withSpring(1, { damping: 15, stiffness: 200 }));
-    degreeBoxScale.value = withDelay(200, withSpring(1, { damping: 15, stiffness: 200 }));
+    mapButtonScale.value = withDelay(50, withTiming(1, { duration: 250, easing: Easing.out(Easing.cubic) }));
+    degreeBoxScale.value = withDelay(100, withTiming(1, { duration: 250, easing: Easing.out(Easing.cubic) }));
     
     // Continuous subtle glow for degree box
     degreeBoxGlow.value = withRepeat(
@@ -161,11 +162,36 @@ export default function CompassActionButtons({ onMapPress, heading }) {
     );
     onMapPress();
   };
+
+  const uploadButtonScale = useSharedValue(1);
+  const handleUploadPress = () => {
+    uploadButtonScale.value = withSequence(
+      withTiming(0.9, { duration: 100 }),
+      withTiming(1, { duration: 100 })
+    );
+    if (onUploadPress) {
+      onUploadPress();
+    }
+  };
+
+  const uploadButtonAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: uploadButtonScale.value }],
+  }));
   
 
   return (
     <Animated.View style={[styles.container, containerAnimatedStyle]}>
-      <View style={styles.placeholder} />
+      <AnimatedTouchableOpacity
+        style={[styles.actionButton, uploadButtonAnimatedStyle]}
+        onPress={handleUploadPress}
+        activeOpacity={0.8}
+        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+      >
+        <View style={styles.buttonCircle} pointerEvents="none">
+          <ImageIcon size={getResponsiveSize(22)} color="#3B2F2F" />
+        </View>
+        <Text style={styles.buttonLabel} pointerEvents="none">Upload</Text>
+      </AnimatedTouchableOpacity>
 
       <View style={styles.degreeContainer}>
         <Animated.View style={[styles.degreeBox, degreeBoxAnimatedStyle]}>

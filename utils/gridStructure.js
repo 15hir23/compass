@@ -25,64 +25,64 @@ function getDevtaLayer(devtaName, row, col) {
 
 export const GRID_STRUCTURE = [
   // Row 0
-  { name: 'Vayu', row: 0, col: 0, rowSpan: 1, colSpan: 1 },
-  { name: 'Naag', row: 0, col: 1, rowSpan: 1, colSpan: 1 },
+  { name: 'Rog', row: 0, col: 0, rowSpan: 1, colSpan: 1 },
+  { name: 'Nag', row: 0, col: 1, rowSpan: 1, colSpan: 1 },
   { name: 'Mukhya', row: 0, col: 2, rowSpan: 1, colSpan: 1 },
-  { name: 'Bhallat', row: 0, col: 3, rowSpan: 1, colSpan: 1 },
-  { name: 'Som', row: 0, col: 4, rowSpan: 1, colSpan: 1 },
-  { name: 'Charak', row: 0, col: 5, rowSpan: 1, colSpan: 1 },
+  { name: 'Bhalla', row: 0, col: 3, rowSpan: 1, colSpan: 1 },
+  { name: 'Soma', row: 0, col: 4, rowSpan: 1, colSpan: 1 },
+  { name: 'Bhujang', row: 0, col: 5, rowSpan: 1, colSpan: 1 },
   { name: 'Aditi', row: 0, col: 6, rowSpan: 1, colSpan: 1 },
-  { name: 'Uditi', row: 0, col: 7, rowSpan: 1, colSpan: 1 },
-  { name: 'Isha', row: 0, col: 8, rowSpan: 1, colSpan: 1 },
+  { name: 'Diti', row: 0, col: 7, rowSpan: 1, colSpan: 1 },
+  { name: 'Shikhi', row: 0, col: 8, rowSpan: 1, colSpan: 1 },
   
   // Row 1
-  { name: 'Rog', row: 1, col: 0, rowSpan: 1, colSpan: 1 },
+  { name: 'Papa Yaksha', row: 1, col: 0, rowSpan: 1, colSpan: 1 },
   { name: 'Rudrajay', row: 1, col: 1, rowSpan: 1, colSpan: 2 },
-  { name: 'Bhoodhar', row: 1, col: 3, rowSpan: 2, colSpan: 3 },
+  { name: 'Prithvidhara', row: 1, col: 3, rowSpan: 2, colSpan: 3 },
   { name: 'Aap', row: 1, col: 6, rowSpan: 1, colSpan: 2 },
   { name: 'Parjanya', row: 1, col: 8, rowSpan: 1, colSpan: 1 },
   
   // Row 2
-  { name: 'Sosh', row: 2, col: 0, rowSpan: 1, colSpan: 1 },
+  { name: 'Sosha', row: 2, col: 0, rowSpan: 1, colSpan: 1 },
   { name: 'Rudra', row: 2, col: 1, rowSpan: 1, colSpan: 2 },
   { name: 'Aapvatsa', row: 2, col: 6, rowSpan: 1, colSpan: 2 },
-  { name: 'Jayant', row: 2, col: 8, rowSpan: 1, colSpan: 1 },
+  { name: 'Jayanta', row: 2, col: 8, rowSpan: 1, colSpan: 1 },
   
   // Row 3
-  { name: 'Asur', row: 3, col: 0, rowSpan: 1, colSpan: 1 },
+  { name: 'Asura', row: 3, col: 0, rowSpan: 1, colSpan: 1 },
   { name: 'Mitra', row: 3, col: 1, rowSpan: 3, colSpan: 2 },
   { name: 'Brahma', row: 3, col: 3, rowSpan: 3, colSpan: 3 },
   { name: 'Aryama', row: 3, col: 6, rowSpan: 3, colSpan: 2 },
   { name: 'Mahendra', row: 3, col: 8, rowSpan: 1, colSpan: 1 },
   
   // Row 4
-  { name: 'Varun', row: 4, col: 0, rowSpan: 1, colSpan: 1 },
-  { name: 'Aditya', row: 4, col: 8, rowSpan: 1, colSpan: 1 },
+  { name: 'Varuna', row: 4, col: 0, rowSpan: 1, colSpan: 1 },
+  { name: 'Surya', row: 4, col: 8, rowSpan: 1, colSpan: 1 },
   
   // Row 5
-  { name: 'Pushpdant', row: 5, col: 0, rowSpan: 1, colSpan: 1 },
-  { name: 'Satyak', row: 5, col: 8, rowSpan: 1, colSpan: 1 },
+  { name: 'Pushpadanta', row: 5, col: 0, rowSpan: 1, colSpan: 1 },
+  { name: 'Satya', row: 5, col: 8, rowSpan: 1, colSpan: 1 },
   
   // Row 6
-  { name: 'Sugreev', row: 6, col: 0, rowSpan: 1, colSpan: 1 },
+  { name: 'Sugriva', row: 6, col: 0, rowSpan: 1, colSpan: 1 },
   { name: 'Indraraj', row: 6, col: 1, rowSpan: 1, colSpan: 2 },
-  { name: 'Vivasvan', row: 6, col: 3, rowSpan: 2, colSpan: 3 },
+  { name: 'Vivaswan', row: 6, col: 3, rowSpan: 2, colSpan: 3 },
   { name: 'Svitra', row: 6, col: 6, rowSpan: 1, colSpan: 2 },
-  { name: 'Bhusha', row: 6, col: 8, rowSpan: 1, colSpan: 1 },
+  { name: 'Bhrusha', row: 6, col: 8, rowSpan: 1, colSpan: 1 },
   
   // Row 7
-  { name: 'Dauwarik', row: 7, col: 0, rowSpan: 1, colSpan: 1 },
+  { name: 'Dwarika', row: 7, col: 0, rowSpan: 1, colSpan: 1 },
   { name: 'Indra', row: 7, col: 1, rowSpan: 1, colSpan: 2 },
   { name: 'Savitra', row: 7, col: 6, rowSpan: 1, colSpan: 2 },
-  { name: 'Antrix', row: 7, col: 8, rowSpan: 1, colSpan: 1 },
+  { name: 'Aakash', row: 7, col: 8, rowSpan: 1, colSpan: 1 },
   
   // Row 8
-  { name: 'Pitru', row: 8, col: 0, rowSpan: 1, colSpan: 1 },
-  { name: 'Mrig', row: 8, col: 1, rowSpan: 1, colSpan: 1 },
-  { name: 'Bhujang', row: 8, col: 2, rowSpan: 1, colSpan: 1 },
+  { name: 'Pitru Gana', row: 8, col: 0, rowSpan: 1, colSpan: 1 },
+  { name: 'Mriga', row: 8, col: 1, rowSpan: 1, colSpan: 1 },
+  { name: 'Bhringaraj', row: 8, col: 2, rowSpan: 1, colSpan: 1 },
   { name: 'Gandharva', row: 8, col: 3, rowSpan: 1, colSpan: 1 },
   { name: 'Yama', row: 8, col: 4, rowSpan: 1, colSpan: 1 },
-  { name: 'Gkhawat', row: 8, col: 5, rowSpan: 1, colSpan: 1 },
+  { name: 'Bhratsata', row: 8, col: 5, rowSpan: 1, colSpan: 1 },
   { name: 'Vitath', row: 8, col: 6, rowSpan: 1, colSpan: 1 },
   { name: 'Pusha', row: 8, col: 7, rowSpan: 1, colSpan: 1 },
   { name: 'Agni', row: 8, col: 8, rowSpan: 1, colSpan: 1 },
@@ -302,7 +302,7 @@ export const drawVastuGrid = ({
           padding = '6px 14px';
           borderRadius = '8px';
           letterSpacing = '2px';
-        } else if (cell.name === 'Bhoodhar' || cell.name === 'Vivasvan') {
+        } else if (cell.name === 'Prithvidhara' || cell.name === 'Vivaswan') {
           fontSize = 14;
           fontWeight = '800';
           padding = '5px 11px';
@@ -319,7 +319,7 @@ export const drawVastuGrid = ({
           fontWeight = '700';
           padding = '3px 8px';
           letterSpacing = '0.6px';
-        } else if (cell.name === 'Pushpdant' || cell.name === 'Gandharva') {
+        } else if (cell.name === 'Pushpadanta' || cell.name === 'Gandharva') {
           fontSize = 8;
           padding = '2px 5px';
           letterSpacing = '0.3px';

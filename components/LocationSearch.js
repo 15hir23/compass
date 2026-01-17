@@ -66,7 +66,7 @@ export default function LocationSearch({ onLocationSelect }) {
 
     try {
       const encodedQuery = encodeURIComponent(query);
-      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodedQuery}&limit=5&addressdetails=1`;
+      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodedQuery}&limit=5&addressdetails=1&countrycodes=in`;
       
       const response = await fetch(url, {
         headers: {

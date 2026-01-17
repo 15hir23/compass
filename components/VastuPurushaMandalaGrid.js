@@ -16,18 +16,18 @@ const CELL_SIZE = GRID_SIZE / 9;
 // Exact cell names from HTML - matching the order and structure
 const CELLS = [
   // Row 0 (top row)
-  { row: 0, col: 0, text: 'Vayu' },
-  { row: 0, col: 1, text: 'Naag' },
+  { row: 0, col: 0, text: 'Rog' },
+  { row: 0, col: 1, text: 'Nag' },
   { row: 0, col: 2, text: 'Mukhya' },
-  { row: 0, col: 3, text: 'Bhallat' },
-  { row: 0, col: 4, text: 'Som' },
-  { row: 0, col: 5, text: 'Charak' },
+  { row: 0, col: 3, text: 'Bhalla' },
+  { row: 0, col: 4, text: 'Soma' },
+  { row: 0, col: 5, text: 'Bhujang' },
   { row: 0, col: 6, text: 'Aditi' },
-  { row: 0, col: 7, text: 'Uditi' },
-  { row: 0, col: 8, text: 'Isha' },
+  { row: 0, col: 7, text: 'Diti' },
+  { row: 0, col: 8, text: 'Shikhi' },
   
   // Row 1
-  { row: 1, col: 0, text: 'Rog' },
+  { row: 1, col: 0, text: 'Papa Yaksha' },
   // RUDRAJAY spans rows 1-2, col 1 (span-2-col in HTML but actually spans 2 rows)
   { row: 1, col: 2, text: null }, // Empty cell
   // BHOODHAR spans rows 1-3, cols 3-5 (north-block: span 3 cols, span 2 rows)
@@ -35,55 +35,55 @@ const CELLS = [
   { row: 1, col: 8, text: 'Parjanya' },
   
   // Row 2
-  { row: 2, col: 0, text: 'Sosh' },
+  { row: 2, col: 0, text: 'Sosha' },
   // RUDRAJAY continues
   { row: 2, col: 2, text: 'Rudra' },
   // BHOODHAR continues
   // AAPVATSA spans row 2, cols 6-7 (span-2-col)
-  { row: 2, col: 8, text: 'Jayant' },
+  { row: 2, col: 8, text: 'Jayanta' },
   
   // Row 3
-  { row: 3, col: 0, text: 'Asur' },
+  { row: 3, col: 0, text: 'Asura' },
   // MITRA spans rows 3-5, cols 1-2 (west-block: span 2 cols, span 3 rows)
   // BRAHMA spans rows 3-5, cols 3-5 (center-block: span 3 cols, span 3 rows)
   // ARYAMA spans rows 3-5, cols 6-7 (east-block: span 2 cols, span 3 rows)
   { row: 3, col: 8, text: 'Mahendra' },
   
   // Row 4
-  { row: 4, col: 0, text: 'Varun' },
+  { row: 4, col: 0, text: 'Varuna' },
   // MITRA continues
   // BRAHMA continues
   // ARYAMA continues
-  { row: 4, col: 8, text: 'Aditya' },
+  { row: 4, col: 8, text: 'Surya' },
   
   // Row 5
-  { row: 5, col: 0, text: 'Pushpdant' },
+  { row: 5, col: 0, text: 'Pushpadanta' },
   // MITRA continues
   // BRAHMA continues
   // ARYAMA continues
-  { row: 5, col: 8, text: 'Satyak' },
+  { row: 5, col: 8, text: 'Satya' },
   
   // Row 6
-  { row: 6, col: 0, text: 'Sugreev' },
+  { row: 6, col: 0, text: 'Sugriva' },
   // INDRARAJ spans row 6, cols 1-2 (span-2-col)
-  // VIVASVAN spans rows 6-7, cols 3-5 (south-block: span 3 cols, span 2 rows)
+  // VIVASWAN spans rows 6-7, cols 3-5 (south-block: span 3 cols, span 2 rows)
   // SVITRA spans row 6, cols 6-7 (span-2-col)
-  { row: 6, col: 8, text: 'Bhusha' },
+  { row: 6, col: 8, text: 'Bhrusha' },
   
   // Row 7
-  { row: 7, col: 0, text: 'Dauwarik' },
+  { row: 7, col: 0, text: 'Dwarika' },
   // INDRA spans row 7, cols 1-2 (span-2-col)
-  // VIVASVAN continues
+  // VIVASWAN continues
   // SAVITRA spans row 7, cols 6-7 (span-2-col)
-  { row: 7, col: 8, text: 'Antrix' },
+  { row: 7, col: 8, text: 'Aakash' },
   
   // Row 8 (bottom row)
-  { row: 8, col: 0, text: 'Pitru' },
-  { row: 8, col: 1, text: 'Mrig' },
-  { row: 8, col: 2, text: 'Bhujang' },
+  { row: 8, col: 0, text: 'Pitru Gana' },
+  { row: 8, col: 1, text: 'Mriga' },
+  { row: 8, col: 2, text: 'Bhringaraj' },
   { row: 8, col: 3, text: 'Gandharva' },
   { row: 8, col: 4, text: 'Yama' },
-  { row: 8, col: 5, text: 'Gkhawat' },
+  { row: 8, col: 5, text: 'Bhratsata' },
   { row: 8, col: 6, text: 'Vitath' },
   { row: 8, col: 7, text: 'Pusha' },
   { row: 8, col: 8, text: 'Agni' },
@@ -94,7 +94,7 @@ const MERGED_CELLS = [
   // RUDRAJAY - spans (2,2) to (3,2) in image = rows 1-2, col 1 (2 rows, 1 col)
   { row: 1, col: 1, rowSpan: 2, colSpan: 1, text: 'Rudrajay' },
   // BHOODHAR - north-block: grid-column: span 3; grid-row: span 2; = rows 1-2, cols 3-5 (2 rows, 3 cols)
-  { row: 1, col: 3, rowSpan: 2, colSpan: 3, text: 'Bhoodhar' },
+  { row: 1, col: 3, rowSpan: 2, colSpan: 3, text: 'Prithvidhara' },
   // AAP - spans (2,7) to (2,8) in image = row 1, cols 6-7 (1 row, 2 cols)
   { row: 1, col: 6, rowSpan: 1, colSpan: 2, text: 'Aap' },
   // AAPVATSA - spans (3,7) to (3,8) in image = row 2, cols 6-7 (1 row, 2 cols)
@@ -107,8 +107,8 @@ const MERGED_CELLS = [
   { row: 3, col: 6, rowSpan: 3, colSpan: 2, text: 'Aryama' },
   // INDRARAJ - spans (7,2) to (7,3) in image = row 6, cols 1-2 (1 row, 2 cols)
   { row: 6, col: 1, rowSpan: 1, colSpan: 2, text: 'Indraraj' },
-  // VIVASVAN - spans (7,4) to (8,6) in image = rows 6-7, cols 3-5 (2 rows, 3 cols) - matching HTML south-block
-  { row: 6, col: 3, rowSpan: 2, colSpan: 3, text: 'Vivasvan' },
+  // VIVASWAN - spans (7,4) to (8,6) in image = rows 6-7, cols 3-5 (2 rows, 3 cols) - matching HTML south-block
+  { row: 6, col: 3, rowSpan: 2, colSpan: 3, text: 'Vivaswan' },
   // SVITRA - spans (7,7) to (7,8) in image = row 6, cols 6-7 (1 row, 2 cols)
   { row: 6, col: 6, rowSpan: 1, colSpan: 2, text: 'Svitra' },
   // INDRA - spans (8,2) to (8,3) in image = row 7, cols 1-2 (1 row, 2 cols)
@@ -184,7 +184,7 @@ export default function VastuPurushaMandalaGrid() {
       
       // Special styling matching HTML
       const isCenter = cell.text === 'Brahma';
-      const isSouth = cell.text === 'Vivasvan';
+      const isSouth = cell.text === 'Vivaswan';
       
       // Font size: center uses clamp(0.8rem, 2vmin, 1.2rem), others use clamp(0.6rem, 1.5vmin, 1rem)
       const baseFontSize = isCenter ? CELL_SIZE * 0.2 : CELL_SIZE * 0.12;

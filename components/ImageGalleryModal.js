@@ -64,7 +64,7 @@ export default function ImageGalleryModal({ visible, onClose, onSelectImage }) {
   useEffect(() => {
     if (visible) {
       loadImages();
-      scale.value = withSpring(1, { damping: 20, stiffness: 150 });
+      scale.value = withTiming(1, { duration: 300, easing: Easing.out(Easing.cubic) });
     } else {
       scale.value = 0;
     }

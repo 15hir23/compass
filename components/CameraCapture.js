@@ -29,7 +29,7 @@ import { useI18n } from '../utils/i18n';
 
 const { width, height } = Dimensions.get('window');
 
-export default function CameraCapture({ onCapture, onClose, visible, mode = 'normal', compassType = 'vastu' }) {
+export default function CameraCapture({ onCapture, onClose, visible, mode = 'normal', compassType = 'vastu', initialGridState = false, onOpen }) {
   const { language } = useI18n();
   const [permission, requestPermission] = useCameraPermissions();
   const [facing, setFacing] = useState('back');
@@ -39,7 +39,7 @@ export default function CameraCapture({ onCapture, onClose, visible, mode = 'nor
   
   // Compass & Grid Controls - Don't auto-show compass
   const [showCompass, setShowCompass] = useState(false);
-  const [showVastuGrid, setShowVastuGrid] = useState(false);
+  const [showVastuGrid, setShowVastuGrid] = useState(initialGridState);
   const [heading, setHeading] = useState(0);
   
   // 3 Layer Toggles
@@ -72,6 +72,15 @@ export default function CameraCapture({ onCapture, onClose, visible, mode = 'nor
       });
     }
   }, [permission, requestPermission]);
+
+  React.useEffect(() => {
+    if (visible && initialGridState && onOpen) {
+      // Call onOpen callback after component is mounted
+      setTimeout(() => {
+        onOpen();
+      }, 100);
+    }
+  }, [visible, initialGridState, onOpen]);
 
   React.useEffect(() => {
     // Animate only once when permission is granted
@@ -147,48 +156,48 @@ export default function CameraCapture({ onCapture, onClose, visible, mode = 'nor
 
   // Pada descriptions (same as MapViewModal)
   const padaDescriptions = {
-    'Vayu': 'Vayu pada represents the wind element. Ideal for ventilation, air circulation, and maintaining fresh energy flow. Best for windows, doors, or open spaces.',
-    'Naag': 'Naag pada is associated with serpents and hidden energies. Should be kept clean and avoid heavy construction. Suitable for storage or utility areas.',
+    'Rog': 'Rog pada represents the wind element. Ideal for ventilation, air circulation, and maintaining fresh energy flow. Best for windows, doors, or open spaces.',
+    'Nag': 'Nag pada is associated with serpents and hidden energies. Should be kept clean and avoid heavy construction. Suitable for storage or utility areas.',
     'Mukhya': 'Mukhya pada means "chief" or "main". Represents leadership and authority. Good for main entrances or important rooms. Maintains positive energy flow.',
-    'Bhallat': 'Bhallat pada is neutral in nature. Can be used for general purposes. Avoid placing heavy objects or creating obstructions here.',
-    'Som': 'Som pada represents the moon and is very positive. Excellent for bedrooms, meditation areas, or places requiring peace and tranquility.',
-    'Charak': 'Charak pada is neutral. Suitable for general living spaces. Keep this area clean and well-maintained for balanced energy.',
+    'Bhalla': 'Bhalla pada is neutral in nature. Can be used for general purposes. Avoid placing heavy objects or creating obstructions here.',
+    'Soma': 'Soma pada represents the moon (चंद्र). Very positive energy. Excellent for bedrooms, meditation areas, and places requiring peace and tranquility.',
+    'Bhujang': 'Bhujang pada is neutral. Suitable for general living spaces. Keep this area clean and well-maintained for balanced energy.',
     'Aditi': 'Aditi pada is very positive, representing the mother goddess. Ideal for kitchen, dining areas, or spaces where family gathers. Promotes harmony.',
-    'Uditi': 'Uditi pada is positive and represents upward energy. Good for study rooms, libraries, or areas requiring mental clarity and focus.',
-    'Isha': 'Isha pada is very positive, representing the divine. Excellent for prayer rooms, meditation spaces, or spiritual areas. Maintains purity and peace.',
-    'Rog': 'Rog pada means "disease" and is negative. Should be kept clean, avoid heavy construction. Best for storage or utility areas. Requires remedies if used for living spaces.',
+    'Diti': 'Diti pada is positive and represents upward energy. Good for study rooms, libraries, or areas requiring mental clarity and focus.',
+    'Shikhi': 'Shikhi pada is very positive, representing the divine. Excellent for prayer rooms, meditation spaces, or spiritual areas. Maintains purity and peace.',
+    'Papa Yaksha': 'Papa Yaksha pada is negative. Should be kept clean, avoid heavy construction. Best for storage or utility areas. Requires remedies if used for living spaces.',
     'Rudrajay': 'Rudrajay pada is neutral. Represents transformation and change. Suitable for transitional spaces or areas that need periodic renewal.',
-    'Bhoodhar': 'Bhoodhar pada is positive and represents earth element. Excellent for foundation, storage, or areas requiring stability. Good for heavy furniture placement.',
+    'Prithvidhara': 'Prithvidhara pada is positive and represents earth element. Excellent for foundation, storage, or areas requiring stability. Good for heavy furniture placement.',
     'Aap': 'Aap pada is very positive, representing water element. Ideal for bathrooms, water features, or areas related to purification. Promotes flow and prosperity.',
     'Parjanya': 'Parjanya pada is positive, representing rain and fertility. Good for gardens, plants, or areas requiring growth and abundance.',
-    'Sosh': 'Sosh pada is negative, meaning "drying" or "withering". Should be kept clean and avoid placing important items here. Best for utility or storage.',
+    'Sosha': 'Sosha pada is negative, meaning "drying" or "withering". Should be kept clean and avoid placing important items here. Best for utility or storage.',
     'Rudra': 'Rudra pada is neutral. Represents transformation and change. Suitable for areas that need periodic renewal or modification.',
-    'Aapvatsa': 'Aapvatsa pada is positive, related to water and flow. Good for areas requiring movement and circulation. Ideal for hallways or passages.',
-    'Jayant': 'Jayant pada is positive, meaning "victorious". Excellent for study rooms, offices, or areas requiring success and achievement.',
-    'Asur': 'Asur pada is negative, representing negative forces. Should be kept clean and minimal. Avoid placing important rooms here. Requires Vastu remedies.',
+    'Aapvatsa': 'Aapvatsa (आपवत्स), also known as Uma (उमा), is the embodiment of Goddess Parvati, the consort of Lord Shiva. This pada represents the Goddess of Creative Power, Marriage, Children, Fertility, Beauty, Purity, Energy, Love, and Devotion. Located in the Northeast (NE) direction, ruled by planet Ketu, and associated with Career attributes. Aapvatsa brings ideas and carries them towards practical application. This zone is ideal for areas related to nutrition, creativity, and feminine energy. If this zone has problems, the womenfolk of the house may suffer. Keep this area clean, positive, and well-maintained to harness the divine feminine energy of Parvati.',
+    'Jayanta': 'Jayanta pada is positive, meaning "victorious". Excellent for study rooms, offices, or areas requiring success and achievement.',
+    'Asura': 'Asura pada is negative, representing negative forces. Should be kept clean and minimal. Avoid placing important rooms here. Requires Vastu remedies.',
     'Mitra': 'Mitra pada is positive, meaning "friend". Excellent for living rooms, guest areas, or spaces for social interaction. Promotes friendship and harmony.',
     'Brahma': 'Brahma pada is divine, representing the creator. This is the most sacred center (Brahmasthan). Should remain open and uncluttered. Never place heavy objects, pillars, or construction here. Ideal for meditation or open space.',
     'Aryama': 'Aryama pada is positive, representing the sun and leadership. Excellent for master bedrooms, offices, or areas requiring authority and respect.',
     'Mahendra': 'Mahendra pada is very positive, representing Indra (king of gods). Ideal for main entrances, living rooms, or important spaces. Promotes prosperity and power.',
-    'Varun': 'Varun pada is neutral, representing water god. Suitable for bathrooms, water-related areas, or spaces requiring purification.',
-    'Aditya': 'Aditya pada is positive, representing the sun. Excellent for east-facing rooms, study areas, or spaces requiring energy and vitality.',
-    'Pushpdant': 'Pushpdant pada is positive, meaning "flower-toothed". Good for decorative areas, gardens, or spaces requiring beauty and aesthetics.',
-    'Satyak': 'Satyak pada is positive, meaning "truthful". Excellent for study rooms, libraries, or areas requiring honesty and clarity of thought.',
-    'Sugreev': 'Sugreev pada is neutral. Represents strength and courage. Suitable for areas requiring determination and willpower.',
+    'Varuna': 'Varuna pada represents the water god (वरुण). Suitable for bathrooms, water-related areas, and spaces requiring purification.',
+    'Surya': 'Surya pada represents the sun (सूर्य). Excellent for east-facing rooms, study areas, and spaces requiring energy and vitality.',
+    'Pushpadanta': 'Pushpadanta pada is positive, meaning "flower-toothed". Good for decorative areas, gardens, or spaces requiring beauty and aesthetics.',
+    'Satya': 'Satya pada is positive, meaning "truthful". Excellent for study rooms, libraries, or areas requiring honesty and clarity of thought.',
+    'Sugriva': 'Sugriva pada is neutral. Represents strength and courage. Suitable for areas requiring determination and willpower.',
     'Indraraj': 'Indraraj pada is positive, representing the king of gods. Excellent for master bedrooms, offices, or areas requiring leadership and authority.',
-    'Vivasvan': 'Vivasvan pada is positive, representing the sun god. Ideal for east-facing rooms, study areas, or spaces requiring brightness and energy.',
+    'Vivaswan': 'Vivaswan pada is positive, representing the sun god. Ideal for east-facing rooms, study areas, or spaces requiring brightness and energy.',
     'Svitra': 'Svitra pada is positive. Represents purity and cleanliness. Good for bathrooms, kitchens, or areas requiring hygiene.',
-    'Bhusha': 'Bhusha pada is neutral. Suitable for general purposes. Keep clean and well-maintained for balanced energy flow.',
-    'Dauwarik': 'Dauwarik pada is neutral. Represents gatekeepers. Suitable for entrance areas, doorways, or transitional spaces.',
+    'Bhrusha': 'Bhrusha pada is neutral. Suitable for general purposes. Keep clean and well-maintained for balanced energy flow.',
+    'Dwarika': 'Dwarika pada is neutral. Represents gatekeepers. Suitable for entrance areas, doorways, or transitional spaces.',
     'Indra': 'Indra pada is positive, representing the king of gods. Excellent for important rooms, offices, or areas requiring power and prosperity.',
     'Savitra': 'Savitra pada is positive, representing the sun. Ideal for east-facing areas, study rooms, or spaces requiring illumination and knowledge.',
-    'Antrix': 'Antrix pada is neutral, representing space or sky. Suitable for open areas, balconies, or spaces requiring openness and freedom.',
-    'Pitru': 'Pitru pada is negative, representing ancestors. Should be kept clean and respectful. Avoid placing bedrooms or important rooms here. Best for storage.',
-    'Mrig': 'Mrig pada is neutral, representing deer. Suitable for general purposes. Keep clean and avoid heavy construction.',
-    'Bhujang': 'Bhujang pada is negative, representing serpents. Should be kept minimal and clean. Avoid important placements. Requires Vastu remedies.',
+    'Aakash': 'Aakash pada is neutral, representing space or sky. Suitable for open areas, balconies, or spaces requiring openness and freedom.',
+    'Pitru Gana': 'Pitru Gana pada is negative, representing ancestors. Should be kept clean and respectful. Avoid placing bedrooms or important rooms here. Best for storage.',
+    'Mriga': 'Mriga pada is neutral, representing deer. Suitable for general purposes. Keep clean and avoid heavy construction.',
+    'Bhringaraj': 'Bhringaraj pada is negative, representing serpents. Should be kept minimal and clean. Avoid important placements. Requires Vastu remedies.',
     'Gandharva': 'Gandharva pada is neutral, representing celestial musicians. Suitable for entertainment areas, music rooms, or spaces for creativity.',
-    'Yama': 'Yama pada is negative, representing death. Should be kept clean and minimal. Avoid placing bedrooms or important rooms here. Best for storage or utility.',
-    'Gkhawat': 'Gkhawat pada is neutral. Suitable for general purposes. Keep clean and well-maintained.',
+    'Yama': 'Yama pada represents death (यम). Keep clean and minimal. Avoid placing bedrooms or important rooms here. Best for storage or utility.',
+    'Bhratsata': 'Bhratsata pada is neutral. Suitable for general purposes. Keep clean and well-maintained.',
     'Vitath': 'Vitath pada is neutral. Represents falsehood or illusion. Should be kept clean. Avoid placing important items here.',
     'Pusha': 'Pusha pada is positive, representing nourishment. Good for kitchens, dining areas, or spaces related to food and sustenance.',
     'Agni': 'Agni pada is positive, representing fire. Excellent for kitchens, fireplaces, or areas requiring heat and transformation. Promotes energy and activity.',
@@ -413,7 +422,7 @@ export default function CameraCapture({ onCapture, onClose, visible, mode = 'nor
                         padding = 6;
                         borderRadius = 8;
                         letterSpacing = 2;
-                      } else if (cell.name === 'Bhoodhar' || cell.name === 'Vivasvan') {
+                      } else if (cell.name === 'Prithvidhara' || cell.name === 'Vivaswan') {
                         fontSize = 14;
                         fontWeight = '800';
                         padding = 5;
@@ -430,7 +439,7 @@ export default function CameraCapture({ onCapture, onClose, visible, mode = 'nor
                         fontWeight = '700';
                         padding = 3;
                         letterSpacing = 0.6;
-                      } else if (cell.name === 'Pushpdant' || cell.name === 'Gandharva') {
+                      } else if (cell.name === 'Pushpadanta' || cell.name === 'Gandharva') {
                         fontSize = 8;
                         padding = 2;
                         letterSpacing = 0.3;

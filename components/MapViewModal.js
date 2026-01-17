@@ -21,7 +21,9 @@ import {
   LockIcon, 
   PinIcon, 
   CompassToggleIcon, 
-  MapLayerIcon 
+  MapLayerIcon,
+  RotateLeftIcon,
+  RotateRightIcon
 } from './svgs';
 import * as Location from 'expo-location';
 // Removed mapUtils imports - using simple inline calculations instead
@@ -76,10 +78,18 @@ const getResponsiveFont = (size) => {
   return Math.max(size * scale, size * 0.85);
 };
 
-export default function MapViewModal({ visible, onClose, mode, compassType, selectedLocation }) {
+export default function MapViewModal({ visible, onClose, mode, compassType, selectedLocation, initialGridState = false, onOpen }) {
+  console.log('🗺️ MapViewModal: Component initialized', { 
+    platform: Platform.OS, 
+    visible,
+    hasWindow: typeof window !== 'undefined',
+    hasL: typeof window !== 'undefined' && typeof window.L !== 'undefined'
+  });
+  
   const { t, language } = useI18n();
   const [currentLocation, setCurrentLocation] = useState(null);
   const [heading, setHeading] = useState(0);
+  const [mapBearing, setMapBearing] = useState(0);
   const [loading, setLoading] = useState(true);
   
   // Use Classic Compass as default fallback if no compass type specified
@@ -96,7 +106,7 @@ export default function MapViewModal({ visible, onClose, mode, compassType, sele
   // Vastu Grid state
   const [plotCorners, setPlotCorners] = useState([]);
   const [cornerSelectionMode, setCornerSelectionMode] = useState(false);
-  const [showVastuGrid, setShowVastuGrid] = useState(false);
+  const [showVastuGrid, setShowVastuGrid] = useState(initialGridState);
   const [showDevtaLabels, setShowDevtaLabels] = useState(true);
   const [highlightBrahmasthan, setHighlightBrahmasthan] = useState(true);
   const gridLayersRef = useRef([]);
@@ -127,16 +137,38 @@ export default function MapViewModal({ visible, onClose, mode, compassType, sele
       setLoading(true);
       setMapReady(false);
       setPlotCorners([]);
-      setShowVastuGrid(false);
+      // Only reset grid if not opening with initial grid state
+      if (!initialGridState) {
+        setShowVastuGrid(false);
+      } else {
+        setShowVastuGrid(true);
+        // Call onOpen callback after component is mounted
+        if (onOpen) {
+          setTimeout(() => {
+            onOpen();
+          }, 100);
+        }
+      }
       setCornerSelectionMode(false);
       cornerMarkersRef.current = [];
       gridLayersRef.current = [];
     }
-  }, [visible]);
+  }, [visible, initialGridState, onOpen]);
 
   // Load Leaflet script dynamically on web
   useEffect(() => {
-    if (Platform.OS === 'web' && typeof window !== 'undefined' && !window.L) {
+    console.log('📦 Leaflet script loader effect', { 
+      platform: Platform.OS,
+      hasWindow: typeof window !== 'undefined',
+      hasL: typeof window !== 'undefined' && typeof window.L !== 'undefined'
+    });
+    
+    if (Platform.OS !== 'web') {
+      console.log('⏸️ Leaflet loader: Skipping - not web platform');
+      return;
+    }
+    
+    if (typeof window !== 'undefined' && !window.L) {
       // Load Leaflet JS
       const script = document.createElement('script');
       script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
@@ -159,7 +191,22 @@ export default function MapViewModal({ visible, onClose, mode, compassType, sele
   }, []);
 
   useEffect(() => {
-    if (visible && Platform.OS === 'web' && !loading && locationToUse && mapContainerRef.current && !googleMapRef.current) {
+    console.log('🗺️ Map initialization effect', { 
+      platform: Platform.OS,
+      visible,
+      loading,
+      hasLocation: !!locationToUse,
+      hasContainer: !!mapContainerRef.current,
+      hasMap: !!googleMapRef.current
+    });
+    
+    if (Platform.OS !== 'web') {
+      console.log('⏸️ Map init: Skipping - not web platform');
+      return;
+    }
+    
+    if (visible && !loading && locationToUse && mapContainerRef.current && !googleMapRef.current) {
+      console.log('✅ Map init: All conditions met, initializing Leaflet');
       // Add small delay to ensure DOM is ready
       const timer = setTimeout(() => {
         initializeLeafletMap();
@@ -169,10 +216,12 @@ export default function MapViewModal({ visible, onClose, mode, compassType, sele
   }, [visible, loading, currentLocation, selectedLocation]);
 
   const getCurrentLocation = async () => {
+    console.log('📍 getCurrentLocation called', { platform: Platform.OS });
     try {
       setLoading(true);
       
       if (Platform.OS === 'web') {
+        console.log('🌐 Using web geolocation API');
         // Use web geolocation API
         if ('geolocation' in navigator) {
           navigator.geolocation.getCurrentPosition(
@@ -248,7 +297,28 @@ export default function MapViewModal({ visible, onClose, mode, compassType, sele
 
   // Draw Vastu Grid on map
   const drawVastuGrid = () => {
-    if (!googleMapRef.current || plotCorners.length !== 4 || !window.L) return;
+    console.log('🎨 drawVastuGrid called', { 
+      platform: Platform.OS,
+      hasMap: !!googleMapRef.current,
+      cornersCount: plotCorners.length,
+      hasWindow: typeof window !== 'undefined',
+      hasL: typeof window !== 'undefined' && typeof window.L !== 'undefined'
+    });
+    
+    // Only run on web
+    if (Platform.OS !== 'web') {
+      console.log('⏸️ drawVastuGrid: Skipping - not web platform');
+      return;
+    }
+    
+    if (!googleMapRef.current || plotCorners.length !== 4 || !window.L) {
+      console.log('⏸️ drawVastuGrid: Missing requirements', {
+        hasMap: !!googleMapRef.current,
+        cornersCount: plotCorners.length,
+        hasL: !!window.L
+      });
+      return;
+    }
     
     // Clear previous grid layers
     gridLayersRef.current.forEach(layer => {
@@ -681,6 +751,18 @@ export default function MapViewModal({ visible, onClose, mode, compassType, sele
   }, [plotCorners, showDevtaLabels, highlightBrahmasthan, cornerSelectionMode, language]);
 
   const initializeLeafletMap = () => {
+    console.log('🗺️ initializeLeafletMap called', { 
+      platform: Platform.OS,
+      hasWindow: typeof window !== 'undefined',
+      hasL: typeof window !== 'undefined' && typeof window.L !== 'undefined',
+      hasContainer: !!mapContainerRef.current
+    });
+    
+    if (Platform.OS !== 'web') {
+      console.log('❌ initializeLeafletMap: Should not be called on mobile!');
+      return;
+    }
+    
     let retryCount = 0;
     const maxRetries = 100; // Try for 10 seconds
     
@@ -811,10 +893,22 @@ export default function MapViewModal({ visible, onClose, mode, compassType, sele
   };
 
   const changeMapType = () => {
+    console.log('🗺️ changeMapType called', { 
+      platform: Platform.OS,
+      currentType: mapType,
+      hasMap: !!googleMapRef.current,
+      hasL: typeof window !== 'undefined' && typeof window.L !== 'undefined'
+    });
+    
     const newType = mapType === 'satellite' ? 'standard' : 'satellite';
     setMapType(newType);
     
-    if (Platform.OS === 'web' && googleMapRef.current && window.L) {
+    if (Platform.OS !== 'web') {
+      console.log('⏸️ changeMapType: Skipping - not web platform');
+      return;
+    }
+    
+    if (googleMapRef.current && window.L) {
       // For Leaflet, remove old layer and add new one
       googleMapRef.current.eachLayer((layer) => {
         if (layer instanceof window.L.TileLayer) {
@@ -838,16 +932,107 @@ export default function MapViewModal({ visible, onClose, mode, compassType, sele
     }
   };
 
+  // Rotate map manually
+  const rotateMap = (degrees) => {
+    console.log('🔄 rotateMap called', { platform: Platform.OS, degrees, currentBearing: mapBearing });
+    
+    const newBearing = (mapBearing + degrees) % 360;
+    setMapBearing(newBearing);
+    
+    if (Platform.OS === 'web') {
+      // Web: Use Leaflet's setBearing if available, or manually rotate
+      if (googleMapRef.current && window.L) {
+        // Check if Leaflet has setBearing method (requires rotation plugin)
+        if (typeof googleMapRef.current.setBearing === 'function') {
+          googleMapRef.current.setBearing(newBearing);
+        } else {
+          // Fallback: Rotate using CSS transform on the map container
+          const mapContainer = mapContainerRef.current?.querySelector('.leaflet-container');
+          if (mapContainer) {
+            mapContainer.style.transform = `rotate(${newBearing}deg)`;
+            mapContainer.style.transformOrigin = 'center center';
+          }
+        }
+      }
+    } else {
+      // Mobile: Use MapView's animateToBearing or animateCamera to change bearing
+      if (googleMapRef.current && locationToUse) {
+        // Try animateToBearing first (if available), otherwise use animateCamera
+        if (typeof googleMapRef.current.animateToBearing === 'function') {
+          googleMapRef.current.animateToBearing(newBearing, 300);
+        } else {
+          // Use animateCamera with heading
+          googleMapRef.current.animateCamera({
+            center: {
+              latitude: locationToUse.latitude,
+              longitude: locationToUse.longitude,
+            },
+            heading: newBearing,
+            pitch: 0,
+            altitude: 0,
+          }, { duration: 300 });
+        }
+      }
+    }
+  };
+
+  // Reset map to north
+  const resetMapRotation = () => {
+    console.log('🧭 Resetting map to north');
+    setMapBearing(0);
+    
+    if (Platform.OS === 'web') {
+      if (googleMapRef.current && window.L) {
+        if (typeof googleMapRef.current.setBearing === 'function') {
+          googleMapRef.current.setBearing(0);
+        } else {
+          const mapContainer = mapContainerRef.current?.querySelector('.leaflet-container');
+          if (mapContainer) {
+            mapContainer.style.transform = 'rotate(0deg)';
+          }
+        }
+      }
+    } else {
+      if (googleMapRef.current && locationToUse) {
+        // Try animateToBearing first (if available), otherwise use animateCamera
+        if (typeof googleMapRef.current.animateToBearing === 'function') {
+          googleMapRef.current.animateToBearing(0, 300);
+        } else {
+          googleMapRef.current.animateCamera({
+            center: {
+              latitude: locationToUse.latitude,
+              longitude: locationToUse.longitude,
+            },
+            heading: 0,
+            pitch: 0,
+            altitude: 0,
+          }, { duration: 300 });
+        }
+      }
+    }
+  };
+
   const locationToUse = selectedLocation || currentLocation;
 
   const effectiveLocation = mapLocation || selectedLocation || currentLocation;
 
   // Update map when location changes
   useEffect(() => {
+    if (Platform.OS !== 'web') {
+      return;
+    }
+    
     if (googleMapRef.current && effectiveLocation && window.L) {
       googleMapRef.current.setView([effectiveLocation.latitude, effectiveLocation.longitude], 18);
     }
   }, [mapLocation]);
+
+  console.log('🎨 MapViewModal render', { 
+    platform: Platform.OS,
+    visible,
+    loading,
+    hasLocation: !!locationToUse
+  });
 
   return (
     <Modal
@@ -953,6 +1138,11 @@ export default function MapViewModal({ visible, onClose, mode, compassType, sele
               onMapReady={() => {
                 setMapReady(true);
                 console.log('✅ Mobile map ready');
+              }}
+              onCameraChange={(event) => {
+                if (event?.nativeEvent?.heading !== undefined) {
+                  setMapBearing(event.nativeEvent.heading);
+                }
               }}
             >
               <Marker
@@ -1108,7 +1298,7 @@ export default function MapViewModal({ visible, onClose, mode, compassType, sele
 
         {/* Compass Overlay - Toggle visibility */}
         {showCompass && locationToUse && !cornerSelectionMode && (
-          <View style={[styles.compassOverlay, { pointerEvents: 'none', zIndex: 500, opacity: 0.6 }]}>
+          <View style={[styles.compassOverlay, { pointerEvents: 'none', zIndex: 500, opacity: 0.55 }]}>
             <CompassView
               mode={mode}
               compassType={effectiveCompassType}
@@ -1116,6 +1306,7 @@ export default function MapViewModal({ visible, onClose, mode, compassType, sele
               onClearImage={() => {}}
               onHeadingChange={setHeading}
               hideCalibration={true}
+              externalHeading={mapBearing}
             />
           </View>
         )}
@@ -1166,6 +1357,56 @@ export default function MapViewModal({ visible, onClose, mode, compassType, sele
                  {mapType === 'satellite' ? (t('map.mapView') || 'Map') : (t('map.satelliteView') || 'Satellite')}
                </Text>
              </View>
+
+             {/* Map Rotation Controls */}
+             <View style={styles.buttonWithLabel}>
+             <TouchableOpacity
+               style={styles.mapControlButton}
+               onPress={() => rotateMap(-15)}
+               onPressIn={() => setPressedButton('rotateLeft')}
+               onPressOut={() => setPressedButton(null)}
+               activeOpacity={0.6}
+             >
+               <RotateLeftIcon 
+                 size={getResponsiveSize(20)} 
+                 color={pressedButton === 'rotateLeft' ? "#5D4037" : "#F4C430"} 
+               />
+             </TouchableOpacity>
+               <Text style={styles.buttonLabel}>{t('map.rotateLeft') || 'Rotate L'}</Text>
+             </View>
+
+             <View style={styles.buttonWithLabel}>
+             <TouchableOpacity
+               style={styles.mapControlButton}
+               onPress={() => rotateMap(15)}
+               onPressIn={() => setPressedButton('rotateRight')}
+               onPressOut={() => setPressedButton(null)}
+               activeOpacity={0.6}
+             >
+               <RotateRightIcon 
+                 size={getResponsiveSize(20)} 
+                 color={pressedButton === 'rotateRight' ? "#5D4037" : "#F4C430"} 
+               />
+             </TouchableOpacity>
+               <Text style={styles.buttonLabel}>{t('map.rotateRight') || 'Rotate R'}</Text>
+             </View>
+
+             {mapBearing !== 0 && (
+               <View style={styles.buttonWithLabel}>
+               <TouchableOpacity
+                 style={styles.mapControlButton}
+                 onPress={resetMapRotation}
+                 onPressIn={() => setPressedButton('resetNorth')}
+                 onPressOut={() => setPressedButton(null)}
+                 activeOpacity={0.6}
+               >
+                 <Text style={[styles.mapControlButtonText, pressedButton === 'resetNorth' && { opacity: 0.7 }]}>
+                   🧭
+                 </Text>
+               </TouchableOpacity>
+                 <Text style={styles.buttonLabel}>{t('map.resetNorth') || 'North'}</Text>
+               </View>
+             )}
              
              {/* Vastu Grid Toggle - Corner Selection */}
              {!showVastuGrid && (
@@ -1180,7 +1421,7 @@ export default function MapViewModal({ visible, onClose, mode, compassType, sele
                    if (isMapLocked && newMode) {
                      // Auto-unlock map when starting selection
                      setIsMapLocked(false);
-                     if (googleMapRef.current && window.L) {
+                     if (Platform.OS === 'web' && googleMapRef.current && window.L) {
                        googleMapRef.current.dragging.enable();
                        googleMapRef.current.touchZoom.enable();
                        googleMapRef.current.doubleClickZoom.enable();
@@ -1237,13 +1478,17 @@ export default function MapViewModal({ visible, onClose, mode, compassType, sele
                <TouchableOpacity
                  style={styles.mapControlButton}
                  onPress={() => {
-                   console.log('🗑️ Clearing grid and corners');
+                   console.log('🗑️ Clearing grid and corners', { platform: Platform.OS });
                    // Clear all grid layers
-                   gridLayersRef.current.forEach(layer => {
-                     if (googleMapRef.current) {
-                       googleMapRef.current.removeLayer(layer);
-                     }
-                   });
+                   if (Platform.OS === 'web' && googleMapRef.current) {
+                     gridLayersRef.current.forEach(layer => {
+                       try {
+                         googleMapRef.current.removeLayer(layer);
+                       } catch (e) {
+                         console.log('Error removing layer:', e);
+                       }
+                     });
+                   }
                    gridLayersRef.current = [];
                    setPlotCorners([]);
                    setShowVastuGrid(false);
@@ -1320,13 +1565,18 @@ export default function MapViewModal({ visible, onClose, mode, compassType, sele
             <TouchableOpacity
               style={[styles.cornerCancelButton, { pointerEvents: 'auto' }]}
               onPress={() => {
+                console.log('❌ Corner cancel button pressed', { platform: Platform.OS });
                 setCornerSelectionMode(false);
                 // Clear corners and grid when closing
-                gridLayersRef.current.forEach(layer => {
-                  if (googleMapRef.current) {
-                    googleMapRef.current.removeLayer(layer);
-                  }
-                });
+                if (Platform.OS === 'web' && googleMapRef.current) {
+                  gridLayersRef.current.forEach(layer => {
+                    try {
+                      googleMapRef.current.removeLayer(layer);
+                    } catch (e) {
+                      console.log('Error removing layer:', e);
+                    }
+                  });
+                }
                 gridLayersRef.current = [];
                 setPlotCorners([]);
                 setShowVastuGrid(false);
@@ -1462,8 +1712,9 @@ export default function MapViewModal({ visible, onClose, mode, compassType, sele
            <TouchableOpacity
              style={[styles.bottomButton, isMapLocked && styles.bottomButtonActive]}
              onPress={() => {
+               console.log('🔒 Lock/Unlock button pressed', { platform: Platform.OS, isLocked: isMapLocked });
                setIsMapLocked(!isMapLocked);
-               if (googleMapRef.current && window.L) {
+               if (Platform.OS === 'web' && googleMapRef.current && window.L) {
                  if (!isMapLocked) {
                    // Lock the map
                    googleMapRef.current.dragging.disable();

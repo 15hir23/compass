@@ -11,6 +11,7 @@ import {
   Linking,
   Modal,
   ScrollView,
+  BackHandler,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Updates from 'expo-updates';
@@ -30,6 +31,7 @@ import LocationSearch from './components/LocationSearch';
 import CameraCapture from './components/CameraCapture';
 import CapturedImageModal from './components/CapturedImageModal';
 import ImageGalleryModal from './components/ImageGalleryModal';
+import ImageUploadEditModal from './components/ImageUploadEditModal';
 import { saveImage } from './utils/imageStorage';
 import ImageShare from './components/ImageShare';
 import HomeScreen from './components/HomeScreen';
@@ -41,6 +43,7 @@ import Sidebar from './components/Sidebar';
 import MapViewModal from './components/MapViewModal';
 import SplashScreen from './components/SplashScreen';
 import { useI18n } from './utils/i18n';
+import { routeManager } from './utils/routeManager';
 
 // Get dimensions safely
 const getDimensions = () => {
@@ -141,6 +144,7 @@ export default function App() {
   const [capturedImage, setCapturedImage] = useState(null);
   const [showCapturedImageModal, setShowCapturedImageModal] = useState(false);
   const [showImageGallery, setShowImageGallery] = useState(false);
+  const [showImageUploadEdit, setShowImageUploadEdit] = useState(false);
   const [heading, setHeading] = useState(0);
   const [showLocationSearch, setShowLocationSearch] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState(null);
@@ -150,6 +154,92 @@ export default function App() {
   const [showMapView, setShowMapView] = useState(false);
   const menuVisible = useSharedValue(0);
   const compassInitialRotation = useSharedValue(0);
+
+  // Initialize route manager and handle back button
+  useEffect(() => {
+    // Initialize from URL (for web)
+    const initialRoute = routeManager.initFromURL();
+    
+    // Skip splash screen for non-home routes
+    if (initialRoute !== 'home') {
+      setShowSplash(false);
+    }
+    
+    if (initialRoute === 'home') {
+      setShowHomeScreen(true);
+      setShowMapView(false);
+    } else if (initialRoute === 'compass') {
+      setShowHomeScreen(false);
+      setShowMapView(false);
+    } else if (initialRoute === 'upload') {
+      setShowHomeScreen(false);
+      setShowImageUploadEdit(true);
+      setShowMapView(false);
+    } else if (initialRoute === 'camera') {
+      setShowHomeScreen(false);
+      setShowCamera(true);
+      setShowMapView(false);
+    } else if (initialRoute === 'map') {
+      setShowHomeScreen(false);
+      setShowMapView(true);
+    }
+
+    // Setup Android back button handler
+    const removeBackHandler = routeManager.setupBackHandler((route) => {
+      handleRouteChange(route);
+    });
+
+    // Setup web browser back button handler
+    const removeWebBackHandler = routeManager.setupWebBackHandler((route) => {
+      handleRouteChange(route);
+    });
+
+    // Subscribe to route changes
+    const unsubscribe = routeManager.subscribe((route) => {
+      console.log('Route changed to:', route);
+      handleRouteChange(route);
+    });
+
+    return () => {
+      if (removeBackHandler) removeBackHandler();
+      if (removeWebBackHandler) removeWebBackHandler();
+      unsubscribe();
+    };
+  }, []);
+
+  // Handle route changes
+  const handleRouteChange = (route) => {
+    console.log('handleRouteChange called with route:', route);
+    if (route === 'home') {
+      setShowHomeScreen(true);
+      setShowCamera(false);
+      setShowImageUploadEdit(false);
+      setShowCapturedImageModal(false);
+      setShowImageGallery(false);
+      setShowMapView(false);
+    } else if (route === 'compass') {
+      setShowHomeScreen(false);
+      setShowCamera(false);
+      setShowImageUploadEdit(false);
+      setShowMapView(false);
+    } else if (route === 'upload') {
+      console.log('Setting upload route - showImageUploadEdit=true, showHomeScreen=false');
+      setShowHomeScreen(false);
+      setShowImageUploadEdit(true);
+      setShowMapView(false);
+      setShowCamera(false);
+    } else if (route === 'camera') {
+      setShowHomeScreen(false);
+      setShowCamera(true);
+      setShowMapView(false);
+      setShowImageUploadEdit(false);
+    } else if (route === 'map') {
+      setShowHomeScreen(false);
+      setShowCamera(false);
+      setShowImageUploadEdit(false);
+      setShowMapView(true);
+    }
+  };
 
   // Auto-update check and cache clearance
   useEffect(() => {
@@ -199,8 +289,8 @@ export default function App() {
           // After rotation completes, pause briefly then show other components
           setTimeout(() => {
             runOnJS(setIsLoading)(false);
-            menuVisible.value = withSpring(1, { damping: 15, stiffness: 100 });
-          }, 300); // 300ms pause
+            menuVisible.value = withTiming(1, { duration: 300, easing: Easing.out(Easing.cubic) });
+          }, 100); // 100ms pause
         }
       });
     } else {
@@ -239,7 +329,13 @@ export default function App() {
   };
 
   const handleCameraToggle = () => {
-    setShowCamera(!showCamera);
+    if (showCamera) {
+      routeManager.goBack();
+      setShowCamera(false);
+    } else {
+      routeManager.navigate('camera');
+      setShowCamera(true);
+    }
   };
 
   const handleCompassSelect = (compassId) => {
@@ -255,6 +351,7 @@ export default function App() {
       // Make sure we're in Vastu compass type when selecting Vastu modes
       setCompassType(COMPASS_TYPES.VASTU);
       setCurrentMode(modeMap[compassId]);
+      routeManager.navigate('compass');
       setShowHomeScreen(false);
       setIsLoading(true);
       menuVisible.value = 0;
@@ -269,6 +366,7 @@ export default function App() {
   };
 
   const handleBackToHome = () => {
+    routeManager.navigate('home');
     setShowHomeScreen(true);
     setIsLoading(false);
   };
@@ -284,12 +382,14 @@ export default function App() {
     if (type === COMPASS_TYPES.MAP) {
       // Open map view directly - now works from any screen
       // Classic compass will be used as default if no compass type is set
+      routeManager.navigate('map');
       setShowMapView(true);
     } else if (type === COMPASS_TYPES.CLASSIC || type === COMPASS_TYPES.FENGSHUI) {
       // For Classic and Feng Shui, set mode to normal (they don't use mode variations)
       setCurrentMode(COMPASS_MODES.NORMAL);
       
       // Go directly to compass screen for these types
+      routeManager.navigate('compass');
       setShowHomeScreen(false);
       
       // If already in compass view, trigger a reload animation
@@ -307,7 +407,7 @@ export default function App() {
             if (finished) {
               setTimeout(() => {
                 runOnJS(setIsLoading)(false);
-                menuVisible.value = withSpring(1, { damping: 15, stiffness: 100 });
+                menuVisible.value = withTiming(1, { duration: 300, easing: Easing.out(Easing.cubic) });
               }, 300);
             }
           });
@@ -322,6 +422,37 @@ export default function App() {
       // Show home screen to let user select Vastu zone type
       setShowHomeScreen(true);
       setIsLoading(false);
+    }
+  };
+
+  const [enableGridOnOpen, setEnableGridOnOpen] = useState(false);
+  const [enableGridAfterImage, setEnableGridAfterImage] = useState(false);
+
+  const handleShowVastuGrid = (option) => {
+    // Close sidebar
+    setSidebarVisible(false);
+    
+    console.log('handleShowVastuGrid called with option:', option);
+    
+    if (option === 'camera') {
+      // Open camera - grid will be enabled after image is captured
+      setEnableGridAfterImage(true);
+      console.log('Navigating to camera route');
+      routeManager.navigate('camera');
+      // handleRouteChange will be called automatically by routeManager
+    } else if (option === 'upload') {
+      // Open upload modal - grid will be enabled after image is uploaded
+      setEnableGridAfterImage(true);
+      console.log('Navigating to upload route');
+      routeManager.navigate('upload');
+      // handleRouteChange will be called automatically by routeManager
+    } else if (option === 'map') {
+      // Open map view with grid enabled immediately
+      setCompassType(COMPASS_TYPES.VASTU);
+      setEnableGridOnOpen(true);
+      console.log('Navigating to map route');
+      routeManager.navigate('map');
+      // handleRouteChange will be called automatically by routeManager
     }
   };
 
@@ -344,6 +475,7 @@ export default function App() {
             onServicePress={handleServicePress}
               compassType={compassType}
               onCompassTypeChange={handleCompassTypeChange}
+              onShowVastuGrid={handleShowVastuGrid}
           />
         </View>
       </SafeAreaView>
@@ -351,8 +483,18 @@ export default function App() {
         {/* Map View Modal - available from home screen */}
         <MapViewModal
           visible={showMapView}
-          onClose={() => setShowMapView(false)}
+          onClose={() => {
+            routeManager.goBack();
+            setShowMapView(false);
+            setEnableGridOnOpen(false);
+          }}
           mode={currentMode}
+          initialGridState={enableGridOnOpen}
+          onOpen={() => {
+            if (enableGridOnOpen) {
+              setEnableGridOnOpen(false);
+            }
+          }}
           compassType={compassType}
           selectedLocation={selectedLocation}
           onCompassTypeChange={handleCompassTypeChange}
@@ -365,6 +507,7 @@ export default function App() {
           onShowHowToUse={() => setShowHowToUse(true)}
           compassType={compassType}
           onCompassTypeChange={handleCompassTypeChange}
+          onShowVastuGrid={handleShowVastuGrid}
         />
       </>
     );
@@ -408,7 +551,12 @@ export default function App() {
             {!isLoading && (
               <CompassActionButtons
                 onMapPress={() => {
+                  routeManager.navigate('map');
                   setShowMapView(true);
+                }}
+                onUploadPress={() => {
+                  routeManager.navigate('upload');
+                  setShowImageUploadEdit(true);
                 }}
                 heading={heading}
               />
@@ -451,16 +599,27 @@ export default function App() {
                 visible={showCamera}
                 mode={currentMode}
                 compassType={compassType}
+                initialGridState={enableGridOnOpen}
+                onOpen={() => {
+                  if (enableGridOnOpen) {
+                    setEnableGridOnOpen(false);
+                  }
+                }}
             onCapture={async (uri) => {
                   setShowCamera(false);
                   // Save image to storage
                   await saveImage(uri, currentMode, heading);
                   setTimeout(() => {
               setCapturedImage(uri);
+              // Enable grid if it was requested from sidebar
+              if (enableGridAfterImage) {
+                setEnableGridOnOpen(true);
+              }
               setShowCapturedImageModal(true);
                   }, 200);
                 }}
                 onClose={() => {
+              routeManager.goBack();
               setShowCamera(false);
             }}
           />
@@ -473,10 +632,21 @@ export default function App() {
               mode={currentMode}
               compassType={compassType}
               heading={heading}
-              onClose={() => setShowCapturedImageModal(false)}
+              initialGridState={enableGridOnOpen}
+              onOpen={() => {
+                if (enableGridOnOpen) {
+                  setEnableGridOnOpen(false);
+                  setEnableGridAfterImage(false);
+                }
+              }}
+              onClose={() => {
+                setShowCapturedImageModal(false);
+                setEnableGridAfterImage(false);
+              }}
               onClearImage={() => {
                 setCapturedImage(null);
                 setShowCapturedImageModal(false);
+                setEnableGridAfterImage(false);
               }}
           />
 
@@ -491,11 +661,52 @@ export default function App() {
               }}
             />
 
+            {/* Image Upload Edit Modal */}
+            <ImageUploadEditModal
+              visible={showImageUploadEdit}
+              mode={currentMode}
+              compassType={compassType}
+              heading={heading}
+              initialGridState={false}
+              enableGridAfterPick={enableGridAfterImage}
+              onOpen={() => {
+                if (enableGridOnOpen) {
+                  setEnableGridOnOpen(false);
+                }
+              }}
+              onClose={() => {
+                routeManager.goBack();
+                setShowImageUploadEdit(false);
+                setEnableGridAfterImage(false);
+              }}
+              onSave={(uri) => {
+                setCapturedImage(uri);
+                setShowImageUploadEdit(false);
+                // Enable grid if it was requested from sidebar
+                if (enableGridAfterImage) {
+                  setEnableGridOnOpen(true);
+                }
+                setTimeout(() => {
+                  setShowCapturedImageModal(true);
+                }, 200);
+              }}
+            />
+
             {/* Map View Modal */}
             <MapViewModal
               visible={showMapView}
-              onClose={() => setShowMapView(false)}
+              onClose={() => {
+            routeManager.goBack();
+            setShowMapView(false);
+            setEnableGridOnOpen(false);
+          }}
               mode={currentMode}
+              initialGridState={enableGridOnOpen}
+              onOpen={() => {
+                if (enableGridOnOpen) {
+                  setEnableGridOnOpen(false);
+                }
+              }}
               compassType={compassType}
               selectedLocation={selectedLocation}
             />
@@ -510,6 +721,7 @@ export default function App() {
         onShowHowToUse={() => setShowHowToUse(true)}
         compassType={compassType}
         onCompassTypeChange={handleCompassTypeChange}
+        onShowVastuGrid={handleShowVastuGrid}
       />
 
       {/* How to Use Modal */}
